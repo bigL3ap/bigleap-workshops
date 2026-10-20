@@ -3,6 +3,7 @@
 window.BL_CONFIG = {
   endpoint: "",
   session: "curran-nov26",
+  publicUrl: "https://bigl3ap.github.io/bigleap-workshops/curran/",
   client: "Curran",
   /* Breakout groups and facilitators. Rename freely; ids must stay unique. */
   groups: [
