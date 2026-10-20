@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Journey and Systems</title>
+<meta name="description" content="How a Curran customer moves through the journey, and which systems carry them.">
+<link rel="icon" href="../assets/bigleap-logo.png">
+<link rel="stylesheet" href="../assets/workshop.css">
+<style>
+  .wrap { max-width:1180px; }
+  .top .in { max-width:1180px; }
+  .journey { display:grid; grid-template-columns:repeat(8,minmax(118px,1fr)); gap:8px; margin-top:18px; overflow-x:auto; padding-bottom:6px; scroll-snap-type:x mandatory; }
+  .stage { scroll-snap-align:start; position:relative; min-height:96px; border-radius:14px; border:1.5px solid var(--line); background:#fff; padding:12px 12px 12px; text-align:left; cursor:pointer; color:var(--navy); display:flex; flex-direction:column; gap:2px; }
+  .stage .num { font:800 11px "Open Sans",Arial,sans-serif; color:var(--blue); letter-spacing:.06em; }
+  .stage b { font:800 15px/1.2 "Raleway",Arial,sans-serif; }
+  .stage span { font-size:12px; color:var(--muted); line-height:1.35; }
+  .stage[aria-pressed="true"] { background:var(--navy); border-color:var(--navy); }
+  .stage[aria-pressed="true"] b, .stage[aria-pressed="true"] span, .stage[aria-pressed="true"] .num { color:#fff; }
+  .stage:not(:last-child)::after { content:""; position:absolute; right:-7px; top:50%; width:8px; height:8px; border-top:2px solid #9FB4C2; border-right:2px solid #9FB4C2; transform:translateY(-50%) rotate(45deg); }
+  .layout { display:grid; grid-template-columns:1fr; gap:16px; margin-top:16px; }
+  @media (min-width:900px){ .layout { grid-template-columns:1.35fr 1fr; } }
+  .systems { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  @media (min-width:640px){ .systems { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+  .sys { min-height:104px; border-radius:14px; border:1.5px solid var(--line); background:#fff; padding:12px; text-align:left; cursor:pointer; color:var(--navy); display:flex; flex-direction:column; gap:4px; transition:opacity .2s, transform .2s, box-shadow .2s; }
+  .sys .ic { width:30px; height:30px; border-radius:9px; background:var(--blue-soft); color:var(--blue); display:grid; place-items:center; }
+  .sys .ic svg { width:18px; height:18px; }
+  .sys b { font:800 14.5px/1.2 "Raleway",Arial,sans-serif; }
+  .sys span { font-size:12px; color:var(--muted); line-height:1.35; }
+  .sys.dim { opacity:.28; }
+  .sys.lit { border-color:var(--blue); box-shadow:0 0 0 3px rgba(49,135,181,.22); }
+  .sys.memory .ic { background:#FCE8E6; color:var(--red); }
+  .sys[aria-pressed="true"] { background:var(--navy); border-color:var(--navy); }
+  .sys[aria-pressed="true"] b, .sys[aria-pressed="true"] span { color:#fff; }
+  .panel { background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px; box-shadow:var(--shadow); align-self:start; }
+  .panel h2 { font-size:22px; font-weight:800; }
+  .panel .k { font:700 12px "Open Sans",Arial,sans-serif; text-transform:uppercase; letter-spacing:.06em; color:var(--blue); margin-top:14px; }
+  .panel ul { margin:6px 0 0; padding-left:18px; }
+  .panel li { margin:4px 0; }
+  .hand { background:#FFF4F2; border-left:4px solid var(--red); border-radius:10px; padding:10px 12px; margin-top:8px; font-size:14.5px; }
+  .legend { display:flex; gap:16px; flex-wrap:wrap; font-size:13px; color:var(--muted); margin-top:10px; }
+  .legend i { display:inline-block; width:12px; height:12px; border-radius:4px; vertical-align:-1px; margin-right:6px; }
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="index.html"><img src="../assets/bigleap-logo.png" alt="Big Leap: workshop home"></a><div class="tag">Journey &amp; systems</div></div></header>
+<main class="wrap">
+  <div class="eyebrow">Customers don't see departments</div>
+  <h1 class="h1">One journey. Many systems. A lot of carrying by hand.</h1>
+  <p class="lede">Tap a stage to see which systems are involved and where a person has to carry the information. Tap a system to see what it holds.</p>
+
+  <div class="journey" id="journey" role="group" aria-label="Customer journey stages"></div>
+
+  <div class="layout">
+    <section aria-label="Systems">
+      <div class="systems" id="systems"></div>
+      <div class="legend"><span><i style="background:var(--blue)"></i>Used at this stage</span><span><i style="background:var(--red)"></i>The system nobody bought: someone's memory</span></div>
+    </section>
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+</main>
+<script src="../assets/config.js"></script>
+<script src="../assets/workshop.js"></script>
+<script>
+  var IC = {
+    web:'<path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/><circle cx="12" cy="12" r="9"/>',
+    admin:'<path d="M9 12l2 2 4-4"/><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/>',
+    hub:'<circle cx="12" cy="12" r="3"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><path d="M7 7l3 3M17 7l-3 3M7 17l3-3"/>',
+    erp:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/>',
+    phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
+    mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/>',
+    bi:'<path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/>',
+    mem:'<path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-1.04Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-1.04Z"/>'
+  };
+  var SYS = [
+    { id:'web', ic:'web', name:'Website & online store', sub:'curranfloor.com', holds:['Browsing and product research','Forms, swatch orders and web orders','Trade program applications'], stages:['aware','inquiry','sale'] },
+    { id:'admin', ic:'admin', name:'Admin tool', sub:'Trade applications', holds:['Trade program applications and approvals','Trade tiers and pricing that feed Acumatica'], stages:['qualify'] },
+    { id:'hub', ic:'hub', name:'HubSpot', sub:'Contacts, leads, marketing', holds:['Every contact and company','Marketing emails, forms and lead triage','Tasks, sales emails and, soon, calls'], stages:['aware','inquiry','qualify','opp','repeat'] },
+    { id:'erp', ic:'erp', name:'Acumatica', sub:'Quotes, orders, money', holds:['Quotes and sales orders','Invoices, payments and pricing','The financial source of truth'], stages:['opp','sale','handoff','customer','repeat'] },
+    { id:'phone', ic:'phone', name:'Phones', sub:'Aircall, moving into HubSpot', holds:['Inbound and outbound calls','Call history (not always on the right record today)'], stages:['inquiry','opp','customer'] },
+    { id:'mail', ic:'mail', name:'Outlook & shared inboxes', sub:'hello@ · service@ · orders@ · trade@', holds:['Personal sales threads','Order, trade and service inboxes','A lot of customer context that never reaches the CRM'], stages:['inquiry','opp','sale','handoff','customer'] },
+    { id:'bi', ic:'bi', name:'Power BI & reports', sub:'How leadership sees results', holds:['Sales results from Acumatica','Company-wide presentations'], stages:['sale','repeat'] },
+    { id:'mem', ic:'mem', name:'Someone’s memory', sub:'Notes, spreadsheets, side chats', holds:['Who is working which project','What was promised and when','The things we “just know”'], stages:['aware','inquiry','qualify','opp','sale','handoff','customer','repeat'] }
+  ];
+  var HAND = {
+    aware:'Marketing can’t easily see which campaigns lead to sales that close offline, so it’s hard to know what to do more of.',
+    inquiry:'Inquiries land in different inboxes and get forwarded or copied into new threads; order emails get matched to a customer by hand.',
+    qualify:'Leads are sorted, prioritized and assigned by people, and trade approvals are rotated between reps by hand.',
+    opp:'The quote lives in Acumatica, the conversation lives in Outlook, and HubSpot may not see either.',
+    sale:'The order and the sales record don’t always meet in one place, so the full story is split.',
+    handoff:'Project context travels to the next team by email or memory.',
+    customer:'The customer may have to repeat themselves to a different person.',
+    repeat:'It’s hard to see who has gone quiet, who is ready for the next project, and what brought them back.'
+  };
+  var j = document.getElementById('journey'), s = document.getElementById('systems'), panel = document.getElementById('panel');
+  j.innerHTML = BL.STAGES.map(function (x) { return '<button class="stage" data-v="' + x.id + '"><span class="num">' + x.n + '</span><b>' + x.name + '</b><span>' + x.short + '</span></button>'; }).join('');
+  s.innerHTML = SYS.map(function (x) { return '<button class="sys' + (x.id === 'mem' ? ' memory' : '') + '" data-s="' + x.id + '" aria-pressed="false" type="button"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + IC[x.ic] + '</svg></span><b>' + x.name + '</b><span>' + BL.esc(x.sub) + '</span></button>'; }).join('');
+  var sysBtns = s.querySelectorAll('.sys');
+  function intro() {
+    panel.innerHTML = '<div class="eyebrow">How to read this</div><h2>Every arrow is a handoff</h2><p class="lede">Each stage touches several systems. Wherever two systems don’t talk, a person becomes the connector: copying, forwarding, remembering. That’s not a people problem. It’s plumbing.</p><div class="hand"><b>Try it:</b> tap <b>Inquiry</b> or <b>Opportunity</b>.</div>';
+  }
+  function showStage(id) {
+    var st = BL.STAGES.filter(function (x) { return x.id === id; })[0];
+    sysBtns.forEach(function (b) { b.setAttribute('aria-pressed', 'false'); var on = SYS.filter(function (x) { return x.id === b.getAttribute('data-s'); })[0].stages.indexOf(id) > -1; b.classList.toggle('lit', on); b.classList.toggle('dim', !on); });
+    var used = SYS.filter(function (x) { return x.stages.indexOf(id) > -1 && x.id !== 'mem'; }).map(function (x) { return x.name; });
+    panel.innerHTML = '<div class="eyebrow">Stage ' + st.n + '</div><h2>' + st.name + ': ' + st.short.toLowerCase() + '</h2><p class="small" style="margin-top:6px">' + st.ex + '</p>' +
+      '<div class="k">Systems involved</div><ul>' + used.map(function (u) { return '<li>' + BL.esc(u) + '</li>'; }).join('') + '</ul>' +
+      '<div class="k">Where a person carries it today</div><div class="hand">' + HAND[id] + '</div>';
+    BL.track('workshop_map_stage', { stage: id });
+  }
+  function showSys(id) {
+    var x = SYS.filter(function (y) { return y.id === id; })[0];
+    BL.reset(j);
+    sysBtns.forEach(function (b) { var me = b.getAttribute('data-s') === id; b.setAttribute('aria-pressed', me ? 'true' : 'false'); b.classList.remove('lit', 'dim'); });
+    panel.innerHTML = '<div class="eyebrow">System</div><h2>' + x.name + '</h2><p class="small" style="margin-top:6px">' + BL.esc(x.sub) + '</p><div class="k">What it holds</div><ul>' + x.holds.map(function (h) { return '<li>' + h + '</li>'; }).join('') + '</ul>' +
+      '<div class="k">Stages it touches</div><p style="margin-top:6px">' + x.stages.map(function (sid) { return '<span class="pill">' + BL.STAGES.filter(function (q) { return q.id === sid; })[0].name + '</span>'; }).join(' ') + '</p>';
+    BL.track('workshop_map_system', { system: id });
+  }
+  BL.choice(j, { onChange: function (v) { if (v) showStage(v); } });
+  sysBtns.forEach(function (b) { b.addEventListener('click', function () { showSys(b.getAttribute('data-s')); }); });
+  var start = BL.params.get('stage'); if (start) { var sb = j.querySelector('[data-v="' + start + '"]'); if (sb) { sb.setAttribute('aria-pressed', 'true'); showStage(start); } else intro(); } else intro();
+  BL.chrome('Journey & systems');
+</script>
+</body>
+</html>

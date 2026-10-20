@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Human or Robot</title>
+<meta name="description" content="Sort Curran's everyday tasks into human work and system work.">
+<link rel="icon" href="../assets/bigleap-logo.png">
+<link rel="stylesheet" href="../assets/workshop.css">
+<style>
+  .deck { position:relative; margin-top:16px; }
+  .task { background:#fff; border:1px solid var(--line); border-radius:20px; box-shadow:var(--shadow); padding:26px 20px; min-height:190px; display:flex; flex-direction:column; justify-content:center; text-align:center; transition:transform .22s ease, opacity .22s ease; }
+  .task .k { font:700 12px "Open Sans",Arial,sans-serif; color:var(--faint); letter-spacing:.06em; text-transform:uppercase; }
+  .task h2 { font-size:clamp(21px,5.6vw,27px); font-weight:800; margin-top:10px; }
+  .task.out-l { transform:translateX(-30px) rotate(-3deg); opacity:0; } .task.out-r { transform:translateX(30px) rotate(3deg); opacity:0; } .task.out-u { transform:translateY(-20px); opacity:0; }
+  .sort { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:12px; }
+  .sort button { min-height:74px; border-radius:16px; border:0; cursor:pointer; font:800 16px "Raleway",Arial,sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
+  .sort button small { font:600 11.5px "Open Sans",Arial,sans-serif; opacity:.85; }
+  .sort .h { background:#FDE7E4; color:#A8321F; } .sort .b { background:var(--sky); color:var(--navy); } .sort .r { background:var(--blue-soft); color:#1F6A92; }
+  .sort button:hover { filter:brightness(.96); }
+  .sort svg { width:24px; height:24px; }
+  .counter { display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin-top:8px; font-weight:600; }
+  .owns { display:grid; gap:10px; margin-top:10px; }
+  .own { background:var(--sky); border-radius:12px; padding:12px; }
+  .own .mins { display:flex; align-items:center; gap:10px; margin-top:6px; }
+  .own output { min-width:92px; text-align:right; font-weight:700; color:var(--navy); font-size:14px; }
+  .tally { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; text-align:center; }
+  .tally div { background:var(--sky); border-radius:12px; padding:10px; } .tally b { display:block; font:800 24px "Raleway",Arial,sans-serif; }
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="index.html"><img src="../assets/bigleap-logo.png" alt="Big Leap: workshop home"></a><div class="tag">Human or Robot?</div></div></header>
+<main class="wrap">
+  <div class="eyebrow">Human work vs. robot work</div>
+  <h1 class="h1">Who should be doing this?</h1>
+  <p class="lede">Sort each task. <b>Human</b> needs judgment, relationships or expertise. <b>Robot</b> a system could handle reliably. <b>Both</b>: the system does the legwork, a person makes the call.</p>
+
+  <section id="sorting">
+    <div class="deck"><article class="task" id="task" aria-live="polite"></article></div>
+    <div class="sort" role="group" aria-label="Sort this task">
+      <button class="h" data-c="human"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>Human<small>Needs a person</small></button>
+      <button class="b" data-c="both"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12h8M12 8v8"/><circle cx="12" cy="12" r="9"/></svg>Both<small>System helps</small></button>
+      <button class="r" data-c="robot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 14h.01M15 14h.01"/></svg>Robot<small>System does it</small></button>
+    </div>
+    <div class="counter"><span id="pos"></span><button class="linkbtn" id="back" type="button">Undo</button></div>
+  </section>
+
+  <form id="f" class="card" hidden novalidate>
+    <h2>Nice. Here's how you sorted it</h2>
+    <div class="tally" id="tally"></div>
+    <div class="step" style="margin-top:20px"><span class="n">1</span><h3>What do <em>you</em> do every week that a system should do?</h3></div>
+    <p class="small">Add up to 3, with a rough guess at the time. Guesses are fine; this is the room's own estimate.</p>
+    <div class="owns" id="owns"></div>
+    <button class="linkbtn" id="addOwn" type="button">+ Add another</button>
+    <div class="step" style="margin-top:18px"><span class="n">2</span><h3>If a system handled that, what would you spend the time on instead?</h3></div>
+    <label class="sr" for="instead">What you'd do instead</label>
+    <textarea id="instead" maxlength="200" style="min-height:72px" placeholder="e.g. more time with designers on new projects"></textarea>
+    <div class="row"><button class="btn block" id="go" type="submit">Send to the room</button></div>
+  </form>
+
+  <section class="card done" id="ok" hidden>
+    <div class="check"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <h2>Thanks, it's on the wall</h2>
+    <p class="lede">The goal isn't automation for its own sake. It's giving people more time for the work only people can do.</p>
+    <div class="row" style="justify-content:center"><a class="btn navy" href="index.html">Back to today's toolkits</a></div>
+  </section>
+  <p style="text-align:center;margin-top:16px"><span id="mode"></span></p>
+</main>
+<script src="../assets/config.js"></script>
+<script src="../assets/workshop.js"></script>
+<script>
+  var TASKS = BL.TASKS;
+  var i = 0, answers = {}, hist = [];
+  var taskEl = document.getElementById('task');
+  function show() {
+    if (i >= TASKS.length) return finish();
+    taskEl.className = 'task';
+    taskEl.innerHTML = '<span class="k">Task ' + (i + 1) + ' of ' + TASKS.length + '</span><h2>' + TASKS[i].t + '</h2>';
+    document.getElementById('pos').textContent = Object.keys(answers).length + ' sorted';
+    document.getElementById('back').hidden = !hist.length;
+  }
+  document.querySelectorAll('.sort button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (i >= TASKS.length) return;
+      var c = b.getAttribute('data-c'); answers[TASKS[i].id] = c; hist.push(i);
+      taskEl.classList.add(c === 'human' ? 'out-l' : c === 'robot' ? 'out-r' : 'out-u');
+      i++; setTimeout(show, 200);
+    });
+  });
+  document.getElementById('back').addEventListener('click', function () { if (!hist.length) return; i = hist.pop(); delete answers[TASKS[i].id]; show(); });
+  function finish() {
+    document.getElementById('sorting').hidden = true; document.getElementById('f').hidden = false;
+    var c = { human:0, both:0, robot:0 }; for (var k in answers) c[answers[k]]++;
+    document.getElementById('tally').innerHTML = '<div><b>' + c.human + '</b>Human</div><div><b>' + c.both + '</b>Both</div><div><b>' + c.robot + '</b>Robot</div>';
+    addOwn();
+  }
+  var owns = document.getElementById('owns'), n = 0;
+  function fmt(m) { return m >= 60 ? (Math.round(m / 6) / 10) + ' hr/week' : m + ' min/week'; }
+  function addOwn() {
+    if (owns.children.length >= 3) { BL.toast('Three is plenty'); return; }
+    n++; var d = document.createElement('div'); d.className = 'own';
+    d.innerHTML = '<label class="sr" for="o' + n + '">Task</label><input type="text" id="o' + n + '" maxlength="120" placeholder="e.g. matching order emails to customers">' +
+      '<div class="mins"><label class="sr" for="m' + n + '">Minutes per week</label><input type="range" id="m' + n + '" min="15" max="600" step="15" value="60"><output for="m' + n + '">1 hr/week</output></div>';
+    owns.appendChild(d);
+    var r = d.querySelector('input[type=range]'), o = d.querySelector('output');
+    r.addEventListener('input', function () { o.textContent = fmt(+r.value); });
+  }
+  document.getElementById('addOwn').addEventListener('click', addOwn);
+  document.getElementById('f').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var own = Array.prototype.map.call(owns.children, function (d) { return { text: d.querySelector('input[type=text]').value.trim(), minutes: +d.querySelector('input[type=range]').value }; }).filter(function (x) { return x.text; });
+    document.getElementById('go').disabled = true;
+    BL.submit('robot', { sorts: answers, own: own, instead: document.getElementById('instead').value.trim() }).then(function () {
+      document.getElementById('f').hidden = true; document.getElementById('ok').hidden = false; window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+  show();
+  BL.chrome('Human or Robot?');
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>First Moves</title>
+<meta name="description" content="Closing discussion: what should Curran change first?">
+<link rel="icon" href="../assets/bigleap-logo.png">
+<link rel="stylesheet" href="../assets/workshop.css">
+<style>
+  .moves { display:grid; gap:8px; margin-top:10px; }
+  .move { display:flex; gap:12px; align-items:center; text-align:left; min-height:56px; border-radius:14px; border:1.5px solid var(--line); background:#fff; padding:10px 12px; font-size:15px; color:var(--navy); cursor:pointer; }
+  .move .dot { flex:none; width:26px; height:26px; border-radius:50%; border:2px solid #B9C9D4; }
+  .move[aria-pressed="true"] { border-color:var(--red); background:#FFF6F5; }
+  .move[aria-pressed="true"] .dot { background:var(--red); border-color:var(--red); box-shadow:inset 0 0 0 4px #fff; }
+  .dots { display:flex; gap:6px; align-items:center; font-weight:700; font-size:14px; color:var(--muted); }
+  .dots i { width:14px; height:14px; border-radius:50%; background:var(--red); display:inline-block; }
+  .dots i.off { background:#D9E3EA; }
+  .q { margin-top:14px; }
+  .q label { font-weight:700; display:block; margin-bottom:6px; }
+  .hint { font-size:13px; color:var(--muted); margin:-2px 0 6px; }
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="index.html"><img src="../assets/bigleap-logo.png" alt="Big Leap: workshop home"></a><div class="tag">First Moves</div></div></header>
+<main class="wrap">
+  <div class="eyebrow">Closing · What would we change first?</div>
+  <h1 class="h1">Spend your three dots</h1>
+  <p class="lede">Pick the three changes that would make the biggest difference for your team <b>or for the customer</b>. Then answer one of the questions below, or all three.</p>
+
+  <form id="f" novalidate>
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2>Your three dots</h2><div class="dots" id="dots" aria-live="polite"></div></div>
+      <div class="moves" id="moves"></div>
+      <label class="f" for="other">Something else? <span class="small">(optional)</span></label>
+      <input type="text" id="other" maxlength="120" placeholder="Your own first move">
+    </section>
+
+    <section class="card">
+      <h2>Three questions</h2>
+      <div id="qs"></div>
+    </section>
+    <div class="row"><button class="btn block" id="go" type="submit" disabled>Cast my votes</button></div>
+  </form>
+
+  <section class="card done" id="ok" hidden>
+    <div class="check"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <h2>Votes are in</h2>
+    <p class="lede">The most valuable RevOps work usually isn't a massive transformation. It starts with the handful of moments where better information and alignment change how we work.</p>
+    <div class="row" style="justify-content:center"><a class="btn navy" href="index.html">See what happens next</a></div>
+  </section>
+  <p style="text-align:center;margin-top:16px"><span id="mode"></span></p>
+</main>
+<script src="../assets/config.js"></script>
+<script src="../assets/workshop.js"></script>
+<script>
+  var HINTS = {
+    'Sales':'Think about the minute before you call a customer: what would you want to already know?',
+    'Marketing':'Think about what happens after someone engages: which channels and segments become customers?',
+    'Operations & fulfillment':'Think about the moment an order reaches you: what context do you wish came with it?',
+    'Customer service':'Think about when a customer reaches out: what history would help you help them faster?',
+    'Leadership':'Think about the questions you ask every month: which are hard to answer today?'
+  };
+  var moves = document.getElementById('moves'), go = document.getElementById('go');
+  moves.innerHTML = BL.MOVES.map(function (m) { return '<button class="move" data-v="' + m.id + '"><span class="dot" aria-hidden="true"></span><span>' + m.t + '</span></button>'; }).join('');
+  document.getElementById('qs').innerHTML = BL.QUESTIONS.map(function (q, i) {
+    var hint = i === 0 && HINTS[BL.team()] ? '<p class="hint">' + HINTS[BL.team()] + '</p>' : '';
+    return '<div class="q"><label for="q_' + q.id + '">' + (i + 1) + '. ' + q.t + '</label>' + hint + '<textarea id="q_' + q.id + '" maxlength="220" style="min-height:70px"></textarea></div>';
+  }).join('');
+  function dots() {
+    var n = BL.val(moves, true).length;
+    document.getElementById('dots').innerHTML = [0, 1, 2].map(function (k) { return '<i class="' + (k < n ? '' : 'off') + '"></i>'; }).join('') + '<span>' + (3 - n) + ' left</span>';
+    go.disabled = n === 0;
+  }
+  BL.choice(moves, { multi: true, max: 3, onChange: dots });
+  document.getElementById('f').addEventListener('submit', function (e) {
+    e.preventDefault(); if (go.disabled) return;
+    var a = {}; BL.QUESTIONS.forEach(function (q) { a[q.id] = document.getElementById('q_' + q.id).value.trim(); });
+    go.disabled = true;
+    BL.submit('moves', { votes: BL.val(moves, true), other: document.getElementById('other').value.trim(), answers: a }).then(function () {
+      document.getElementById('f').hidden = true; document.getElementById('ok').hidden = false; window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+  dots();
+  BL.chrome('First Moves');
+</script>
+</body>
+</html>

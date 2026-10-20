@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Fix-It Builder</title>
+<meta name="description" content="Turn a Curran friction point into a RevOps recipe: trigger, automation, owner, measure.">
+<link rel="icon" href="../assets/bigleap-logo.png">
+<link rel="stylesheet" href="../assets/workshop.css">
+<style>
+  .picks { display:grid; gap:8px; margin-top:10px; }
+  .picks button { text-align:left; min-height:48px; border-radius:12px; border:1.5px solid var(--line); background:#fff; padding:10px 12px; font-size:14px; color:var(--navy); cursor:pointer; }
+  .picks button:hover { border-color:var(--blue); }
+  .picks .src { display:block; font:700 11px "Open Sans",Arial,sans-serif; letter-spacing:.05em; text-transform:uppercase; color:var(--blue); margin-bottom:2px; }
+  .recipe { background:var(--navy); color:#fff; border-radius:18px; padding:20px; margin-top:16px; box-shadow:var(--shadow); }
+  .recipe h2 { color:#fff; font-size:20px; }
+  .recipe .line { display:grid; grid-template-columns:96px 1fr; gap:10px; padding:10px 0; border-top:1px solid rgba(255,255,255,.14); font-size:15px; }
+  .recipe .line:first-of-type { border-top:0; }
+  .recipe .k { font:700 11px "Open Sans",Arial,sans-serif; text-transform:uppercase; letter-spacing:.06em; color:#8CC6E6; padding-top:3px; }
+  .recipe .empty { color:#7FA0B4; font-style:italic; }
+  .road { margin-top:14px; background:rgba(255,255,255,.08); border-radius:12px; padding:12px; }
+  .road b { font-family:"Raleway",Arial,sans-serif; }
+  .road .tagp { display:inline-block; background:#8CC6E6; color:var(--navy); font-weight:700; font-size:12px; border-radius:999px; padding:2px 9px; margin:4px 4px 0 0; }
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="index.html"><img src="../assets/bigleap-logo.png" alt="Big Leap: workshop home"></a><div class="tag">Fix-It Builder</div></div></header>
+<main class="wrap">
+  <div class="eyebrow">What could HubSpot do about it?</div>
+  <h1 class="h1">Turn a problem into a recipe</h1>
+  <p class="lede">Every good fix answers four questions: <b>when</b> does it start, what should <b>the system</b> do, what does <b>a person</b> still own, and how will we <b>know</b> it worked?</p>
+  <p class="small" style="margin-top:8px"><span id="groupLabel"></span> · <a href="index.html">change</a></p>
+
+  <form id="f" class="card" novalidate>
+    <div class="step"><span class="n">1</span><h2 style="font-size:18px">Pick the problem</h2></div>
+    <div class="picks" id="picks"></div>
+    <label class="f" for="prob">…or write your own</label>
+    <textarea id="prob" maxlength="200" style="min-height:72px" placeholder="The problem, in a sentence"></textarea>
+
+    <div class="step" style="margin-top:20px"><span class="n">2</span><h2 style="font-size:18px">When this happens…</h2></div>
+    <div class="chips" id="trig"></div>
+
+    <div class="step" style="margin-top:20px"><span class="n">3</span><h2 style="font-size:18px">…the system should <span class="small">(pick up to 3)</span></h2></div>
+    <div class="chips" id="act"></div>
+
+    <div class="step" style="margin-top:20px"><span class="n">4</span><h2 style="font-size:18px">…and a person still owns</h2></div>
+    <div class="chips" id="own"></div>
+    <label class="f" for="human">The human part of the job <span class="small">(optional)</span></label>
+    <input type="text" id="human" maxlength="120" placeholder="e.g. a personal call to talk through the project">
+
+    <div class="step" style="margin-top:20px"><span class="n">5</span><h2 style="font-size:18px">We'll know it's working when we see…</h2></div>
+    <div class="chips" id="meas"></div>
+
+    <div class="recipe" id="recipe" aria-live="polite"></div>
+    <div class="row"><button class="btn block" id="go" type="submit" disabled>Share this recipe with the room</button></div>
+  </form>
+  <p style="text-align:center;margin-top:16px"><span id="mode"></span></p>
+</main>
+<script src="../assets/config.js"></script>
+<script src="../assets/workshop.js"></script>
+<script>
+  var TRIG = { form:'Someone fills out a form', swatch:'A swatch or web order comes in', trade:'A trade application is approved', inbox:'An email lands in a shared inbox', call:'A customer calls', quote:'A quote is sent', quiet:'Nothing happens for a few days', won:'A project is won or an order is placed', ship:'An order ships or is delivered', lost:'We lose a project' };
+  var ACT = {
+    owner:{ t:'Assign the right owner', p:'p24' }, task:{ t:'Create a task with a due date', p:'p24' }, notify:{ t:'Alert the right person or team', p:'p24' },
+    reply:{ t:'Send a confirmation or follow-up email', p:'p24' }, nurture:{ t:'Add them to a check-in or nurture list', p:'p24' },
+    stage:{ t:'Move it to the next stage', p:'p25' }, nudge:{ t:'Remind the owner if it goes quiet', p:'p25' }, context:{ t:'Package the history for the next team', p:'p25' }, reason:{ t:'Capture the reason (e.g. why we lost)', p:'p25' },
+    log:{ t:'Log the email or call to the right customer', p:'p21' }, sync:{ t:'Update the other system so both match', p:'p22' }, report:{ t:'Count it in a dashboard', p:'p3' }
+  };
+  var MEAS = { speed:'Faster first response', untouched:'Nothing left untouched', owned:'Every record has an owner', nextstep:'Every project has a next step', handoff:'Handoffs without repeat questions', repeat:'More customers coming back', source:'Which marketing drove the sale' };
+  var EX = [
+    { text:'Swatch orders come in and sales doesn’t always know, so follow-up waits.', trig:'swatch', act:['owner','task','notify'], own:'Sales', meas:'speed' },
+    { text:'We can’t see which marketing creates customers, because most sales close offline.', trig:'won', act:['sync','report'], own:'Marketing', meas:'source' },
+    { text:'Handoffs to the next team depend on an email or someone’s memory.', trig:'won', act:['context','task','notify'], own:'Operations & fulfillment', meas:'handoff' }
+  ];
+  function chips(el, map) { el.innerHTML = Object.keys(map).map(function (k) { return '<button class="chip" data-v="' + k + '">' + (map[k].t || map[k]) + '</button>'; }).join(''); }
+  var trig = document.getElementById('trig'), act = document.getElementById('act'), own = document.getElementById('own'), meas = document.getElementById('meas'), prob = document.getElementById('prob'), human = document.getElementById('human'), go = document.getElementById('go');
+  chips(trig, TRIG); chips(act, ACT); chips(meas, MEAS);
+  own.innerHTML = BL.config.teams.filter(function (t) { return t !== 'Other'; }).map(function (t) { return '<button class="chip" data-v="' + BL.esc(t) + '">' + BL.esc(t) + '</button>'; }).join('');
+  BL.choice(trig, { onChange: render }); BL.choice(act, { multi: true, max: 3, onChange: render }); BL.choice(own, { onChange: render }); BL.choice(meas, { onChange: render });
+  prob.addEventListener('input', render); human.addEventListener('input', render);
+
+  function setChoice(el, v) { el.querySelectorAll('[data-v]').forEach(function (b) { b.setAttribute('aria-pressed', [].concat(v).indexOf(b.getAttribute('data-v')) > -1 ? 'true' : 'false'); }); }
+  function pickBtn(label, text, preset) {
+    var b = document.createElement('button'); b.type = 'button';
+    b.innerHTML = '<span class="src">' + label + '</span>' + BL.esc(text);
+    b.addEventListener('click', function () {
+      prob.value = text;
+      if (preset) { setChoice(trig, preset.trig); setChoice(act, preset.act); setChoice(own, preset.own); setChoice(meas, preset.meas); }
+      render(); prob.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    return b;
+  }
+  var picks = document.getElementById('picks');
+  EX.forEach(function (e, i) { picks.appendChild(pickBtn('Worked example ' + (i + 1), e.text, e)); });
+  BL.load('friction').then(function (rows) {
+    rows.filter(function (r) { return r.payload && r.payload.text; })
+      .sort(function (a, b) { return (b.payload.hurt || 0) - (a.payload.hurt || 0); })
+      .slice(0, 5).forEach(function (r) { picks.appendChild(pickBtn('From the room', r.payload.text)); });
+  }).catch(function () {});
+
+  function phases(v) {
+    var ids = v.act.map(function (a) { return ACT[a].p; });
+    if (v.act.indexOf('log') > -1 && v.trig === 'call') ids[v.act.indexOf('log')] = 'p23';
+    if (v.trig === 'call' && ids.indexOf('p23') < 0) ids.push('p23');
+    if (v.meas === 'source' && ids.indexOf('p3') < 0) ids.push('p3');
+    var seen = {}; return BL.ROADMAP.filter(function (p) { if (ids.indexOf(p.id) > -1 && !seen[p.id]) { seen[p.id] = 1; return true; } });
+  }
+  function val() { return { problem: prob.value.trim(), trig: BL.val(trig), act: BL.val(act, true), owner: BL.val(own), human: human.value.trim(), meas: BL.val(meas) }; }
+  function render() {
+    var v = val(), E = function (x) { return x ? BL.esc(x) : '<span class="empty">not picked yet</span>'; };
+    var ph = phases(v);
+    document.getElementById('recipe').innerHTML = '<div class="eyebrow" style="color:#8CC6E6">Your recipe</div><h2>' + (v.problem ? BL.esc(v.problem) : 'Pick a problem to start') + '</h2>' +
+      '<div style="margin-top:10px"><div class="line"><span class="k">When</span><span>' + E(TRIG[v.trig]) + '</span></div>' +
+      '<div class="line"><span class="k">System</span><span>' + (v.act.length ? v.act.map(function (a) { return BL.esc(ACT[a].t); }).join('<br>') : E('')) + '</span></div>' +
+      '<div class="line"><span class="k">Person</span><span>' + E(v.owner) + (v.human ? ': ' + BL.esc(v.human) : '') + '</span></div>' +
+      '<div class="line"><span class="k">Measure</span><span>' + E(MEAS[v.meas]) + '</span></div></div>' +
+      (ph.length ? '<div class="road"><b>Already on the plan.</b> This lines up with: <br>' + ph.map(function (p) { return '<span class="tagp">' + BL.esc(p.when) + ' · ' + BL.esc(p.name) + '</span>'; }).join('') + '</div>' : '');
+    go.disabled = !(v.problem && v.trig && v.act.length && v.owner && v.meas);
+  }
+  document.getElementById('f').addEventListener('submit', function (e) {
+    e.preventDefault(); if (go.disabled) return;
+    var v = val(); v.phases = phases(v).map(function (p) { return p.id; });
+    v.trigText = TRIG[v.trig]; v.actText = v.act.map(function (a) { return ACT[a].t; }); v.measText = MEAS[v.meas];
+    go.disabled = true;
+    BL.submit('fixit', v).then(function () {
+      BL.toast('Recipe shared with the room');
+      prob.value = ''; human.value = ''; [trig, act, own, meas].forEach(BL.reset); render(); window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+  render();
+  BL.chrome('Fix-It Builder');
+</script>
+</body>
+</html>
