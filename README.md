@@ -9,7 +9,7 @@ Interactive, mobile-first toolkits used during live Big Leap client workshops. P
 | Page | Used for | Link |
 |---|---|---|
 | `curran/index.html` | Participant hub: pick your group and team, see all activities and what happens next | [open](https://bigl3ap.github.io/bigleap-workshops/curran/) |
-| `curran/pulse.html` | Warm-up: one word + 1–5 team-efficiency rating | [open](https://bigl3ap.github.io/bigleap-workshops/curran/pulse.html) |
+| `curran/pulse.html` | Group Think: one word + 1–5 team-efficiency rating | [open](https://bigl3ap.github.io/bigleap-workshops/curran/pulse.html) |
 | `curran/map.html` | Journey × systems explorer (presenter) | [open](https://bigl3ap.github.io/bigleap-workshops/curran/map.html) |
 | `curran/friction.html` | Breakout 1: Friction Finder | [open](https://bigl3ap.github.io/bigleap-workshops/curran/friction.html) |
 | `curran/fixit.html` | Fix-It Builder: trigger → automation → owner → measure | [open](https://bigl3ap.github.io/bigleap-workshops/curran/fixit.html) |

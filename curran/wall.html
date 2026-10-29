@@ -180,7 +180,7 @@
       var cloud = list.map(function (x, i) { var s = 22 + Math.round(70 * Math.sqrt(x.n / max)); return '<span style="--fs:' + s + 'px;color:' + cols[i % cols.length] + '" data-hide="' + E(x.k) + '" title="Click to hide">' + E(x.w) + '</span>'; }).join('');
       var dmax = Math.max.apply(null, dist.concat([1]));
       var avg = rows.length ? (sum / rows.length).toFixed(1) : '–';
-      return header('Warm-up', 'How does it feel to work in our systems today?', 'One word each. Bigger means more people said it.', rows.length) +
+      return header('Group Think', 'How does it feel to work in our systems today?', 'One word each. Bigger means more people said it.', rows.length) +
         '<div class="grid2"><section class="panel"><div class="cloud">' + (cloud || '<div class="empty">Waiting for the first word…</div>') + '</div></section>' +
         '<section class="panel"><div class="k">Team efficiency: not efficient at all (1) → most efficient (5)</div><div style="display:flex;align-items:baseline;gap:10px;margin-top:8px"><span class="big">' + avg + '</span><span class="sub">room average</span></div>' +
         '<div class="dist">' + dist.map(function (d) { return '<div style="height:' + Math.round(100 * d / dmax) + '%"><b>' + d + '</b></div>'; }).join('') + '</div><div class="dist-l"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div></section></div>';
