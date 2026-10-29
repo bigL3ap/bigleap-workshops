@@ -38,7 +38,23 @@
   .k { font:700 12px "Open Sans",Arial,sans-serif; text-transform:uppercase; letter-spacing:.06em; color:var(--blue); }
   /* Pulse */
   .cloud { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:10px 22px; min-height:320px; padding:20px; }
-  .cloud span { font-family:"Raleway",Arial,sans-serif; font-weight:800; line-height:1; cursor:pointer; }
+  .cloud span { font-family:"Raleway",Arial,sans-serif; font-weight:800; line-height:1; cursor:pointer; font-size:var(--fs); }
+  /* Phones: scale the whole cloud down rather than clamping, so the biggest word stays the biggest,
+     and never break a word across lines. */
+  @media (max-width:820px){
+    .cloud { min-height:150px; gap:7px 14px; padding:14px 10px; }
+    .cloud span { font-size:calc(13px + (var(--fs) - 22px) * 0.30); overflow-wrap:normal; word-break:keep-all; hyphens:none; }
+  }
+  @media (max-width:430px){
+    .cloud span { font-size:calc(12px + (var(--fs) - 22px) * 0.24); }
+  }
+  @media (max-width:820px){
+    /* The join QR is for the projector; whoever is reading this on a phone is already here. */
+    .head .join { display:none; }
+    .head .k { white-space:nowrap; }
+    .head { gap:12px; }
+    .head .big { font-size:34px; }
+  }
   .dist { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; align-items:end; height:220px; margin-top:44px; }
   .dist div { background:var(--blue); border-radius:10px 10px 4px 4px; position:relative; min-height:4px; }
   .dist div b { position:absolute; top:-26px; left:0; right:0; text-align:center; font-weight:800; color:var(--navy); }
@@ -161,7 +177,7 @@
       rows.forEach(function (r) { var w = (r.payload.word || '').toLowerCase(); if (w) (words[w] = words[w] || { n: 0, k: key(r) }).n++; if (r.payload.score) { dist[r.payload.score - 1]++; sum += r.payload.score; } });
       var list = Object.keys(words).map(function (w) { return { w: w, n: words[w].n, k: words[w].k }; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 60);
       var max = list.length ? list[0].n : 1, cols = ['#143D55', '#3187B5', '#EA4335', '#4D6575', '#1F6A92'];
-      var cloud = list.map(function (x, i) { var s = 22 + Math.round(70 * Math.sqrt(x.n / max)); return '<span style="font-size:' + s + 'px;color:' + cols[i % cols.length] + '" data-hide="' + E(x.k) + '" title="Click to hide">' + E(x.w) + '</span>'; }).join('');
+      var cloud = list.map(function (x, i) { var s = 22 + Math.round(70 * Math.sqrt(x.n / max)); return '<span style="--fs:' + s + 'px;color:' + cols[i % cols.length] + '" data-hide="' + E(x.k) + '" title="Click to hide">' + E(x.w) + '</span>'; }).join('');
       var dmax = Math.max.apply(null, dist.concat([1]));
       var avg = rows.length ? (sum / rows.length).toFixed(1) : '–';
       return header('Warm-up', 'How does it feel to work in our systems today?', 'One word each. Bigger means more people said it.', rows.length) +
