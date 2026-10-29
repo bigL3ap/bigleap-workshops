@@ -1,7 +1,7 @@
 /* Workshop settings. After deploying the Apps Script web app (see backend/SETUP.md),
    paste its URL into `endpoint`. Leave it empty to run in demo mode (answers stay on this device). */
 window.BL_CONFIG = {
-  endpoint: "",
+  endpoint: "https://script.google.com/macros/s/AKfycbw0A3hcCORSZI7nafqeOwG-78vAHmicLDBwvsBUcseouQ_mnGoeDIDpsYFfJ0BIJUbkNA/exec",
   session: "curran-nov26",
   publicUrl: "https://bigl3ap.github.io/bigleap-workshops/curran/",
   client: "Curran",
