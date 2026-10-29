@@ -27,6 +27,8 @@
   .act span { font-size:13.5px; color:var(--muted); line-height:1.4; display:block; margin-top:2px; }
   .act .when { margin-left:auto; flex:none; font:700 11px "Open Sans",Arial,sans-serif; color:var(--faint); text-transform:uppercase; letter-spacing:.05em; text-align:right; }
   .act .done-dot { color:var(--green); font-weight:700; }
+  .act .see { display:block; font-size:12px; font-weight:700; color:var(--blue); margin-top:2px; white-space:nowrap; }
+  .again { display:block; margin:-4px 0 10px 56px; font:700 13px "Open Sans",Arial,sans-serif; color:var(--navy); text-decoration:underline; }
   .tl { list-style:none; margin:12px 0 0; padding:0; position:relative; }
   .tl li { position:relative; padding:0 0 14px 22px; }
   .tl li::before { content:""; position:absolute; left:5px; top:6px; width:10px; height:10px; border-radius:50%; background:var(--blue); }
@@ -95,9 +97,22 @@
   t.innerHTML = BL.config.teams.map(function (x) { return '<button class="chip" data-v="' + BL.esc(x) + '">' + BL.esc(x) + '</button>'; }).join('');
   BL.choice(t, { onChange: function (v) { BL.setTeam(v); } });
   var ct = BL.team(); if (ct) { var tb = t.querySelector('[data-v="' + ct + '"]'); if (tb) tb.setAttribute('aria-pressed', 'true'); }
+  var MULTI = { friction: 1, fixit: 1 };
   document.querySelectorAll('.act').forEach(function (a) {
     var k = a.getAttribute('data-a');
-    if (k !== 'map' && BL.mine(k).length) a.querySelector('.when').innerHTML = '<span class="done-dot">✓ Done</span>';
+    if (k === 'map' || !BL.mine(k).length) return;
+    var page = a.getAttribute('href');
+    a.setAttribute('href', 'wall.html?view=' + k);
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'noopener');
+    a.querySelector('.when').innerHTML = '<span class="done-dot">\u2713 Done</span><span class="see">See the answers \u2192</span>';
+    if (MULTI[k]) {
+      var again = document.createElement('a');
+      again.className = 'again';
+      again.setAttribute('href', page);
+      again.textContent = '+ Add another';
+      a.insertAdjacentElement('afterend', again);
+    }
   });
   document.getElementById('tl').innerHTML = BL.ROADMAP.map(function (p) {
     return '<li><span class="w">' + BL.esc(p.when) + '</span><b>' + BL.esc(p.name) + '</b><span>' + BL.esc(p.what) + '</span></li>';
