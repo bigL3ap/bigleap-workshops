@@ -14,6 +14,14 @@
   .scale button[aria-pressed="true"] { background:var(--navy); color:#fff; border-color:var(--navy); }
   .ends { display:flex; justify-content:space-between; gap:10px; font-size:13px; font-weight:600; color:var(--muted); margin-top:6px; }
   .ends span:last-child { text-align:right; }
+  .ends b { display:none; }
+  /* Phones: side-by-side end labels collide, so stack them and name the number each belongs to */
+  @media (max-width:620px){
+    .ends { display:grid; grid-template-columns:minmax(0,1fr); gap:7px; margin-top:12px; }
+    .ends span, .ends span:last-child { display:flex; gap:9px; align-items:baseline; text-align:left; }
+    .ends b { display:inline; font:800 14px "Raleway",Arial,sans-serif; color:var(--navy); }
+    .scale button { min-height:52px; }
+  }
 </style>
 </head>
 <body>
@@ -32,7 +40,7 @@
     <div class="scale" id="scale" role="group" aria-label="1 means I work for the system, 5 means the system works for me">
       <button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button>
     </div>
-    <div class="ends"><span>I work for the system</span><span>The system works for me</span></div>
+    <div class="ends"><span><b>1</b> I work for the system</span><span><b>5</b> The system works for me</span></div>
 
     <div class="row"><button class="btn block" id="go" type="submit" disabled>Send it to the room</button></div>
   </form>
