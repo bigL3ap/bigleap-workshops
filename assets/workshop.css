@@ -43,6 +43,7 @@ button { font:inherit; }
 .step .n { flex:none; width:28px; height:28px; border-radius:50%; background:var(--navy); color:#fff; font:800 14px/28px "Raleway",Arial,sans-serif; text-align:center; }
 
 /* Choice chips & tiles */
+[hidden] { display:none !important; }
 .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
 .chip { min-height:44px; padding:9px 14px; border-radius:999px; border:1.5px solid var(--line); background:#fff; color:var(--navy); font-weight:600; font-size:15px; cursor:pointer; text-align:left; }
 .chip:hover { border-color:var(--blue); }
@@ -98,4 +99,10 @@ input[type=range] { width:100%; accent-color:var(--blue); height:36px; }
 .prog { display:flex; gap:6px; margin:14px 0 4px; }
 .prog i { flex:1; height:6px; border-radius:6px; background:#D9E3EA; }
 .prog i.on { background:var(--blue); }
+/* Long forms on a phone: keep the submit button reachable without scrolling to the end */
+@media (max-width:820px){
+  .row:has(> #go) { position:sticky; bottom:0; z-index:5; padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px)); margin-top:2px; background:var(--sky); }
+  .card > .row:has(> #go) { background:var(--paper); }
+  .row:has(> #go) .btn { box-shadow:0 6px 18px rgba(20,61,85,.18); }
+}
 @media (prefers-reduced-motion:reduce){ * { transition:none !important; animation:none !important; } }

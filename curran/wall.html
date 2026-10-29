@@ -12,6 +12,9 @@
   body { background:#F4F7FA; }
   .bar { background:#fff; border-bottom:2px solid var(--blue); display:flex; align-items:center; gap:14px; padding:10px 20px; flex-wrap:wrap; position:sticky; top:0; z-index:5; }
   .bar img { height:26px; }
+  .back { display:inline-flex; align-items:center; gap:7px; min-height:40px; padding:6px 14px; border:1.5px solid var(--line); border-radius:10px; font:700 14px "Open Sans",Arial,sans-serif; color:var(--navy); text-decoration:none; background:#fff; white-space:nowrap; }
+  .back:hover { background:var(--sky); }
+  @media (max-width:820px){ .back { min-height:44px; } }
   .tabs { display:flex; gap:4px; flex-wrap:wrap; }
   .tabs button { min-height:40px; border:0; background:transparent; border-radius:10px; padding:6px 12px; font:700 14px "Open Sans",Arial,sans-serif; color:var(--muted); cursor:pointer; }
   .tabs button[aria-selected="true"] { background:var(--navy); color:#fff; }
@@ -93,12 +96,22 @@
   .mv .w { font-size:12px; color:var(--blue); font-weight:700; }
   .qcols { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:20px; }
   @media (max-width:1100px){ .qcols { grid-template-columns:1fr; } }
+  /* Phones and small laptops: compact header, projector-only controls hidden */
+  @media (max-width:820px){
+    .bar.bar { gap:10px; padding:8px 14px; flex-wrap:nowrap; }
+    .bar.bar > img { height:22px; flex:none; }
+    .bar .tabs { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; flex:1 1 auto; min-width:0; }
+    .bar .tabs::-webkit-scrollbar { display:none; }
+    .bar .tabs button { white-space:nowrap; min-height:44px; }
+    .bar .ctl { display:none; }
+  }
   .hidden-text .item .txt, .hidden-text .rc .ln, .hidden-text .cloud span { filter:blur(9px); }
 </style>
 </head>
 <body>
 <div class="bar">
   <img src="../assets/bigleap-logo.png" alt="Big Leap">
+  <a class="back" href="index.html"><span aria-hidden="true">&#8592;</span> Toolkits</a>
   <div class="tabs" role="tablist" id="tabs">
     <button role="tab" data-v="pulse">Pulse</button>
     <button role="tab" data-v="friction">Friction</button>

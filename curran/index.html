@@ -54,22 +54,29 @@
   </section>
 
   <section class="card" aria-labelledby="g">
-    <h2 id="g">1. Which group are you in?</h2>
-    <p class="small" style="margin-top:4px">Your facilitator will tell you. This only groups answers on the results wall.</p>
-    <div class="chips" id="groups"></div>
-    <h3 style="margin-top:18px">And which team do you work on?</h3>
-    <p class="small" style="margin-top:4px">So we can spot the same problem showing up from different seats.</p>
+    <h2 id="g">Which team do you work on?</h2>
+    <p class="small" style="margin-top:4px">Asked once. It lets us spot the same problem showing up from different seats.</p>
     <div class="chips" id="teams"></div>
   </section>
 
-  <h2 style="font-size:20px;font-weight:800;margin-top:26px">2. Today's activities</h2>
-  <nav class="acts" aria-label="Activities">
+  <h2 style="font-size:20px;font-weight:800;margin-top:26px">Everyone together</h2>
+  <p class="small" style="margin:4px 0 10px">Answered by the whole room. Your answers stay anonymous.</p>
+  <nav class="acts" aria-label="Whole-room activities">
     <a class="act" href="pulse.html" data-a="pulse"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span><span><b>Warm-up pulse</b><span>One word, one slider. Takes 30 seconds.</span></span><span class="when">Opening</span></a>
-    <a class="act" href="map.html" data-a="map"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><path d="M9 6h6M18 9v6M8.5 8.5l7 7"/></svg></span><span><b>One journey, many systems</b><span>See how a customer moves through Curran, and where information gets carried by hand.</span></span><span class="when">Explore</span></a>
-    <a class="act" href="friction.html" data-a="friction"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v3M11 14h.01"/></svg></span><span><b>Friction Finder</b><span>Where do we lose information, time or momentum?</span></span><span class="when">Breakout 1</span></a>
     <a class="act" href="fixit.html" data-a="fixit"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg></span><span><b>Fix-It Builder</b><span>Turn a problem into a recipe: trigger, automation, owner, measure.</span></span><span class="when">Solve</span></a>
     <a class="act" href="robot.html" data-a="robot"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 14h.01M15 14h.01M2 13v3M22 13v3"/></svg></span><span><b>Human or Robot?</b><span>Sort real tasks, then add the ones you'd hand to a system.</span></span><span class="when">Activity</span></a>
     <a class="act" href="first-moves.html" data-a="moves"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4M4 4h12l-2 4 2 4H4"/></svg></span><span><b>First Moves</b><span>Three questions, three votes: what should we change first?</span></span><span class="when">Close</span></a>
+  </nav>
+
+  <h2 style="font-size:20px;font-weight:800;margin-top:26px">In your breakout group</h2>
+  <p class="small" style="margin:4px 0 10px">You'll be split into three groups. We'll ask which one you're in when you get there.</p>
+  <nav class="acts" aria-label="Breakout activities">
+    <a class="act" href="friction.html" data-a="friction"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v3M11 14h.01"/></svg></span><span><b>Friction Finder</b><span>Where do we lose information, time or momentum?</span></span><span class="when">Breakout 1</span></a>
+  </nav>
+
+  <h2 style="font-size:20px;font-weight:800;margin-top:26px">Explore any time</h2>
+  <nav class="acts" aria-label="Reference">
+    <a class="act" href="map.html" data-a="map"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><path d="M9 6h6M18 9v6M8.5 8.5l7 7"/></svg></span><span><b>One journey, many systems</b><span>See how a customer moves through Curran, and where information gets carried by hand.</span></span><span class="when">Explore</span></a>
   </nav>
 
   <section class="card" aria-labelledby="next">
@@ -86,13 +93,6 @@
 <script src="../assets/config.js"></script>
 <script src="../assets/workshop.js"></script>
 <script>
-  var g = document.getElementById('groups');
-  BL.config.groups.forEach(function (x) {
-    var b = document.createElement('button'); b.className = 'chip'; b.setAttribute('data-v', x.id);
-    b.innerHTML = '<b>' + BL.esc(x.name) + '</b> · ' + BL.esc(x.lead); g.appendChild(b);
-  });
-  BL.choice(g, { onChange: function (v) { BL.setGroup(v); BL.toast('You’re in ' + BL.groupName(v)); } });
-  var cur = BL.group(); if (cur) { var b = g.querySelector('[data-v="' + cur + '"]'); if (b) b.setAttribute('aria-pressed', 'true'); }
   var t = document.getElementById('teams');
   t.innerHTML = BL.config.teams.map(function (x) { return '<button class="chip" data-v="' + BL.esc(x) + '">' + BL.esc(x) + '</button>'; }).join('');
   BL.choice(t, { onChange: function (v) { BL.setTeam(v); } });

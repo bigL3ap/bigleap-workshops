@@ -21,7 +21,15 @@
   <div class="eyebrow">Breakout 1 · Friction Finder</div>
   <h1 class="h1">Where does revenue get stuck?</h1>
   <p class="lede">Think about a real customer or project. Where do we lose <b>information</b>, <b>time</b> or <b>momentum</b>? Add as many as you like, one at a time.</p>
-  <p class="small" style="margin-top:8px"><span id="groupLabel"></span> · <a href="index.html">change</a></p>
+  <p class="small" style="margin-top:8px"><span id="groupLabel"></span> &middot; <a href="#" id="chg">change</a></p>
+
+  <section class="card" id="groupAsk" hidden aria-labelledby="ga">
+    <h2 id="ga" style="font-size:18px">Which group are you in?</h2>
+    <p class="small" style="margin-top:4px">Your facilitator will tell you. We only ask once, and it just groups answers on the results wall.</p>
+    <div class="chips" id="groups" style="margin-top:10px"></div>
+    <h3 style="margin-top:18px;font-size:16px" id="teamAskH" hidden>And which team do you work on?</h3>
+    <div class="chips" id="teams" style="margin-top:8px" hidden></div>
+  </section>
 
   <form id="f" class="card" novalidate>
     <div class="prog" aria-hidden="true"><i id="p1"></i><i id="p2"></i><i id="p3"></i><i id="p4"></i></div>
@@ -104,6 +112,29 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
+  // Group is only asked here, the first place it matters, and only until it's answered.
+  var ask = document.getElementById('groupAsk'), gWrap = document.getElementById('groups');
+  var tH = document.getElementById('teamAskH'), tWrap = document.getElementById('teams');
+  BL.config.groups.forEach(function (x) {
+    var b = document.createElement('button'); b.className = 'chip'; b.setAttribute('data-v', x.id);
+    b.innerHTML = '<b>' + BL.esc(x.name) + '</b> \u00b7 ' + BL.esc(x.lead); gWrap.appendChild(b);
+  });
+  BL.choice(gWrap, { onChange: function (v) { BL.setGroup(v); BL.chrome('Breakout 1'); maybeClose(); } });
+  tWrap.innerHTML = BL.config.teams.map(function (x) { return '<button class="chip" data-v="' + BL.esc(x) + '">' + BL.esc(x) + '</button>'; }).join('');
+  BL.choice(tWrap, { onChange: function (v) { BL.setTeam(v); BL.chrome('Breakout 1'); maybeClose(); } });
+  function maybeClose() { if (BL.group() && BL.team()) { ask.hidden = true; } }
+  function openAsk() {
+    ask.hidden = false;
+    var needTeam = !BL.team(); tH.hidden = !needTeam; tWrap.hidden = !needTeam;
+    var cg = BL.group(); if (cg) { var b = gWrap.querySelector('[data-v="' + cg + '"]'); if (b) b.setAttribute('aria-pressed', 'true'); }
+    var ct = BL.team(); if (ct) { var tb = tWrap.querySelector('[data-v="' + ct + '"]'); if (tb) tb.setAttribute('aria-pressed', 'true'); }
+  }
+  if (!BL.group()) openAsk();
+  document.getElementById('chg').addEventListener('click', function (e) {
+    e.preventDefault(); openAsk(); tH.hidden = false; tWrap.hidden = false;
+    ask.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
   renderMine(); check();
   BL.chrome('Breakout 1');
 </script>
