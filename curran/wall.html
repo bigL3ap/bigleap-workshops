@@ -42,14 +42,23 @@
   .dist-l { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; text-align:center; font-weight:700; color:var(--muted); margin-top:6px; }
   /* Heatmap */
   .heat { display:grid; grid-template-columns:150px repeat(8,1fr); gap:6px; margin-top:12px; }
+  .heatwrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .swipe { display:none; }
+  @media (max-width:820px){
+    .heat { min-width:660px; grid-template-columns:104px repeat(8,minmax(62px,1fr)); gap:5px; }
+    .heat .h { font-size:12px; padding:4px 2px; }
+    .heat .rl { font-size:13px; }
+    .heat .c { min-height:52px; font-size:18px; }
+    .swipe { display:block; margin:8px 0 0; font:600 13px "Open Sans",Arial,sans-serif; color:var(--muted); }
+  }
   .heat .h { font:800 clamp(12px,.9vw,15px)/1.2 "Raleway",Arial,sans-serif; color:var(--navy); text-align:center; padding:6px 2px; }
   .heat .rl { font:700 14px "Open Sans",Arial,sans-serif; display:flex; align-items:center; color:var(--navy); }
   .heat .c { min-height:clamp(58px,6vh,88px); border-radius:10px; display:grid; place-items:center; font:800 clamp(18px,1.6vw,28px) "Raleway",Arial,sans-serif; cursor:pointer; border:0; }
   .heat .c[aria-pressed="true"] { outline:3px solid var(--navy); outline-offset:2px; }
   .heat .tot { font:700 14px "Open Sans",Arial,sans-serif; text-align:center; color:var(--muted); }
   .items { display:grid; gap:10px; margin-top:12px; max-height:62vh; overflow:auto; padding-right:4px; }
-  .item { background:var(--sky); border-radius:12px; padding:12px 14px; font-size:clamp(14px,1vw,18px); position:relative; }
-  .item .x { position:absolute; right:8px; top:6px; border:0; background:transparent; color:var(--faint); cursor:pointer; font-size:18px; }
+  .item { background:var(--sky); border-radius:12px; padding:12px 32px 12px 14px; font-size:clamp(14px,1vw,18px); position:relative; }
+  .item .x { position:absolute; right:4px; top:4px; width:30px; height:30px; border:0; background:transparent; color:var(--faint); cursor:pointer; font-size:18px; line-height:1; }
   .item .meta { margin-bottom:4px; }
   .callout { background:var(--navy); color:#fff; border-radius:16px; padding:16px 18px; }
   .callout .k { color:#8CC6E6; }
@@ -68,6 +77,13 @@
   .stack { display:flex; height:30px; border-radius:8px; overflow:hidden; background:#E4EBF0; }
   .stack i { display:block; height:100%; font-style:normal; color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; white-space:nowrap; overflow:hidden; }
   .lg { display:flex; gap:16px; font-size:13px; color:var(--muted); margin-top:8px; } .lg i { display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:-1px; }
+  @media (max-width:820px){
+    .rrow { grid-template-columns:1fr; gap:5px; align-items:stretch; }
+    .rows { gap:14px; }
+    .stack { height:26px; }
+    .cards { grid-template-columns:1fr; }
+    .rc .ln { grid-template-columns:68px 1fr; }
+  }
   /* Moves */
   .mv { display:grid; grid-template-columns:1fr auto; gap:4px 12px; align-items:center; margin-top:14px; }
   .mv .t { font:700 clamp(15px,1.1vw,19px) "Open Sans",Arial,sans-serif; color:var(--navy); }
@@ -145,7 +161,7 @@
       rows.forEach(function (r) { var p = r.payload, k = p.stage + '|' + p.bucket; cell[k] = (cell[k] || 0) + 1; stageTot[p.stage] = (stageTot[p.stage] || 0) + 1; max = Math.max(max, cell[k]); if (r.team) { (teams[p.stage] = teams[p.stage] || {})[r.team] = 1; } });
       var top = Object.keys(stageTot).sort(function (a, b) { return stageTot[b] - stageTot[a]; })[0];
       var shared = Object.keys(teams).filter(function (s) { return Object.keys(teams[s]).length >= 3; }).map(stageName);
-      var g = '<div class="heat"><div></div>' + BL.STAGES.map(function (s) { return '<div class="h">' + s.n + '. ' + s.name + '</div>'; }).join('');
+      var g = '<div class="heatwrap"><div class="heat"><div></div>' + BL.STAGES.map(function (s) { return '<div class="h">' + s.n + '. ' + s.name + '</div>'; }).join('');
       BL.BUCKETS.forEach(function (b) {
         g += '<div class="rl"><span class="pill ' + b.id + '" style="font-size:13px">' + b.name.replace(' problem', '') + '</span></div>';
         BL.STAGES.forEach(function (s) {
@@ -153,7 +169,7 @@
           g += '<button class="c" data-cell="' + s.id + '|' + b.id + '" aria-pressed="' + (sel === s.id + '|' + b.id) + '" style="background:' + (n ? 'rgba(' + c.join(',') + ',' + a.toFixed(2) + ')' : '#EEF2F5') + ';color:' + (a > .55 ? '#fff' : 'var(--navy)') + '">' + (n || '') + '</button>';
         });
       });
-      g += '<div></div>' + BL.STAGES.map(function (s) { return '<div class="tot">' + (stageTot[s.id] || 0) + '</div>'; }).join('') + '</div>';
+      g += '<div></div>' + BL.STAGES.map(function (s) { return '<div class="tot">' + (stageTot[s.id] || 0) + '</div>'; }).join('') + '</div></div><p class="swipe">Swipe the grid sideways to see every stage.</p>';
       var list = rows.filter(function (r) { return !sel || (r.payload.stage + '|' + r.payload.bucket) === sel; }).sort(function (a, b) { return (b.payload.hurt || 0) - (a.payload.hurt || 0); });
       var hurtL = ['', 'Annoying', 'Costs time', 'Costs deals'];
       var items = list.map(function (r) { var p = r.payload; return '<div class="item"><button class="x" data-hide="' + E(key(r)) + '" title="Hide from wall" aria-label="Hide">×</button><div class="meta"><span class="pill">' + stageName(p.stage) + '</span><span class="pill ' + p.bucket + '">' + p.bucket + '</span>' + (r.team ? '<span class="pill">' + E(r.team) + '</span>' : '') + '<span class="pill">' + hurtL[p.hurt || 1] + '</span></div><div class="txt">' + E(p.text) + '</div></div>'; }).join('');
