@@ -20,7 +20,7 @@
 <main class="wrap">
   <div class="eyebrow">Breakout 1 · Friction Finder</div>
   <h1 class="h1">Where does revenue get stuck?</h1>
-  <p class="lede">Think about a real customer or project. Where do we lose <b>information</b>, <b>time</b> or <b>momentum</b>? Add as many as you like, one at a time.</p>
+  <p class="lede">Think about a real customer or project. Where do we lose <b>information</b>, <b>time</b>, <b>momentum</b> or an <b>opportunity</b>? Add as many as you like, one at a time.</p>
   <p class="small" style="margin-top:8px"><span id="groupLabel"></span> &middot; <a href="#" id="chg">change</a></p>
 
   <section class="card" id="groupAsk" hidden aria-labelledby="ga">
@@ -34,11 +34,11 @@
   <form id="f" class="card" data-sticky-submit novalidate>
     <div class="prog" aria-hidden="true"><i id="p1"></i><i id="p2"></i><i id="p3"></i><i id="p4"></i></div>
 
-    <div class="step" style="margin-top:12px"><span class="n">1</span><h2 style="font-size:18px">Where in the journey?</h2></div>
+    <div class="step" style="margin-top:12px"><span class="n">1</span><h2 style="font-size:18px">Where does this happen?</h2></div>
     <div class="tiles t4" id="stage"></div>
 
     <div class="step" style="margin-top:20px"><span class="n">2</span><h2 style="font-size:18px">What gets lost?</h2></div>
-    <div class="chips" id="lost"><button class="chip" data-v="info">Information</button><button class="chip" data-v="time">Time</button><button class="chip" data-v="momentum">Momentum</button></div>
+    <div class="chips" id="lost"><button class="chip" data-v="info">Information</button><button class="chip" data-v="time">Time</button><button class="chip" data-v="momentum">Momentum</button><button class="chip" data-v="opportunity">Opportunity</button></div>
 
     <div class="step" style="margin-top:20px"><span class="n">3</span><h2 style="font-size:18px">Describe it in a sentence</h2></div>
     <label class="sr" for="what">Describe the friction</label>
@@ -81,7 +81,7 @@
     'What we learn from customers doesn’t make it back to marketing.'
   ];
   var stage = document.getElementById('stage'), lost = document.getElementById('lost'), bucket = document.getElementById('bucket'), hurt = document.getElementById('hurt'), what = document.getElementById('what'), go = document.getElementById('go');
-  stage.innerHTML = BL.STAGES.map(function (s) { return '<button class="tile" data-v="' + s.id + '"><span class="num">' + s.n + '</span><b>' + s.name + '</b><span>' + s.ex + '</span></button>'; }).join('');
+  stage.innerHTML = BL.STAGES.map(function (s) { return '<button class="tile" data-v="' + s.id + '"><span class="num">' + s.n + '</span><b>' + s.short + '</b><span class="who">' + s.who + '</span><span>' + s.ex + '</span></button>'; }).join('');
   bucket.innerHTML = BL.BUCKETS.map(function (b) { return '<button class="tile ' + b.id + '" data-v="' + b.id + '"><b>' + b.name + '</b><span>' + b.hint + '</span></button>'; }).join('');
   document.getElementById('prompts').innerHTML = PROMPTS.map(function (p) { return '<button type="button">' + p + '</button>'; }).join('');
   document.querySelectorAll('#prompts button').forEach(function (b) { b.addEventListener('click', function () { what.value = b.textContent + ' For example: '; what.focus(); check(); }); });

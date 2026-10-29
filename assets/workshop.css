@@ -54,6 +54,8 @@ button { font:inherit; }
 .tile b { font:800 15px/1.25 "Raleway",Arial,sans-serif; }
 .tile span { font-size:12.5px; line-height:1.4; color:var(--muted); }
 .tile .num { font:800 12px "Open Sans",Arial,sans-serif; color:var(--blue); letter-spacing:.05em; }
+.tile .who { font:700 11.5px "Open Sans",Arial,sans-serif; color:var(--blue); text-transform:uppercase; letter-spacing:.04em; }
+.tile[aria-pressed="true"] .who { color:#cfe4f0; }
 .tile:hover { border-color:var(--blue); }
 .tile[aria-pressed="true"] { border-color:var(--navy); background:var(--navy); }
 .tile[aria-pressed="true"] b, .tile[aria-pressed="true"] span, .tile[aria-pressed="true"] .num { color:#fff; }

@@ -117,15 +117,16 @@
 
   /* Shared content used by several pages and the results wall. */
   BL.STAGES = [
-    { id: 'aware', n: 1, name: 'Awareness', short: 'They find us', ex: 'Search, ads, social, designers talking, referrals' },
-    { id: 'inquiry', n: 2, name: 'Inquiry', short: 'They raise a hand', ex: 'A form, a swatch order, a call, an email to an inbox' },
-    { id: 'qualify', n: 3, name: 'Qualification', short: 'We figure out fit', ex: 'Triage, priority, trade approval, who owns it' },
-    { id: 'opp', n: 4, name: 'Opportunity', short: 'We shape the project', ex: 'Specs, samples, conversations, the quote' },
-    { id: 'sale', n: 5, name: 'Sale', short: 'They commit', ex: 'The order, payment, confirmation' },
-    { id: 'handoff', n: 6, name: 'Handoff', short: 'We deliver', ex: 'Operations, production, shipping, install' },
-    { id: 'customer', n: 7, name: 'Customer', short: 'We take care of them', ex: 'Service questions, issues, updates' },
-    { id: 'repeat', n: 8, name: 'Repeat & referral', short: 'They come back', ex: 'Reorders, the next project, telling others' }
+    { id: 'aware', n: 1, name: 'Awareness', short: 'They find us', who: 'Usually marketing', ex: 'Search, ads, social, a designer telling someone, a referral' },
+    { id: 'inquiry', n: 2, name: 'Inquiry', short: 'They get in touch', who: 'Marketing and service', ex: 'A form, a swatch order, a call, an email to an inbox' },
+    { id: 'qualify', n: 3, name: 'Qualification', short: 'We work out who they are', who: 'Triage and admin', ex: 'Trade or consumer, priority, trade approval, who owns it' },
+    { id: 'opp', n: 4, name: 'Opportunity', short: 'We shape the project', who: 'Sales', ex: 'Fibers, sizes, samples, months of conversation, the quote' },
+    { id: 'sale', n: 5, name: 'Sale', short: 'They place the order', who: 'Sales and accounting', ex: 'The order, payment, confirmation' },
+    { id: 'handoff', n: 6, name: 'Handoff', short: 'We make it and ship it', who: 'Operations', ex: 'Production, freight, install dates' },
+    { id: 'customer', n: 7, name: 'Customer', short: 'We look after them', who: 'Customer service', ex: 'Questions, issues, updates, problems with an order' },
+    { id: 'repeat', n: 8, name: 'Repeat & referral', short: 'They come back', who: 'Sales and marketing', ex: 'Reorders, the next project, telling a colleague' }
   ];
+
   BL.BUCKETS = [
     { id: 'data', name: 'Data problem', hint: 'The information is missing, wrong, duplicated, or lives somewhere else.' },
     { id: 'process', name: 'Process problem', hint: 'No clear step, owner or rule, so it depends on who is working that day.' },
