@@ -23,7 +23,20 @@
     config: C, live: live, cid: cid, track: track,
     params: new URLSearchParams(location.search),
     group: function () { return LS.get(store + 'group', ''); },
-    setGroup: function (g) { LS.set(store + 'group', g); track('workshop_group', { group: g }); },
+    setGroup: function (g) { var prev = LS.get(store + 'group', null); LS.set(store + 'group', g); track('workshop_group', { group: g }); if (g && g !== prev) BL.moveAnswers(g); },
+    /* When someone switches groups, their Friction answers come with them: each one is re-sent under the
+       new group, and readers keep only the newest copy of each answer (see dedupe in load). */
+    moveAnswers: function (g) {
+      var mine = BL.mine('friction'), moved = [];
+      mine.forEach(function (r) { if (r.group !== g) { r.group = g; r.ts = new Date().toISOString(); moved.push(r); } });
+      if (!moved.length) return;
+      LS.set(store + 'mine_friction', mine);
+      moved.forEach(function (row) {
+        if (!live) { var all = LS.get(store + 'local', []); all.push(JSON.parse(JSON.stringify(row))); LS.set(store + 'local', all); return; }
+        fetch(C.endpoint, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(row) })
+          .catch(function () { var q = LS.get(store + 'retry', []); q.push(row); LS.set(store + 'retry', q); });
+      });
+    },
     team: function () { return LS.get(store + 'team', ''); },
     setTeam: function (t) { LS.set(store + 'team', t); },
     groupName: function (id) { var g = (C.groups || []).filter(function (x) { return x.id === id; })[0]; return g ? g.name + ' · ' + g.lead : ''; },
@@ -58,12 +71,17 @@
 
     load: function (activity) {
       if (BL.params.get('demo') === '1' && window.BL_DEMO) return Promise.resolve(window.BL_DEMO(activity));
+      function dedupe(rows) {
+        if (activity !== 'friction') return rows;
+        var keep = {}; rows.forEach(function (r) { var t = r.payload && r.payload.text; if (!t) return; var k = r.cid + '|' + t; if (!keep[k] || String(r.ts) > String(keep[k].ts)) keep[k] = r; });
+        return rows.filter(function (r) { var t = r.payload && r.payload.text; return !t || keep[r.cid + '|' + t] === r; });
+      }
       if (!live) {
-        return Promise.resolve(LS.get(store + 'local', []).filter(function (r) { return r.activity === activity; }));
+        return Promise.resolve(dedupe(LS.get(store + 'local', []).filter(function (r) { return r.activity === activity; })));
       }
       var url = C.endpoint + '?session=' + encodeURIComponent(C.session) + '&activity=' + encodeURIComponent(activity) + '&t=' + Date.now();
       return fetch(url).then(function (r) { return r.json(); }).then(function (j) {
-        return (j.rows || []).map(function (r) { if (typeof r.payload === 'string') { try { r.payload = JSON.parse(r.payload); } catch (e) { r.payload = {}; } } return r; });
+        return dedupe((j.rows || []).map(function (r) { if (typeof r.payload === 'string') { try { r.payload = JSON.parse(r.payload); } catch (e) { r.payload = {}; } } return r; }));
       });
     },
 
