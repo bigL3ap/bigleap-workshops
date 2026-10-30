@@ -202,7 +202,8 @@
       function bk(p) { return p.buckets && p.buckets.length ? p.buckets : [p.bucket]; }
       function sk(p) { return p.stages && p.stages.length ? p.stages : [p.stage]; }
       rows.forEach(function (r) { var p = r.payload; sk(p).forEach(function (st) { bk(p).forEach(function (bb) { var k = st + '|' + bb; cell[k] = (cell[k] || 0) + 1; max = Math.max(max, cell[k]); }); stageTot[st] = (stageTot[st] || 0) + 1; }); if (r.team) { sk(p).forEach(function (st) { (teams[st] = teams[st] || {})[r.team] = 1; }); } });
-      var top = Object.keys(stageTot).sort(function (a, b) { return stageTot[b] - stageTot[a]; })[0];
+      var topN = Math.max.apply(null, [0].concat(Object.keys(stageTot).map(function (k) { return stageTot[k]; })));
+      var tops = BL.STAGES.filter(function (x) { return topN && stageTot[x.id] === topN; }).map(function (x) { return x.id; }), top = tops[0];
       var shared = Object.keys(teams).filter(function (s) { return Object.keys(teams[s]).length >= 3; }).map(stageName);
       var g = '<div class="heatwrap"><div class="heat"><div></div>' + BL.STAGES.map(function (s) { return '<div class="h">' + s.n + '. ' + s.name + '</div>'; }).join('');
       BL.BUCKETS.forEach(function (b) {
@@ -219,9 +220,9 @@
       return header('Breakout · Step 1', 'Where does revenue get stuck?', 'Darker means more people flagged it. Click a square to see what’s behind it.', rows.length) +
         '<section class="panel" style="margin-top:20px">' + g + '</section>' +
         '<div class="grid2"><section class="panel"><div class="k">' + (sel ? stageName(sel.split('|')[0]) + ' · ' + sel.split('|')[1] + ' <button class="linkbtn" data-clear="1">show all</button>' : 'Everything flagged, worst first') + '</div><div class="items">' + (items || '<div class="empty">Nothing here yet</div>') + '</div></section>' +
-        '<section style="display:grid;gap:16px;align-content:start">' + (top ? '<div class="callout"><div class="k">Most friction</div><b>' + stageName(top) + '</b></div>' : '') +
+        '<section style="display:grid;gap:16px;align-content:start">' + (top ? '<div class="callout"><div class="k">' + (tops.length > 1 ? 'Most friction · tied' : 'Most friction') + '</div><b>' + tops.map(stageName).join(' &amp; ') + '</b></div>' : '') +
         (shared.length ? '<div class="callout" style="background:#7B5EA7"><div class="k" style="color:#E6DCF5">Same problem, different seats</div><b>' + shared.join(', ') + '</b><p style="margin-top:6px;color:#EFE8F8">Three or more teams flagged this stage. That’s usually one RevOps problem showing up in different ways.</p></div>' : '') +
-        '<div class="panel"><div class="k">Prompt for the room</div><p style="margin-top:6px;font-size:18px">Pick the 3–5 squares we’ll solve together in the next section.</p></div></section></div>';
+        '<div class="panel"><div class="k">Prompt for the room</div><p style="margin-top:6px;font-size:18px">In step 2, each group picks the one problem it wants to fix.</p></div></section></div>';
     },
     fixit: function (rows) {
       var ph = function (id) { return BL.ROADMAP.filter(function (p) { return p.id === id; })[0]; };
