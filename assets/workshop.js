@@ -24,17 +24,20 @@
     params: new URLSearchParams(location.search),
     group: function () { return LS.get(store + 'group', ''); },
     setGroup: function (g) { var prev = LS.get(store + 'group', null); LS.set(store + 'group', g); track('workshop_group', { group: g }); if (g) BL.moveAnswers(g); },
-    /* When someone switches groups, their Friction answers come with them: each one is re-sent under the
-       new group, and readers keep only the newest copy of each answer (see dedupe in load). */
+    /* When someone switches groups, everything they answered themselves comes with them: Group Think,
+       friction answers and votes. Each one is re-sent under the new group and readers keep only the newest
+       copy (see dedupe in load). Shared group work in steps 2 to 5 (drafts and proposals) stays with the group. */
     moveAnswers: function (g) {
-      var mine = BL.mine('friction'), moved = [];
-      mine.forEach(function (r) { if (r.group !== g) { r.group = g; r.ts = new Date().toISOString(); moved.push(r); } });
-      if (!moved.length) return;
-      LS.set(store + 'mine_friction', mine);
-      moved.forEach(function (row) {
-        if (!live) { var all = LS.get(store + 'local', []); all.push(JSON.parse(JSON.stringify(row))); LS.set(store + 'local', all); return; }
-        fetch(C.endpoint, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(row) })
-          .catch(function () { var q = LS.get(store + 'retry', []); q.push(row); LS.set(store + 'retry', q); });
+      ['pulse', 'friction', 'moves', 'robot'].forEach(function (activity) {
+        var mine = BL.mine(activity), moved = [];
+        mine.forEach(function (r) { if (r.group !== g) { r.group = g; r.ts = new Date().toISOString(); moved.push(r); } });
+        if (!moved.length) return;
+        LS.set(store + 'mine_' + activity, mine);
+        moved.forEach(function (row) {
+          if (!live) { var all = LS.get(store + 'local', []); all.push(JSON.parse(JSON.stringify(row))); LS.set(store + 'local', all); return; }
+          fetch(C.endpoint, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(row) })
+            .catch(function () { var q = LS.get(store + 'retry', []); q.push(row); LS.set(store + 'retry', q); });
+        });
       });
     },
     team: function () { return LS.get(store + 'team', ''); },
@@ -71,10 +74,11 @@
 
     load: function (activity) {
       if (BL.params.get('demo') === '1' && window.BL_DEMO) return Promise.resolve(window.BL_DEMO(activity));
+      /* One copy per answer: the same person's identical answer (e.g. re-sent after switching groups) keeps only its newest copy. */
       function dedupe(rows) {
-        if (activity !== 'friction') return rows;
-        var keep = {}; rows.forEach(function (r) { var t = r.payload && r.payload.text; if (!t) return; var k = r.cid + '|' + t; if (!keep[k] || String(r.ts) > String(keep[k].ts)) keep[k] = r; });
-        return rows.filter(function (r) { var t = r.payload && r.payload.text; return !t || keep[r.cid + '|' + t] === r; });
+        var keep = {}, key = function (r) { return r.cid + '|' + (r.payload && r.payload._id ? r.payload._id : JSON.stringify(r.payload || {})); };
+        rows.forEach(function (r) { var k = key(r); if (!keep[k] || String(r.ts) > String(keep[k].ts)) keep[k] = r; });
+        return rows.filter(function (r) { return keep[key(r)] === r; });
       }
       if (!live) {
         return Promise.resolve(dedupe(LS.get(store + 'local', []).filter(function (r) { return r.activity === activity; })));
