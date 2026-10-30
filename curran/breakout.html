@@ -103,7 +103,7 @@
     <div class="card">
       <div class="eyebrow">Step 2 · One phone per group</div>
       <h2>Pick your group's top problem</h2>
-      <p class="small" style="margin-top:4px">Your group's answers are at the top. As a group, tap the <b>one</b> that matters most. You'll fix it in the next step. You can edit the wording below.</p>
+      <p class="small" style="margin-top:4px">Your group's answers are at the top. As a group, tap the <b>one</b> that matters most. You'll fix it in the next step. You can edit the wording below. Steps 2 to 5 are shared, so everyone in your group sees the same choices on their phone.</p>
       <div class="picks" id="picks"></div>
       <button class="linkbtn" id="refresh" type="button" style="margin-top:8px">Refresh our answers</button>
       <label class="f" for="prob">The problem, in a sentence</label>
@@ -181,7 +181,7 @@
 <script>
   var KEY = 'bl_ws_' + BL.config.session + '_breakout';
   var S = (function () { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; } })();
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} if (window.syncQueue) window.syncQueue(); }
   var $ = function (id) { return document.getElementById(id); };
   var LABELS = ['Find', 'Pick', 'Fix', 'Human / robot', 'Proposal', 'Vote'];
 
@@ -193,7 +193,7 @@
     S.step = n; save();
     for (var i = 1; i <= 6; i++) $('s' + i).hidden = i !== n;
     stepsNav();
-    if (n === 2) loadPicks(); if (n === 3) { $('probtext').textContent = S.problem || 'No problem picked yet. Go back to step 2 and pick one.'; } if (n === 4) renderSorter(); if (n === 5) renderProp(); if (n === 6) loadVotes();
+    if (n >= 2 && n <= 5 && window.pullDraft) window.pullDraft(true); if (n === 2) loadPicks(); if (n === 3) { $('probtext').textContent = S.problem || 'No problem picked yet. Go back to step 2 and pick one.'; } if (n === 4) renderSorter(); if (n === 5) renderProp(); if (n === 6) loadVotes();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   document.addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b) { e.preventDefault(); go(+b.getAttribute('data-go')); } });
@@ -380,7 +380,7 @@
     var el = $('vote'); el.innerHTML = '<p class="small">Loading proposals…</p>';
     BL.load('fixit').then(function (rows) {
       var props = rows.filter(function (r) { return r.payload && r.payload.kind === 'proposal'; });
-      var latest = {}; props.forEach(function (r) { latest[r.group + '|' + r.cid] = r; });
+      var latest = {}; props.forEach(function (r) { var k = r.group || r.cid; if (!latest[k] || String(r.ts) > String(latest[k].ts)) latest[k] = r; });
       props = Object.keys(latest).map(function (k) { return latest[k]; });
       if (!props.length) { el.innerHTML = '<p class="small">No proposals yet. They appear here as groups share them.</p>'; return; }
       el.innerHTML = props.map(function (r) { var p = r.payload, k = pkey(r), mine = S.vote === k;
@@ -395,6 +395,41 @@
   });
   $('vrefresh').addEventListener('click', loadVotes);
 
+  /* Group sync: steps 2 to 5 are shared by everyone in the same group, on any device.
+     Each change is sent as a 'fixit' row with kind 'draft' (the results sheet only accepts its five activities);
+     every phone in the group pulls the newest draft from someone else and applies it. Last change wins. */
+  var lastSent = '', sendTimer = null, pulling = false;
+  function draft() { return { kind: 'draft', problem: S.problem || '', fix: S.fix || null, sort: S.sort || {}, mins: S.mins != null ? S.mins : null, instead: S.instead || '', title: S.title || '' }; }
+  function draftKey(d) { var c = JSON.parse(JSON.stringify(d)); delete c.kind; return JSON.stringify(c); }
+  window.syncQueue = function () {
+    if (pulling || !BL.group() || !(S.step >= 2 && S.step <= 5)) return;
+    var d = draft(), k = draftKey(d); if (k === lastSent) return;
+    clearTimeout(sendTimer);
+    sendTimer = setTimeout(function () { d = draft(); k = draftKey(d); if (k === lastSent) return; lastSent = k; S.syncTs = new Date().toISOString(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} BL.submit('fixit', d); }, 1200);
+  };
+  function applyDraft(d) {
+    pulling = true;
+    S.problem = d.problem || ''; S.fix = d.fix || null; S.sort = d.sort || {}; if (d.mins != null) S.mins = d.mins; S.instead = d.instead || ''; S.title = d.title || '';
+    prob.value = S.problem; markPicks();
+    var f = S.fix || {}; setChoice(trig, f.trig); setChoice(act, f.act); setChoice(own, f.owner); setChoice(meas, f.meas); human.value = f.human || '';
+    if (S.mins != null) { mins.value = S.mins; minsOut.textContent = fmt(+S.mins); } instead.value = S.instead; title.value = S.title;
+    $('probtext').textContent = S.problem || 'No problem picked yet. Go back to step 2 and pick one.';
+    if (S.step === 4) renderSorter(); if (S.step === 5) renderProp();
+    lastSent = draftKey(draft());
+    try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+    pulling = false;
+  }
+  function pullDraft(force) {
+    var g = BL.group(); if (!g || !(S.step >= 2 && S.step <= 5)) return;
+    var a = document.activeElement; if (!force && a && /^(INPUT|TEXTAREA)$/.test(a.tagName)) return;
+    BL.load('fixit').then(function (rows) {
+      var me = BL.cid(), best = null;
+      rows.forEach(function (r) { if (r.payload && r.payload.kind === 'draft' && String(r.group).trim().toLowerCase() === g && r.cid !== me && (!best || String(r.ts) > String(best.ts))) best = r; });
+      if (best && (!S.syncTs || String(best.ts) > S.syncTs)) { S.syncTs = String(best.ts); applyDraft(best.payload); BL.toast('Updated with your group’s latest choices'); }
+    }).catch(function () {});
+  }
+  setInterval(function () { if (!document.hidden) pullDraft(false); }, 6000);
+  window.pullDraft = pullDraft;
   renderMine(); check1();
   BL.chrome('Breakout');
   var start = +(BL.params.get('step') || S.step || 1); go(start >= 1 && start <= 6 ? start : 1);

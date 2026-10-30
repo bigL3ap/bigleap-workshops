@@ -230,7 +230,7 @@
     },
     proposals: function (rows, sel, votes) {
       var props = rows.filter(function (r) { return r.payload.kind === 'proposal'; });
-      var latest = {}; props.forEach(function (r) { latest[r.group + '|' + r.cid] = r; });
+      var latest = {}; props.forEach(function (r) { var k = r.group || r.cid; if (!latest[k] || String(r.ts) > String(latest[k].ts)) latest[k] = r; });
       props = Object.keys(latest).map(function (k) { return latest[k]; });
       var vc = {}; (votes || []).forEach(function (r) { if (r.payload.kind === 'vote') vc[r.payload.target] = (vc[r.payload.target] || 0) + 1; });
       props.sort(function (a, b) { return (vc[key(b)] || 0) - (vc[key(a)] || 0); });
