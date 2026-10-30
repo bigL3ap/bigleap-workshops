@@ -282,7 +282,7 @@
   function markPicks() { document.querySelectorAll('#picks button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-t') === prob.value.trim() ? 'true' : 'false'); }); }
   function loadPicks(quiet) {
     var picks = $('picks'); if (!quiet) picks.innerHTML = '<p class="small">Loading your group’s answers…</p>';
-    function mineRows() { return BL.mine('friction').filter(function (r) { return r.payload && r.payload.text; }); }
+    function mineRows() { var g = BL.group(); return BL.mine('friction').filter(function (r) { return r.payload && r.payload.text && (!g || String(r.group || '').trim().toLowerCase() === g); }); }
     BL.load('friction').catch(function () { return []; }).then(function (rows) {
       picks.innerHTML = ''; var g = BL.group(), seen = {};
       /* The group's answers from the shared sheet, plus everything added on this phone (so your own answers always show, even if the sheet is slow). */
