@@ -23,7 +23,7 @@
     config: C, live: live, cid: cid, track: track,
     params: new URLSearchParams(location.search),
     group: function () { return LS.get(store + 'group', ''); },
-    setGroup: function (g) { var prev = LS.get(store + 'group', null); LS.set(store + 'group', g); track('workshop_group', { group: g }); if (g && g !== prev) BL.moveAnswers(g); },
+    setGroup: function (g) { var prev = LS.get(store + 'group', null); LS.set(store + 'group', g); track('workshop_group', { group: g }); if (g) BL.moveAnswers(g); },
     /* When someone switches groups, their Friction answers come with them: each one is re-sent under the
        new group, and readers keep only the newest copy of each answer (see dedupe in load). */
     moveAnswers: function (g) {
