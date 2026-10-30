@@ -23,7 +23,8 @@
   .live-dot { width:9px; height:9px; border-radius:50%; background:var(--green); display:inline-block; margin-right:6px; box-shadow:0 0 0 0 rgba(30,138,90,.5); animation:pulse 2s infinite; }
   .tonebar { display:flex; height:30px; border-radius:8px; overflow:hidden; margin-top:8px; }
   .tonebar div { color:#fff; font:800 13px "Open Sans",Arial,sans-serif; display:flex; align-items:center; justify-content:center; min-width:34px; }
-  .tonel { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin:5px 0 14px; }
+  .tonel { display:flex; flex-wrap:wrap; gap:6px 18px; font-size:13px; color:var(--muted); margin:8px 0 14px; }
+  .tonel span { display:inline-flex; align-items:center; gap:6px; } .tonel i { width:11px; height:11px; border-radius:3px; display:inline-block; } .tonel b { color:var(--navy); }
   @keyframes pulse { 70% { box-shadow:0 0 0 8px rgba(30,138,90,0); } 100% { box-shadow:0 0 0 0 rgba(30,138,90,0); } }
   .stage-wrap { padding:22px 28px 28px; max-width:1800px; margin:0 auto; }
   .head { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; }
@@ -205,7 +206,9 @@
       return header('Group Think', 'How does it feel to work in our systems today?', 'Everyone picked up to 3. Bigger means more people picked it. Green feels efficient, grey is in the middle, red feels inefficient.', rows.length) +
         '<div class="grid2"><section class="panel"><div class="cloud">' + (cloud || '<div class="empty">Waiting for the first word…</div>') + '</div></section>' +
         '<section class="panel"><div class="k">Team efficiency: not efficient at all (1) → most efficient (5)</div><div style="display:flex;align-items:baseline;gap:10px;margin-top:8px"><span class="big">' + avg + '</span><span class="sub">room average</span></div>' +
-        (function () { var t = tone[0] + tone[1] + tone[2]; if (!t) return ''; var pc = tone.map(function (n) { return Math.round(100 * n / t); }); return '<div class="k" style="margin-top:22px">Overall tone</div><div class="tonebar">' + ['Feels efficient', 'In the middle', 'Feels inefficient'].map(function (l, i) { return pc[i] ? '<div style="flex:' + tone[i] + ';background:' + ['#1E8A5A', '#9AA9B3', '#EA4335'][i] + '" title="' + l + '">' + pc[i] + '%</div>' : ''; }).join('') + '</div><div class="tonel"><span>Feels efficient</span><span>In the middle</span><span>Feels inefficient</span></div>'; })() + '<div class="dist">' + dist.map(function (d) { return '<div style="height:' + Math.round(100 * d / dmax) + '%"><b>' + d + '</b></div>'; }).join('') + '</div><div class="dist-l"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div></section></div>';
+        (function () { var t = tone[0] + tone[1] + tone[2]; if (!t) return ''; var pc = tone.map(function (n) { return Math.round(100 * n / t); }); var big = tone.indexOf(Math.max.apply(null, tone)); pc[big] += 100 - pc[0] - pc[1] - pc[2]; var L = ['Feels efficient', 'In the middle', 'Feels inefficient'], K = ['#1E8A5A', '#9AA9B3', '#EA4335'];
+          return '<div class="k" style="margin-top:22px">Overall tone of the words picked</div><div class="tonebar">' + L.map(function (l, i) { return pc[i] ? '<div style="flex:' + tone[i] + ';background:' + K[i] + '" title="' + l + '">' + (pc[i] >= 12 ? pc[i] + '%' : '') + '</div>' : ''; }).join('') + '</div>' +
+            '<div class="tonel">' + L.map(function (l, i) { return '<span><i style="background:' + K[i] + '"></i>' + l + ' <b>' + pc[i] + '%</b></span>'; }).join('') + '</div>'; })() + '<div class="dist">' + dist.map(function (d) { return '<div style="height:' + Math.round(100 * d / dmax) + '%"><b>' + d + '</b></div>'; }).join('') + '</div><div class="dist-l"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div></section></div>';
     },
     friction: function (rows, sel) {
       var cell = {}, stageTot = {}, max = 1, teams = {};
