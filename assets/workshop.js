@@ -155,6 +155,50 @@
     { id: 'process', name: 'No clear process', hint: 'Nobody owns it, or it depends on who’s working that day.' },
     { id: 'comm', name: 'Someone wasn’t told', hint: 'The right person finds out late, or not at all.' }
   ];
+  /* Step-by-step HubSpot plan for a Friction to Flow proposal. Used by the breakout page and the results wall,
+     so proposals shared before plans were saved still show one. HubSpot's standard tools only. */
+  var HOW_TRIG = {
+    form: 'Trigger: <i>Form submission</i>, and pick the website form.',
+    swatch: 'Trigger: the form (or property) that marks a swatch or web order, for example a <i>Swatch request</i> form submission.',
+    trade: 'Trigger: the property that marks a trade account as approved changes to <i>Approved</i>.',
+    inbox: 'First connect the shared inbox to HubSpot (Settings › Inbox › Connect a channel › Team email) so every email becomes a conversation on the right record. Then trigger on the new conversation.',
+    call: 'Trigger: a call is logged on the contact. Calls need to be made or logged in HubSpot for this to work.',
+    quote: 'Trigger (deal-based workflow): the deal moves to the stage that means a quote was sent.',
+    quiet: 'Trigger: <i>Last activity date</i> is more than 3 days ago (pick the number of days that fits).',
+    won: 'Trigger (deal-based workflow): the deal stage becomes <i>Closed won</i>.',
+    ship: 'Trigger: the order status changes to shipped or delivered. This needs order status in HubSpot, so check that first.',
+    lost: 'Trigger (deal-based workflow): the deal stage becomes <i>Closed lost</i>.'
+  };
+  var HOW_ACT = {
+    owner: ['Assign it to the right person', 'Add the action <i>Rotate record to owner</i> (to share work across a team) or <i>Set property value › Owner</i> (for one person).'],
+    task: ['Create a to-do with a due date', 'Add the action <i>Create task</i>. Give it a clear title, assign it to the record owner, and set it due in 1 business day.'],
+    notify: ['Let the right person or team know', 'Add the action <i>Send internal notification</i> to the owner or team. Use tokens so it shows the customer’s name and what they need.'],
+    reply: ['Email the customer a confirmation or follow-up', 'Write the email first (Marketing › Email › Automated), then add the action <i>Send email</i>. Keep it short and personal.'],
+    nurture: ['Add the customer to regular check-in emails', 'Add the action <i>Enroll in another workflow</i> that sends a few spaced-out check-in emails, or add them to a list your team emails.'],
+    stage: ['Move it to the next step', 'Add the action <i>Set property value</i> to move the lead, lifecycle or deal stage to the next one.'],
+    nudge: ['Remind the person in charge if nothing happens', 'Add a <i>Delay</i> (for example 2 business days), then an <i>If/then branch</i>: if there’s been no activity, create a task or send the owner a reminder.'],
+    context: ['Pass the full history to the next team', 'Add a <i>Create task</i> or <i>Send internal notification</i> for the next team, with the key details pulled in as tokens. Make sure emails, calls and notes are logged on the record so the history is there.'],
+    reason: ['Record the reason (for example, why we lost)', 'Use a dropdown property such as <i>Closed lost reason</i>, and make it required when a deal moves to that stage (pipeline settings › edit stage properties).'],
+    log: ['Save the email or call to the customer’s record', 'Have each person connect their inbox to HubSpot and turn on email logging. Make or log calls from HubSpot so they land on the right record.'],
+    sync: ['Update the other system so both match', 'Map the matching fields in the integration settings so both systems stay in step. This one usually needs your HubSpot admin or integration partner.'],
+    report: ['Count it in a report', 'Create a report (Reporting › Reports › Create report) that counts these records, and add it to your team’s dashboard.']
+  };
+  BL.buildPlan = function (v) {
+    var f = { trig: v.trig, act: v.act, human: v.human }, st = [], E = BL.esc, arr = function (x) { return [].concat(x || []).filter(Boolean); };
+    var fmt = function (m) { return m >= 60 ? (Math.round(m / 6) / 10) + (m === 60 ? ' hr / week' : ' hrs / week') : m + ' min / week'; };
+    st.push({ t: 'Agree on the problem and who owns the fix', d: (v.problem ? E(v.problem.replace(/\s+$/, '')) + (/[.!?]$/.test(v.problem.trim()) ? '' : '.') : 'Write the problem in one sentence that everyone agrees on.') + (v.owner ? ' In charge: ' + E(v.owner) + '.' : ' Name one person or team who owns the fix.') });
+    st.push({ t: 'Write down today’s number before you change anything', d: v.measText ? 'So you can tell if it worked: ' + E(v.measText) + '.' : 'Pick one number that should get better, such as how fast customers hear back, and write down where it is today.' });
+    var trig = arr(f.trig);
+    st.push({ t: 'Create the workflow', d: 'In HubSpot go to Automation › Workflows › Create workflow › From scratch. ' + (trig.length ? trig.map(function (t) { return HOW_TRIG[t]; }).join(' Or: ') : 'Then choose the trigger: the event that should start it, such as a form submission, a deal moving to a new stage, or a property changing.') });
+    f.act = arr(f.act);
+    (f.act || []).forEach(function (a) { var h = HOW_ACT[a]; if (h) st.push({ t: h[0], d: h[1], warn: a === 'sync' || a === 'log' }); });
+    if (!(f.act || []).length) st.push({ t: 'Add the actions', d: 'Add what HubSpot should do each time it starts, such as <i>Rotate record to owner</i>, <i>Create task</i> or <i>Send email</i>.' });
+    if (f.human) st.push({ t: 'Keep the human part human', d: 'A person still does this: ' + E(f.human) + '. Write it into the team’s routine so it doesn’t get skipped.' });
+    st.push({ t: 'Test it, then switch it on', d: 'Run it on a test contact or deal first. Check every action did what you expected, then turn the workflow on.' });
+    st.push({ t: 'Check back in 30 days', d: 'Compare against the number you wrote down. Adjust the timing or the wording, and share the result with your team.' + (v.minutes ? ' Target: about ' + fmt(v.minutes).toLowerCase() + ' back.' : '') });
+    return st;
+  };
+
   /* Proposed roadmap sequence (staff-facing wording, no figures). */
   BL.ROADMAP = [
     { id: 'p21', when: 'Now – mid Nov', name: 'A clean foundation', what: 'Access and roles, cleaner contact records, email logging and shared inboxes connected.' },
