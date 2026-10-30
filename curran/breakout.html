@@ -280,8 +280,8 @@
     return b;
   }
   function markPicks() { document.querySelectorAll('#picks button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-t') === prob.value.trim() ? 'true' : 'false'); }); }
-  function loadPicks() {
-    var picks = $('picks'); picks.innerHTML = '<p class="small">Loading your group’s answers…</p>';
+  function loadPicks(quiet) {
+    var picks = $('picks'); if (!quiet) picks.innerHTML = '<p class="small">Loading your group’s answers…</p>';
     function mineRows() { return BL.mine('friction').filter(function (r) { return r.payload && r.payload.text; }); }
     BL.load('friction').catch(function () { return []; }).then(function (rows) {
       picks.innerHTML = ''; var g = BL.group(), seen = {};
@@ -294,7 +294,7 @@
       markPicks();
     }).catch(function () { picks.innerHTML = ''; SEEDS.forEach(function (t) { picks.appendChild(pickBtn('Example', t)); }); markPicks(); });
   }
-  $('refresh').addEventListener('click', loadPicks);
+  $('refresh').addEventListener('click', function () { loadPicks(); });
 
   /* Step 3: the fix */
   var TRIG = { form:'Someone fills out a form on the website', swatch:'A swatch or web order comes in', trade:'A trade account is approved', inbox:'An email lands in a shared inbox', call:'A customer calls', quote:'We send a quote', quiet:'Nothing happens for a few days', won:'An order is placed', ship:'An order ships or is delivered', lost:'We lose a project' };
@@ -428,7 +428,7 @@
       if (best && (!S.syncTs || String(best.ts) > S.syncTs)) { S.syncTs = String(best.ts); applyDraft(best.payload); BL.toast('Updated with your group’s latest choices'); }
     }).catch(function () {});
   }
-  setInterval(function () { if (!document.hidden) pullDraft(false); }, 6000);
+  setInterval(function () { if (document.hidden) return; pullDraft(false); if (S.step === 2 && document.activeElement !== prob) loadPicks(true); }, 6000);
   window.pullDraft = pullDraft;
   renderMine(); check1();
   BL.chrome('Breakout');
