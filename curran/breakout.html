@@ -41,6 +41,10 @@
   .vc .btn { min-height:44px; padding:8px 16px; font-size:15px; margin-top:8px; }
   .navrow { display:flex; gap:10px; margin-top:16px; }
   .navrow .btn { flex:1; }
+  .probbox { background:var(--navy); color:#fff; border-radius:12px; padding:12px 14px; margin:10px 0 6px; }
+  .probbox .k { font:700 11px "Open Sans",Arial,sans-serif; letter-spacing:.06em; text-transform:uppercase; color:#8CC6E6; }
+  .probbox p { margin:4px 0 2px; font-size:16px; color:#fff; font-weight:600; }
+  .probbox .linkbtn { color:#8CC6E6; }
   .exbox { background:var(--sky); border-radius:12px; padding:10px 12px; margin:8px 0 10px; }
   .exbox .k { font:700 11px "Open Sans",Arial,sans-serif; letter-spacing:.06em; text-transform:uppercase; color:var(--blue); }
   .exbox p { margin:4px 0 2px; font-size:15px; color:var(--navy); }
@@ -113,6 +117,7 @@
     <div class="card">
       <div class="eyebrow">Step 3 · Design the fix</div>
       <h2>Design the fix</h2>
+      <div class="probbox" id="probbox"><div class="k">The problem you're fixing</div><p id="probtext"></p><button class="linkbtn" type="button" data-go="2">Change it</button></div>
       <p class="small" style="margin-top:4px">Think about what should happen, step by step, so this problem stops happening.</p>
       <div class="step" style="margin-top:14px"><span class="n">1</span><h3>When does the problem start? <span class="small">(pick all that apply)</span></h3></div>
       <div class="chips" id="trig"></div>
@@ -188,7 +193,7 @@
     S.step = n; save();
     for (var i = 1; i <= 6; i++) $('s' + i).hidden = i !== n;
     stepsNav();
-    if (n === 2) loadPicks(); if (n === 4) renderSorter(); if (n === 5) renderProp(); if (n === 6) loadVotes();
+    if (n === 2) loadPicks(); if (n === 3) { $('probtext').textContent = S.problem || 'No problem picked yet. Go back to step 2 and pick one.'; } if (n === 4) renderSorter(); if (n === 5) renderProp(); if (n === 6) loadVotes();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   document.addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b) { e.preventDefault(); go(+b.getAttribute('data-go')); } });
