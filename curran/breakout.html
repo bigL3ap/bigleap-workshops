@@ -50,6 +50,8 @@
   .plan li.warn span { color:#8A4B00; }
   .next { background:var(--sky); border-radius:12px; padding:12px 14px; margin-top:16px; font-size:14.5px; color:var(--navy); }
   .next ul { margin:6px 0 0; padding-left:18px; } .next li { margin-top:4px; }
+  .vplan { margin-top:8px; } .vplan summary { cursor:pointer; font-weight:700; color:var(--blue); min-height:36px; display:flex; align-items:center; }
+  .vplan ol { margin:6px 0 0; padding-left:20px; font-size:14px; color:var(--navy); } .vplan li { margin-top:6px; } .vplan li b { display:block; }
   .exbox { background:var(--sky); border-radius:12px; padding:10px 12px; margin:8px 0 10px; }
   .exbox .k { font:700 11px "Open Sans",Arial,sans-serif; letter-spacing:.06em; text-transform:uppercase; color:var(--blue); }
   .exbox p { margin:4px 0 2px; font-size:15px; color:var(--navy); }
@@ -392,6 +394,10 @@
   }
   $('go5').addEventListener('click', function () {
     var v = proposal(); if (!BL.group()) { openAsk(); BL.toast('Pick your group first'); return; }
+    var strip = function (h) { var d = document.createElement('div'); d.innerHTML = h; return d.textContent; };
+    v.plan = planSteps(v).map(function (x) { return { t: x.t, d: strip(x.d) }; });
+    /* The results sheet caps each answer at 6,000 characters; trim step details if a very long plan would go over. */
+    var cap = 260; while (JSON.stringify(v).length > 5600 && cap > 60) { v.plan = v.plan.map(function (x) { return { t: x.t, d: x.d.length > cap ? x.d.slice(0, cap - 1) + '\u2026' : x.d }; }); cap -= 40; }
     $('go5').disabled = true;
     BL.submit('fixit', v).then(function () { S.shared = true; save(); BL.toast('Proposal shared with the room'); renderProp(); });
   });
@@ -464,6 +470,7 @@
       if (!props.length) { el.innerHTML = '<p class="small">No proposals yet. They appear here as groups share them.</p>'; return; }
       el.innerHTML = props.map(function (r) { var p = r.payload, k = pkey(r), mine = S.vote === k;
         return '<div class="vc"><span class="pill">' + BL.esc(BL.groupName(r.group) || 'A group') + '</span><b style="margin-top:6px">' + BL.esc(p.title || p.problem) + '</b>' + (p.title ? '<p class="small">' + BL.esc(p.problem) + '</p>' : '') +
+          (p.plan && p.plan.length ? '<details class="vplan"><summary>See the step-by-step plan</summary><ol>' + p.plan.map(function (x) { return '<li><b>' + BL.esc(x.t) + '</b> ' + BL.esc(x.d) + '</li>'; }).join('') + '</ol></details>' : '') +
           '<button class="btn ' + (mine ? 'navy' : '') + '" type="button" data-vote="' + BL.esc(k) + '" data-g="' + BL.esc(r.group) + '"' + (S.vote ? ' disabled' : '') + '>' + (mine ? '✓ Your vote' : 'Vote for this') + '</button></div>'; }).join('');
     }).catch(function () { el.innerHTML = '<p class="small">Can’t load proposals right now. Try refresh.</p>'; });
   }

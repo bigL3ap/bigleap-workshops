@@ -99,6 +99,10 @@
   .pc .sec { border-top:1px solid rgba(255,255,255,.14); padding:8px 0; margin-top:8px; font-size:15px; }
   .pc .sec .g { display:block; margin-bottom:2px; }
   .pc ul { margin:2px 0 0; padding-left:18px; }
+  .pdet { border-top:1px solid rgba(255,255,255,.14); padding-top:8px; margin-top:8px; } .pdet summary { cursor:pointer; font-weight:700; color:#8CC6E6; }
+  .pplan { margin:8px 0 0; padding-left:20px; font-size:14px; } .pplan li { margin-top:6px; } .pplan li b { display:block; }
+  .plog { border-top:1px solid var(--line,#D4DADF); padding:10px 0; } .plog summary { cursor:pointer; font-size:15px; } .plog summary span { color:var(--muted,#6B7F8C); font-size:13px; margin-left:6px; } .plog .pplan { color:var(--navy); }
+  .dlbtn { display:inline-block; background:var(--navy); color:#fff; border-radius:10px; padding:8px 14px; font-weight:700; text-decoration:none; font-size:14px; }
   .pc .votes { position:absolute; right:16px; top:14px; text-align:right; }
   .pc .votes b { font:800 34px/1 "Raleway",Arial,sans-serif; display:block; }
   .pc .votes span { font-size:11px; color:#8CC6E6; font-weight:700; text-transform:uppercase; letter-spacing:.06em; }
@@ -230,7 +234,8 @@
       return header('What could HubSpot do about it?', 'The room’s fix-it recipes', 'Each recipe is tagged with where it already sits in the plan.', rows.length) + '<div class="cards">' + (cards || '<div class="empty">No recipes yet</div>') + '</div>';
     },
     proposals: function (rows, sel, votes) {
-      var props = rows.filter(function (r) { return r.payload.kind === 'proposal'; });
+      function planHTML(p, open) { if (!p.plan || !p.plan.length) return ''; var ol = '<ol class="pplan">' + p.plan.map(function (x) { return '<li><b>' + E(x.t) + '</b>' + E(x.d) + '</li>'; }).join('') + '</ol>'; return open ? ol : '<details class="pdet"><summary>See the step-by-step plan</summary>' + ol + '</details>'; }
+      var props = rows.filter(function (r) { return r.payload.kind === 'proposal'; }), all = props.slice();
       var latest = {}; props.forEach(function (r) { var k = r.group || r.cid; if (!latest[k] || String(r.ts) > String(latest[k].ts)) latest[k] = r; });
       props = Object.keys(latest).map(function (k) { return latest[k]; });
       var vc = {}; (votes || []).forEach(function (r) { if (r.payload.kind === 'vote') vc[r.payload.target] = (vc[r.payload.target] || 0) + 1; });
@@ -243,9 +248,15 @@
           (p.title ? '<div class="sec"><span class="g">The problem</span>' + E(p.problem) + '</div>' : '') +
           '<div class="sec"><span class="g">Our fix</span>When ' + E(p.trigText).toLowerCase() + ':<ul>' + (p.actText || []).map(function (t) { return '<li>' + E(t) + '</li>'; }).join('') + '</ul>In charge: ' + E(p.owner) + (p.human ? ': ' + E(p.human) : '') + '</div>' +
           '<div class="sec"><span class="g">Why it matters</span>' + E(p.measText) + (p.minutes ? ' · about ' + fmt(p.minutes) + ' back' : '') + (p.instead ? ', for ' + E(p.instead) : '') + '</div>' +
+          planHTML(p) +
           '<button class="x" data-hide="' + E(k) + '" aria-label="Hide">×</button></article>'; }).join('');
-      return header('Friction to Flow', 'Which fix should Curran do first?', 'Each group’s proposal. Vote from your phone; the winner goes to Curran’s leadership.', nv) +
-        '<div class="pcards">' + (cards || '<div class="empty">Proposals appear here as groups share them</div>') + '</div>';
+      all.sort(function (a, b) { return String(a.ts) < String(b.ts) ? 1 : -1; });
+      var when = function (t) { var d = new Date(t); return isNaN(d) ? '' : d.toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }); };
+      var txt = all.map(function (r) { var p = r.payload; return '=== ' + (BL.groupName(r.group) || 'A group') + ' · ' + when(r.ts) + ' · ' + (vc[key(r)] || 0) + ' votes\n' + (p.title ? p.title + '\n' : '') + 'Problem: ' + p.problem + '\nFix: when ' + String(p.trigText || '').toLowerCase() + ', ' + (p.actText || []).join('; ').toLowerCase() + '\nIn charge: ' + (p.owner || '') + (p.measText ? '\nWe\u2019ll know it works when: ' + p.measText : '') + '\n\nStep-by-step plan:\n' + (p.plan || []).map(function (x, i) { return (i + 1) + '. ' + x.t + '\n   ' + x.d; }).join('\n') + '\n'; }).join('\n');
+      var log = all.length ? '<section class="panel" style="margin-top:22px"><div class="row" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div class="k">Plan log · every proposal shared today (' + all.length + ')</div><a class="dlbtn" download="friction-to-flow-plans.txt" href="data:text/plain;charset=utf-8,' + encodeURIComponent(txt) + '">Download all plans</a></div>' +
+        all.map(function (r) { var p = r.payload; return '<details class="plog"><summary><b>' + E(BL.groupName(r.group) || 'A group') + '</b> · ' + E(p.title || p.problem) + ' <span>' + E(when(r.ts)) + '</span></summary>' + planHTML(p, true) + '</details>'; }).join('') + '</section>' : '';
+      return header('Friction to Flow', 'Which fix should Curran do first?', 'Each group’s proposal. Vote from your phone; the winner goes to Curran’s leadership to consider.', nv) +
+        '<div class="pcards">' + (cards || '<div class="empty">Proposals appear here as groups share them</div>') + '</div>' + log;
     },
     robot: function (rows) {
       var c = {}; BL.TASKS.forEach(function (t) { c[t.id] = { human: 0, both: 0, robot: 0, n: 0 }; });
@@ -285,7 +296,7 @@
     var src = view === 'proposals' ? 'fixit' : view;
     Promise.all([BL.load(src), view === 'proposals' ? BL.load('moves') : Promise.resolve([])]).then(function (res) {
       var rows = res[0].filter(function (r) { return hidden.indexOf(key(r)) < 0 && (!grp || r.group === grp) && r.payload; });
-      var y = window.scrollY; V.innerHTML = R[view](rows, sel, res[1].filter(function (r) { return r.payload; })); window.scrollTo(0, y);
+      var y = window.scrollY, open = [].map.call(V.querySelectorAll('details[open] summary'), function (x) { return x.parentNode.className + '|' + x.textContent; }); V.innerHTML = R[view](rows, sel, res[1].filter(function (r) { return r.payload; })); [].forEach.call(V.querySelectorAll('details summary'), function (x) { if (open.indexOf(x.parentNode.className + '|' + x.textContent) > -1) x.parentNode.open = true; }); window.scrollTo(0, y);
     }).catch(function () { V.innerHTML = '<div class="empty">Can’t reach the results sheet. Check the connection; answers are still being saved.</div>'; })
       .then(function () { busy = false; });
   }
