@@ -103,11 +103,10 @@
     <div class="card">
       <div class="eyebrow">Step 2 · One phone per group</div>
       <h2>Pick your group's top problem</h2>
-      <p class="small" style="margin-top:4px">Your group's answers are at the top. As a group, tap the <b>one</b> that matters most. You'll fix it in the next step. You can edit the wording below. Steps 2 to 5 are shared, so everyone in your group sees the same choices on their phone.</p>
+      <p class="small" style="margin-top:4px">These are everyone's answers from step 1. As a group, tap the <b>one</b> problem you want to fix. Steps 2 to 5 are shared, so everyone in your group sees the same choice on their phone.</p>
       <div class="picks" id="picks"></div>
       <button class="linkbtn" id="refresh" type="button" style="margin-top:8px">Refresh our answers</button>
-      <label class="f" for="prob">The problem, in a sentence</label>
-      <textarea id="prob" maxlength="200" style="min-height:72px" placeholder="Pick one above, or write it here"></textarea>
+      <textarea id="prob" hidden aria-hidden="true"></textarea>
     </div>
     <div class="navrow"><button class="btn ghost" type="button" data-go="1">Back</button><button class="btn navy" type="button" data-go="3" id="to3">Next: fix it</button></div>
   </section>
@@ -289,8 +288,10 @@
       rows.filter(function (r) { return r.payload && r.payload.text && (!g || String(r.group).trim().toLowerCase() === g); }).concat(mineRows())
         .sort(function (a, b) { return (b.payload.hurt || 0) - (a.payload.hurt || 0); })
         .forEach(function (r) { var t = r.payload.text; if (seen[t]) return; seen[t] = 1; var st = BL.STAGES.filter(function (x) { return x.id === r.payload.stage; })[0]; picks.appendChild(pickBtn('Your group' + (st ? ' · ' + st.name : ''), t)); });
-      if (!picks.children.length) picks.innerHTML = '<p class="small">No answers from your group yet. Tap “Refresh our answers” in a moment, or start from an example below.</p>';
-      SEEDS.forEach(function (t) { picks.appendChild(pickBtn('Example', t)); });
+      if (!picks.children.length) {
+        picks.innerHTML = '<p class="small">No answers from your group yet. They appear here as people add them in step 1. If your group is stuck, you can start from one of these examples.</p>';
+        SEEDS.forEach(function (t) { picks.appendChild(pickBtn('Example', t)); });
+      }
       markPicks();
     }).catch(function () { picks.innerHTML = ''; SEEDS.forEach(function (t) { picks.appendChild(pickBtn('Example', t)); }); markPicks(); });
   }
