@@ -183,21 +183,24 @@
     sync: ['Update the other system so both match', 'Map the matching fields in the integration settings so both systems stay in step. This one usually needs your HubSpot admin or integration partner.'],
     report: ['Count it in a report', 'Create a report (Reporting › Reports › Create report) that counts these records, and add it to your team’s dashboard.']
   };
-  BL.buildPlan = function (v) {
+  BL.buildPlan = function (v) { try { return planFor(v || {}); } catch (e) { return []; } };
+  function planFor(v) {
+    var txt = function (x) { return x == null ? '' : Array.isArray(x) ? x.join(', ') : String(x); };
+    v = Object.assign({}, v, { problem: txt(v.problem), owner: txt(v.owner), measText: txt(v.measText), human: txt(v.human), trigText: txt(v.trigText) });
     var f = { trig: v.trig, act: v.act, human: v.human }, st = [], E = BL.esc, arr = function (x) { return [].concat(x || []).filter(Boolean); };
     var fmt = function (m) { return m >= 60 ? (Math.round(m / 6) / 10) + (m === 60 ? ' hr / week' : ' hrs / week') : m + ' min / week'; };
-    st.push({ t: 'Agree on the problem and who owns the fix', d: (v.problem ? E(v.problem.replace(/\s+$/, '')) + (/[.!?]$/.test(v.problem.trim()) ? '' : '.') : 'Write the problem in one sentence that everyone agrees on.') + (v.owner ? ' In charge: ' + E(v.owner) + '.' : ' Name one person or team who owns the fix.') });
+    st.push({ t: 'Agree on the problem and who owns the fix', d: (v.problem.trim() ? E(v.problem.trim()) + (/[.!?]$/.test(v.problem.trim()) ? '' : '.') : 'Write the problem in one sentence that everyone agrees on.') + (v.owner ? ' In charge: ' + E(v.owner) + '.' : ' Name one person or team who owns the fix.') });
     st.push({ t: 'Write down today’s number before you change anything', d: v.measText ? 'So you can tell if it worked: ' + E(v.measText) + '.' : 'Pick one number that should get better, such as how fast customers hear back, and write down where it is today.' });
-    var trig = arr(f.trig);
-    st.push({ t: 'Create the workflow', d: 'In HubSpot go to Automation › Workflows › Create workflow › From scratch. ' + (trig.length ? trig.map(function (t) { return HOW_TRIG[t]; }).join(' Or: ') : 'Then choose the trigger: the event that should start it, such as a form submission, a deal moving to a new stage, or a property changing.') });
-    f.act = arr(f.act);
+    var trig = arr(f.trig).map(function (t) { return HOW_TRIG[t]; }).filter(Boolean);
+    st.push({ t: 'Create the workflow', d: 'In HubSpot go to Automation › Workflows › Create workflow › From scratch. ' + (trig.length ? trig.join(' Or: ') : v.trigText ? 'Trigger: ' + E(v.trigText) + '.' : 'Then choose the trigger: the event that should start it, such as a form submission, a deal moving to a new stage, or a property changing.') });
+    f.act = arr(f.act).filter(function (a) { return HOW_ACT[a]; });
     (f.act || []).forEach(function (a) { var h = HOW_ACT[a]; if (h) st.push({ t: h[0], d: h[1], warn: a === 'sync' || a === 'log' }); });
     if (!(f.act || []).length) st.push({ t: 'Add the actions', d: 'Add what HubSpot should do each time it starts, such as <i>Rotate record to owner</i>, <i>Create task</i> or <i>Send email</i>.' });
     if (f.human) st.push({ t: 'Keep the human part human', d: 'A person still does this: ' + E(f.human) + '. Write it into the team’s routine so it doesn’t get skipped.' });
     st.push({ t: 'Test it, then switch it on', d: 'Run it on a test contact or deal first. Check every action did what you expected, then turn the workflow on.' });
-    st.push({ t: 'Check back in 30 days', d: 'Compare against the number you wrote down. Adjust the timing or the wording, and share the result with your team.' + (v.minutes ? ' Target: about ' + fmt(v.minutes).toLowerCase() + ' back.' : '') });
+    st.push({ t: 'Check back in 30 days', d: 'Compare against the number you wrote down. Adjust the timing or the wording, and share the result with your team.' + (+v.minutes > 0 ? ' Target: about ' + fmt(+v.minutes).toLowerCase() + ' back.' : '') });
     return st;
-  };
+  }
 
   /* Proposed roadmap sequence (staff-facing wording, no figures). */
   BL.ROADMAP = [

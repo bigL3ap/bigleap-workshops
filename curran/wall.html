@@ -297,7 +297,7 @@
     var src = view === 'proposals' ? 'fixit' : view;
     Promise.all([BL.load(src), view === 'proposals' ? BL.load('moves') : Promise.resolve([])]).then(function (res) {
       var rows = res[0].filter(function (r) { return hidden.indexOf(key(r)) < 0 && (!grp || r.group === grp) && r.payload; });
-      var y = window.scrollY, open = [].map.call(V.querySelectorAll('details[open] summary'), function (x) { return x.parentNode.className + '|' + x.textContent; }); V.innerHTML = R[view](rows, sel, res[1].filter(function (r) { return r.payload; })); [].forEach.call(V.querySelectorAll('details summary'), function (x) { if (open.indexOf(x.parentNode.className + '|' + x.textContent) > -1) x.parentNode.open = true; }); window.scrollTo(0, y);
+      var y = window.scrollY, open = [].map.call(V.querySelectorAll('details[open] summary'), function (x) { return x.parentNode.className + '|' + x.textContent; }); try { V.innerHTML = R[view](rows, sel, res[1].filter(function (r) { return r.payload; })); } catch (e) { console.error(e); V.innerHTML = '<div class="empty">Something on this tab didn’t display. Refresh the page; all answers are safe.</div>'; } [].forEach.call(V.querySelectorAll('details summary'), function (x) { if (open.indexOf(x.parentNode.className + '|' + x.textContent) > -1) x.parentNode.open = true; }); window.scrollTo(0, y);
     }).catch(function () { V.innerHTML = '<div class="empty">Can’t reach the results sheet. Check the connection; answers are still being saved.</div>'; })
       .then(function () { busy = false; });
   }
