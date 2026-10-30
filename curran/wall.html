@@ -21,6 +21,9 @@
   .ctl { margin-left:auto; display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:13px; color:var(--muted); }
   .ctl select, .ctl button { min-height:36px; border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:4px 10px; font:600 13px "Open Sans",Arial,sans-serif; color:var(--navy); cursor:pointer; }
   .live-dot { width:9px; height:9px; border-radius:50%; background:var(--green); display:inline-block; margin-right:6px; box-shadow:0 0 0 0 rgba(30,138,90,.5); animation:pulse 2s infinite; }
+  .tonebar { display:flex; height:30px; border-radius:8px; overflow:hidden; margin-top:8px; }
+  .tonebar div { color:#fff; font:800 13px "Open Sans",Arial,sans-serif; display:flex; align-items:center; justify-content:center; min-width:34px; }
+  .tonel { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin:5px 0 14px; }
   @keyframes pulse { 70% { box-shadow:0 0 0 8px rgba(30,138,90,0); } 100% { box-shadow:0 0 0 0 rgba(30,138,90,0); } }
   .stage-wrap { padding:22px 28px 28px; max-width:1800px; margin:0 auto; }
   .head { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; }
@@ -190,16 +193,17 @@
   var R = {
     pulse: function (rows) {
       var words = {}, dist = [0, 0, 0, 0, 0], sum = 0;
-      rows.forEach(function (r) { var w = (r.payload.word || '').toLowerCase(); if (w) (words[w] = words[w] || { n: 0, k: key(r) }).n++; if (r.payload.score) { dist[r.payload.score - 1]++; sum += r.payload.score; } });
+      var TONE = { easy:1, organized:1, fast:1, reliable:1, connected:1, clear:1, helpful:1, fine:0, okay:0, mixed:0, manageable:0, 'getting there':0, depends:0, slow:-1, manual:-1, confusing:-1, scattered:-1, clunky:-1, frustrating:-1, overwhelming:-1 }, tc = { '1': '#1E8A5A', '0': '#4D6575', '-1': '#EA4335' }, tone = [0, 0, 0];
+      rows.forEach(function (r) { var ws = r.payload.words && r.payload.words.length ? r.payload.words : [r.payload.word]; ws.forEach(function (w) { w = String(w || '').toLowerCase(); if (!w) return; (words[w] = words[w] || { n: 0, k: key(r) }).n++; if (w in TONE) tone[1 - TONE[w]]++; }); if (r.payload.score) { dist[r.payload.score - 1]++; sum += r.payload.score; } });
       var list = Object.keys(words).map(function (w) { return { w: w, n: words[w].n, k: words[w].k }; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 60);
       var max = list.length ? list[0].n : 1, cols = ['#143D55', '#3187B5', '#EA4335', '#4D6575', '#1F6A92'];
-      var cloud = list.map(function (x, i) { var s = 22 + Math.round(70 * Math.sqrt(x.n / max)); return '<span style="--fs:' + s + 'px;color:' + cols[i % cols.length] + '" data-hide="' + E(x.k) + '" title="Click to hide">' + E(x.w) + '</span>'; }).join('');
+      var cloud = list.map(function (x, i) { var s = 22 + Math.round(70 * Math.sqrt(x.n / max)); return '<span style="--fs:' + s + 'px;color:' + (x.w in TONE ? tc[TONE[x.w]] : cols[i % cols.length]) + '" data-hide="' + E(x.k) + '" title="Click to hide">' + E(x.w) + '</span>'; }).join('');
       var dmax = Math.max.apply(null, dist.concat([1]));
       var avg = rows.length ? (sum / rows.length).toFixed(1) : '–';
-      return header('Group Think', 'How does it feel to work in our systems today?', 'One word each. Bigger means more people said it.', rows.length) +
+      return header('Group Think', 'How does it feel to work in our systems today?', 'Everyone picked up to 3. Bigger means more people picked it. Green feels good, grey is in the middle, red feels hard.', rows.length) +
         '<div class="grid2"><section class="panel"><div class="cloud">' + (cloud || '<div class="empty">Waiting for the first word…</div>') + '</div></section>' +
         '<section class="panel"><div class="k">Team efficiency: not efficient at all (1) → most efficient (5)</div><div style="display:flex;align-items:baseline;gap:10px;margin-top:8px"><span class="big">' + avg + '</span><span class="sub">room average</span></div>' +
-        '<div class="dist">' + dist.map(function (d) { return '<div style="height:' + Math.round(100 * d / dmax) + '%"><b>' + d + '</b></div>'; }).join('') + '</div><div class="dist-l"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div></section></div>';
+        (function () { var t = tone[0] + tone[1] + tone[2]; if (!t) return ''; var pc = tone.map(function (n) { return Math.round(100 * n / t); }); return '<div class="k" style="margin-top:22px">Overall tone</div><div class="tonebar">' + ['Feels good', 'In the middle', 'Feels hard'].map(function (l, i) { return pc[i] ? '<div style="flex:' + tone[i] + ';background:' + ['#1E8A5A', '#9AA9B3', '#EA4335'][i] + '" title="' + l + '">' + pc[i] + '%</div>' : ''; }).join('') + '</div><div class="tonel"><span>Feels good</span><span>In the middle</span><span>Feels hard</span></div>'; })() + '<div class="dist">' + dist.map(function (d) { return '<div style="height:' + Math.round(100 * d / dmax) + '%"><b>' + d + '</b></div>'; }).join('') + '</div><div class="dist-l"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div></section></div>';
     },
     friction: function (rows, sel) {
       var cell = {}, stageTot = {}, max = 1, teams = {};

@@ -15,6 +15,11 @@
   .ends { display:flex; justify-content:space-between; gap:10px; font-size:13px; font-weight:600; color:var(--muted); margin-top:6px; }
   .ends span:last-child { text-align:right; }
   .ends b { display:none; }
+  .pickn { font:600 13px "Open Sans",Arial,sans-serif; color:var(--muted); margin-left:6px; }
+  .tone { margin-top:12px; padding-left:12px; border-left:4px solid var(--line); }
+  .tone .tl { font:800 12px "Open Sans",Arial,sans-serif; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .tone .chips { margin-top:6px; }
+  .tone.pos { border-color:#1E8A5A; } .tone.mid { border-color:#9AA9B3; } .tone.neg { border-color:#EA4335; }
   /* Phones: side-by-side end labels collide, so stack them and name the number each belongs to */
   @media (max-width:620px){
     .ends { display:grid; grid-template-columns:minmax(0,1fr); gap:7px; margin-top:12px; }
@@ -29,12 +34,15 @@
 <main class="wrap">
   <div class="eyebrow">Group Think</div>
   <h1 class="h1">How does it feel to work in our systems today?</h1>
-  <p class="lede">Gut reactions only. Anonymous, and there are no wrong answers.</p>
+  <p class="lede">Gut reactions only. Tap the words that fit, then rate it. Anonymous, and there are no wrong answers.</p>
 
   <form id="f" class="card" novalidate>
-    <label class="f" for="word">1. In one word…</label>
-    <input type="text" id="word" maxlength="24" autocomplete="off" placeholder="clunky, fine, scattered…">
-    <div class="count"><span id="wc">0</span>/24</div>
+    <p class="f" style="font-weight:700;margin:0">1. Which words fit best? <span class="pickn">Pick up to 3</span></p>
+    <div id="words">
+      <div class="tone pos"><div class="tl">Feels good</div><div class="chips"><button class="chip" data-v="easy">Easy</button><button class="chip" data-v="organized">Organized</button><button class="chip" data-v="fast">Fast</button><button class="chip" data-v="reliable">Reliable</button><button class="chip" data-v="connected">Connected</button><button class="chip" data-v="clear">Clear</button><button class="chip" data-v="helpful">Helpful</button></div></div>
+      <div class="tone mid"><div class="tl">In the middle</div><div class="chips"><button class="chip" data-v="fine">Fine</button><button class="chip" data-v="okay">Okay</button><button class="chip" data-v="mixed">Mixed</button><button class="chip" data-v="manageable">Manageable</button><button class="chip" data-v="getting there">Getting there</button><button class="chip" data-v="depends">Depends</button></div></div>
+      <div class="tone neg"><div class="tl">Feels hard</div><div class="chips"><button class="chip" data-v="slow">Slow</button><button class="chip" data-v="manual">Manual</button><button class="chip" data-v="confusing">Confusing</button><button class="chip" data-v="scattered">Scattered</button><button class="chip" data-v="clunky">Clunky</button><button class="chip" data-v="frustrating">Frustrating</button><button class="chip" data-v="overwhelming">Overwhelming</button></div></div>
+    </div>
 
     <p class="f" style="font-weight:700;margin:16px 0 0">2. On a scale of 1 to 5, 5 being the most efficient, how would you rate our team’s efficiency?</p>
     <div class="scale" id="scale" role="group" aria-label="1 means not efficient at all, 5 means the most efficient">
@@ -56,15 +64,15 @@
 <script src="../assets/config.js"></script>
 <script src="../assets/workshop.js"></script>
 <script>
-  var word = document.getElementById('word'), scale = document.getElementById('scale'), go = document.getElementById('go');
-  function check() { go.disabled = !(word.value.trim() && BL.val(scale)); document.getElementById('wc').textContent = word.value.length; }
-  word.addEventListener('input', check);
+  var words = document.getElementById('words'), scale = document.getElementById('scale'), go = document.getElementById('go');
+  function check() { go.disabled = !(BL.val(words, true).length && BL.val(scale)); }
+  BL.choice(words, { multi: true, max: 3, onChange: check });
   BL.choice(scale, { onChange: check });
   document.getElementById('f').addEventListener('submit', function (e) {
     e.preventDefault(); if (go.disabled) return;
     go.disabled = true;
-    var w = word.value.trim().split(/\s+/)[0].toLowerCase().replace(/[^\p{L}\p{N}'-]/gu, '');
-    BL.submit('pulse', { word: w, score: +BL.val(scale) }).then(function () {
+    var w = BL.val(words, true);
+    BL.submit('pulse', { word: w[0], words: w, score: +BL.val(scale) }).then(function () {
       document.getElementById('f').hidden = true; document.getElementById('ok').hidden = false;
     });
   });
