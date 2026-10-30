@@ -90,6 +90,20 @@
   .rc .ln span:first-child { font:700 11px "Open Sans",Arial,sans-serif; letter-spacing:.06em; text-transform:uppercase; color:#8CC6E6; padding-top:2px; }
   .rc .tagp { display:inline-block; background:#8CC6E6; color:var(--navy); font-weight:700; font-size:12px; border-radius:999px; padding:2px 9px; margin:6px 4px 0 0; }
   .rc .x { position:absolute; right:10px; top:8px; border:0; background:transparent; color:#7FA0B4; cursor:pointer; font-size:18px; }
+  /* Proposals */
+  .pcards { display:grid; grid-template-columns:repeat(auto-fill,minmax(380px,1fr)); gap:18px; margin-top:20px; }
+  .pc { background:var(--navy); color:#fff; border-radius:18px; padding:20px; position:relative; }
+  .pc.win { box-shadow:0 0 0 4px var(--red); }
+  .pc h3 { color:#fff; font-size:clamp(19px,1.4vw,24px); margin-top:6px; }
+  .pc .g { font:700 12px "Open Sans",Arial,sans-serif; letter-spacing:.06em; text-transform:uppercase; color:#8CC6E6; }
+  .pc .sec { border-top:1px solid rgba(255,255,255,.14); padding:8px 0; margin-top:8px; font-size:15px; }
+  .pc .sec .g { display:block; margin-bottom:2px; }
+  .pc ul { margin:2px 0 0; padding-left:18px; }
+  .pc .votes { position:absolute; right:16px; top:14px; text-align:right; }
+  .pc .votes b { font:800 34px/1 "Raleway",Arial,sans-serif; display:block; }
+  .pc .votes span { font-size:11px; color:#8CC6E6; font-weight:700; text-transform:uppercase; letter-spacing:.06em; }
+  .pc .x { position:absolute; right:10px; bottom:8px; border:0; background:transparent; color:#7FA0B4; cursor:pointer; font-size:18px; }
+  @media (max-width:820px){ .pcards { grid-template-columns:1fr; } }
   /* Robot */
   .rows { display:grid; gap:9px; margin-top:12px; }
   .rrow { display:grid; grid-template-columns:minmax(220px,1.1fr) 2fr; gap:14px; align-items:center; font-size:clamp(13px,.95vw,16px); }
@@ -132,6 +146,7 @@
     <button role="tab" data-v="pulse">Group Think</button>
     <button role="tab" data-v="friction">Friction</button>
     <button role="tab" data-v="fixit">Fix-its</button>
+    <button role="tab" data-v="proposals">Proposals &amp; votes</button>
     <button role="tab" data-v="robot">Human / Robot</button>
     <button role="tab" data-v="moves">First Moves</button>
   </div>
@@ -214,6 +229,24 @@
       var cards = rows.slice().reverse().map(function (r) { var p = r.payload; return '<article class="rc"><button class="x" data-hide="' + E(key(r)) + '" aria-label="Hide">×</button><h3>' + E(p.problem) + '</h3><div style="margin-top:10px"><div class="ln"><span>When</span><span>' + E(p.trigText) + '</span></div><div class="ln"><span>System</span><span>' + (p.actText || []).map(E).join('<br>') + '</span></div><div class="ln"><span>Person</span><span>' + E(p.owner) + (p.human ? ': ' + E(p.human) : '') + '</span></div><div class="ln"><span>Measure</span><span>' + E(p.measText) + '</span></div></div>' + (p.phases || []).map(function (id) { var x = ph(id); return x ? '<span class="tagp">' + E(x.when) + ' · ' + E(x.name) + '</span>' : ''; }).join('') + '</article>'; }).join('');
       return header('What could HubSpot do about it?', 'The room’s fix-it recipes', 'Each recipe is tagged with where it already sits in the plan.', rows.length) + '<div class="cards">' + (cards || '<div class="empty">No recipes yet</div>') + '</div>';
     },
+    proposals: function (rows, sel, votes) {
+      var props = rows.filter(function (r) { return r.payload.kind === 'proposal'; });
+      var latest = {}; props.forEach(function (r) { latest[r.group + '|' + r.cid] = r; });
+      props = Object.keys(latest).map(function (k) { return latest[k]; });
+      var vc = {}; (votes || []).forEach(function (r) { if (r.payload.kind === 'vote') vc[r.payload.target] = (vc[r.payload.target] || 0) + 1; });
+      props.sort(function (a, b) { return (vc[key(b)] || 0) - (vc[key(a)] || 0); });
+      var top = props.length && vc[key(props[0])] ? key(props[0]) : '';
+      var nv = Object.keys(vc).reduce(function (a, k) { return a + vc[k]; }, 0);
+      var fmt = function (m) { return !m ? '' : m >= 60 ? (Math.round(m / 6) / 10) + (m === 60 ? ' hr / week' : ' hrs / week') : m + ' min / week'; };
+      var cards = props.map(function (r) { var p = r.payload, k = key(r);
+        return '<article class="pc' + (k === top ? ' win' : '') + '"><div class="votes"><b>' + (vc[k] || 0) + '</b><span>votes</span></div><div class="g">' + E(BL.groupName(r.group) || 'A group') + '</div><h3>' + E(p.title || p.problem) + '</h3>' +
+          (p.title ? '<div class="sec"><span class="g">The problem</span>' + E(p.problem) + '</div>' : '') +
+          '<div class="sec"><span class="g">Our fix</span>When ' + E(p.trigText).toLowerCase() + ':<ul>' + (p.actText || []).map(function (t) { return '<li>' + E(t) + '</li>'; }).join('') + '</ul>A person still owns: ' + E(p.owner) + (p.human ? ': ' + E(p.human) : '') + '</div>' +
+          '<div class="sec"><span class="g">Why it matters</span>' + E(p.measText) + (p.minutes ? ' · about ' + fmt(p.minutes) + ' back' : '') + (p.instead ? ', for ' + E(p.instead) : '') + '</div>' +
+          '<button class="x" data-hide="' + E(k) + '" aria-label="Hide">×</button></article>'; }).join('');
+      return header('Friction to Flow', 'Which fix should Curran do first?', 'Each group’s proposal. Vote from your phone; the winner goes to Curran’s leadership.', nv) +
+        '<div class="pcards">' + (cards || '<div class="empty">Proposals appear here as groups share them</div>') + '</div>';
+    },
     robot: function (rows) {
       var c = {}; BL.TASKS.forEach(function (t) { c[t.id] = { human: 0, both: 0, robot: 0, n: 0 }; });
       var own = [], instead = [], mins = 0;
@@ -229,6 +262,7 @@
         '<div class="panel"><div class="k">What we’d do with the time</div><div class="items" style="max-height:24vh">' + (instead.map(function (o) { return '<div class="item"><button class="x" data-hide="' + E(o.k) + '" aria-label="Hide">×</button><div class="txt">' + E(o.t) + '</div></div>'; }).join('') || '<div class="empty" style="padding:20px">None yet</div>') + '</div></div></section></div>';
     },
     moves: function (rows) {
+      rows = rows.filter(function (r) { return r.payload.kind !== 'vote'; });
       var v = {}; BL.MOVES.forEach(function (m) { v[m.id] = 0; }); var other = [], ans = { know: [], auto: [], remember: [] };
       rows.forEach(function (r) { var p = r.payload; (p.votes || []).forEach(function (id) { if (id in v) v[id]++; }); if (p.other) other.push({ t: p.other, k: key(r) }); for (var q in (p.answers || {})) if (p.answers[q] && ans[q]) ans[q].push({ t: p.answers[q], k: key(r) }); });
       var ranked = BL.MOVES.slice().sort(function (a, b) { return v[b.id] - v[a.id]; }), max = Math.max(1, v[ranked[0].id]);
@@ -248,13 +282,14 @@
   var busy = false;
   function load() {
     if (busy) return; busy = true;
-    BL.load(view).then(function (rows) {
-      rows = rows.filter(function (r) { return hidden.indexOf(key(r)) < 0 && (!grp || r.group === grp) && r.payload; });
-      var y = window.scrollY; V.innerHTML = R[view](rows, sel); window.scrollTo(0, y);
+    var src = view === 'proposals' ? 'fixit' : view;
+    Promise.all([BL.load(src), view === 'proposals' ? BL.load('moves') : Promise.resolve([])]).then(function (res) {
+      var rows = res[0].filter(function (r) { return hidden.indexOf(key(r)) < 0 && (!grp || r.group === grp) && r.payload; });
+      var y = window.scrollY; V.innerHTML = R[view](rows, sel, res[1].filter(function (r) { return r.payload; })); window.scrollTo(0, y);
     }).catch(function () { V.innerHTML = '<div class="empty">Can’t reach the results sheet. Check the connection; answers are still being saved.</div>'; })
       .then(function () { busy = false; });
   }
-  setTab(['pulse', 'friction', 'fixit', 'robot', 'moves'].indexOf(view) > -1 ? view : 'pulse');
+  setTab(['pulse', 'friction', 'fixit', 'proposals', 'robot', 'moves'].indexOf(view) > -1 ? view : 'pulse');
   if (!demo) setInterval(load, (C.refreshSeconds || 5) * 1000);
 </script>
 </body>
