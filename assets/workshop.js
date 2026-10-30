@@ -133,6 +133,7 @@
       var g = document.getElementById('groupLabel');
       if (g) g.textContent = (BL.group() ? BL.groupName(BL.group()) : 'No group picked yet') + (BL.team() ? ' · ' + BL.team() : '');
       BL.flushRetries();
+      if (BL.group()) BL.moveAnswers(BL.group()); /* catch up answers added under an earlier group */
       track('workshop_page_view', { page: location.pathname.split('/').pop() || 'index' });
     }
   };
