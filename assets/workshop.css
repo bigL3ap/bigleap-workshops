@@ -65,9 +65,9 @@ button { font:inherit; }
 
 /* Inputs */
 label.f { display:block; font-weight:700; margin:14px 0 6px; }
-textarea, input[type=text] { width:100%; font:16px/1.5 "Open Sans",Arial,sans-serif; color:var(--text); border:1.5px solid var(--line); border-radius:12px; padding:12px; background:#fff; }
+textarea, input[type=text], input[type=search] { width:100%; font:16px/1.5 "Open Sans",Arial,sans-serif; color:var(--text); border:1.5px solid var(--line); border-radius:12px; padding:12px; background:#fff; }
 textarea { min-height:96px; resize:vertical; }
-textarea:focus, input[type=text]:focus { border-color:var(--blue); outline:none; box-shadow:0 0 0 3px rgba(49,135,181,.18); }
+textarea:focus, input[type=text]:focus, input[type=search]:focus { border-color:var(--blue); outline:none; box-shadow:0 0 0 3px rgba(49,135,181,.18); }
 .count { text-align:right; font-size:12px; color:var(--faint); margin-top:4px; }
 input[type=range] { width:100%; accent-color:var(--blue); height:36px; }
 .range-ends { display:flex; justify-content:space-between; font-size:13px; color:var(--muted); font-weight:600; }
@@ -109,3 +109,10 @@ input[type=range] { width:100%; accent-color:var(--blue); height:36px; }
   [data-sticky-submit] .row:has(> #go) .btn { box-shadow:0 6px 18px rgba(20,61,85,.18); }
 }
 @media (prefers-reduced-motion:reduce){ * { transition:none !important; animation:none !important; } }
+
+/* Find your name */
+.fm-list { display:grid; gap:6px; margin-top:6px; }
+.fm-hit { display:flex; justify-content:space-between; align-items:center; gap:10px; min-height:48px; padding:10px 14px; border-radius:12px; border:1.5px solid var(--line); background:#fff; color:var(--navy); cursor:pointer; text-align:left; font-size:15px; }
+.fm-hit:hover, .fm-hit:focus { border-color:var(--blue); }
+.fm-hit b { font:800 16px "Raleway",Arial,sans-serif; }
+.fm-hit span { font-size:13px; color:var(--muted); }

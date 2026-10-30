@@ -192,6 +192,8 @@
 
   var R = {
     pulse: function (rows) {
+      /* One answer per person: if someone changed their Group Think answer, count only the newest. */
+      var last = {}; rows.forEach(function (r) { if (!last[r.cid] || String(r.ts) >= String(last[r.cid].ts)) last[r.cid] = r; }); rows = rows.filter(function (r) { return !r.cid || last[r.cid] === r; });
       var words = {}, dist = [0, 0, 0, 0, 0], sum = 0;
       var TONE = { easy:1, organized:1, fast:1, reliable:1, connected:1, clear:1, helpful:1, fine:0, okay:0, mixed:0, manageable:0, 'getting there':0, depends:0, slow:-1, manual:-1, confusing:-1, scattered:-1, clunky:-1, frustrating:-1, overwhelming:-1 }, tc = { '1': '#1E8A5A', '0': '#4D6575', '-1': '#EA4335' }, tone = [0, 0, 0];
       rows.forEach(function (r) { var ws = r.payload.words && r.payload.words.length ? r.payload.words : [r.payload.word]; ws.forEach(function (w) { w = String(w || '').toLowerCase(); if (!w) return; (words[w] = words[w] || { n: 0, k: key(r) }).n++; if (w in TONE) tone[1 - TONE[w]]++; }); if (r.payload.score) { dist[r.payload.score - 1]++; sum += r.payload.score; } });

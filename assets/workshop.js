@@ -42,6 +42,32 @@
     },
     team: function () { return LS.get(store + 'team', ''); },
     setTeam: function (t) { LS.set(store + 'team', t); },
+    /* "Find your name": type a first name, tap it, and team + group fill in. The name stays on this device only. */
+    me: function () { return LS.get(store + 'me', ''); },
+    findMe: function (wrap, onPick) {
+      var people = [];
+      (C.groups || []).forEach(function (g) { (g.people || []).forEach(function (p) { people.push({ n: p[0], t: p[1], g: g }); }); });
+      if (!people.length) return;
+      wrap.innerHTML = '<label class="f" for="fm_in" style="margin:0">Find your name</label>' +
+        '<input id="fm_in" type="search" autocomplete="off" placeholder="Start typing your first name" style="margin-top:6px">' +
+        '<div class="fm-list" role="listbox"></div><div class="fm-me small" style="margin-top:6px"></div>';
+      var inp = wrap.querySelector('input'), list = wrap.querySelector('.fm-list'), me = wrap.querySelector('.fm-me');
+      function showMe() { var m = BL.me(); me.innerHTML = m ? 'Hi <b>' + BL.esc(m) + '</b>. Not you? Search again, or change your team and group below.' : 'Or pick your team and group yourself below.'; }
+      function draw() {
+        var q = inp.value.trim().toLowerCase();
+        var hits = people.filter(function (p) { return !q || p.n.toLowerCase().indexOf(q) === 0 || p.n.toLowerCase().indexOf(' ' + q) > -1; });
+        list.innerHTML = (document.activeElement === inp || q) ? hits.slice(0, 8).map(function (p, i) { return '<button type="button" class="fm-hit" data-i="' + people.indexOf(p) + '"><b>' + BL.esc(p.n) + '</b><span>' + BL.esc(p.g.name) + ' · ' + BL.esc(p.g.lead) + '</span></button>'; }).join('') + (q && !hits.length ? '<div class="small" style="padding:8px 4px">No match. Pick your team and group below instead.</div>' : '') : '';
+      }
+      inp.addEventListener('input', draw); inp.addEventListener('focus', draw);
+      list.addEventListener('click', function (e) {
+        var b = e.target.closest('.fm-hit'); if (!b) return; var p = people[+b.getAttribute('data-i')];
+        LS.set(store + 'me', p.n); BL.setTeam(p.t); BL.setGroup(p.g.id);
+        inp.value = ''; list.innerHTML = ''; inp.blur(); showMe();
+        BL.toast(p.n + ': ' + p.g.name + ' with ' + p.g.lead);
+        if (onPick) onPick(p);
+      });
+      showMe();
+    },
     groupName: function (id) { var g = (C.groups || []).filter(function (x) { return x.id === id; })[0]; return g ? g.name + ' · ' + g.lead : ''; },
     mine: function (activity) { return LS.get(store + 'mine_' + activity, []); },
     clearMine: function (activity) { LS.set(store + 'mine_' + activity, []); },

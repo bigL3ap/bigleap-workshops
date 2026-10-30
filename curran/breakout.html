@@ -70,7 +70,8 @@
 
   <section class="card" id="groupAsk" hidden aria-labelledby="ga">
     <h2 id="ga" style="font-size:18px">Which group are you in?</h2>
-    <p class="small" style="margin-top:4px">Your facilitator will tell you. It keeps your group's answers together.</p>
+    <p class="small" id="gaintro" style="margin-top:4px">Find your name and we'll fill it in, or tap your group. It keeps your group's answers together.</p>
+    <div id="findme" style="margin-top:10px"></div>
     <div class="chips" id="groups" style="margin-top:10px"></div>
     <h3 style="margin-top:18px;font-size:16px" id="teamAskH">And which team do you work on?</h3>
     <div class="chips" id="teams" style="margin-top:8px"></div>
@@ -225,6 +226,8 @@
   tWrap.innerHTML = BL.config.teams.map(function (x) { return '<button class="chip" data-v="' + BL.esc(x) + '">' + BL.esc(x) + '</button>'; }).join('');
   BL.choice(gWrap, { onChange: function (v) { BL.setGroup(v); BL.chrome('Breakout'); maybeClose(); } });
   BL.choice(tWrap, { onChange: function (v) { BL.setTeam(v); BL.chrome('Breakout'); maybeClose(); } });
+  BL.findMe($('findme'), function () { [[gWrap, BL.group()], [tWrap, BL.team()]].forEach(function (x) { [].forEach.call(x[0].querySelectorAll('[data-v]'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-v') === x[1] ? 'true' : 'false'); }); }); BL.chrome('Breakout'); maybeClose(); });
+  if (!$('findme').innerHTML) $('gaintro').textContent = 'Your facilitator will tell you. It keeps your group\'s answers together.';
   function maybeClose() { if (BL.group() && BL.team()) ask.hidden = true; }
   function openAsk() {
     ask.hidden = false;

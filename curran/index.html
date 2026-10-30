@@ -54,9 +54,14 @@
   </section>
 
   <section class="card" aria-labelledby="g">
-    <h2 id="g">Which team do you work on?</h2>
-    <p class="small" style="margin-top:4px">Asked once. It lets us spot the same problem showing up from different seats.</p>
+    <h2 id="g">Who are you?</h2>
+    <p class="small" id="meintro" style="margin-top:4px">Find your name and we'll fill in your team and breakout group. Your answers stay anonymous; your name never leaves this phone.</p>
+    <div id="findme" style="margin-top:12px"></div>
+    <h3 style="font-size:16px;margin-top:16px">Which team do you work on?</h3>
     <div class="chips" id="teams"></div>
+    <h3 style="font-size:16px;margin-top:16px">Which group are you in?</h3>
+    <p class="small" style="margin-top:2px">Change it any time. Your answers move with you.</p>
+    <div class="chips" id="grps"></div>
   </section>
 
   <h2 style="font-size:20px;font-weight:800;margin-top:26px">Everyone together, to open</h2>
@@ -66,7 +71,7 @@
   </nav>
 
   <h2 style="font-size:20px;font-weight:800;margin-top:26px">In your breakout group</h2>
-  <p class="small" style="margin:4px 0 10px">You'll be split into three groups. We'll ask which one you're in when you get there.</p>
+  <p class="small" style="margin:4px 0 10px">You'll be split into three groups. Yours is set at the top of this page, and you can change it any time.</p>
   <nav class="acts" aria-label="Breakout activities">
     <a class="act" href="breakout.html" data-a="breakout" style="border:2px solid var(--blue)"><span class="ic" style="background:var(--navy);color:#fff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span><b>Breakout: Friction to Flow</b><span>One page walks your group through it: find the friction, pick one problem, design the fix, sort human or robot, then build your proposal.</span></span><span class="when">Breakout</span></a>
   </nav>
@@ -100,11 +105,20 @@
   var t = document.getElementById('teams');
   t.innerHTML = BL.config.teams.map(function (x) { return '<button class="chip" data-v="' + BL.esc(x) + '">' + BL.esc(x) + '</button>'; }).join('');
   BL.choice(t, { onChange: function (v) { BL.setTeam(v); } });
-  var ct = BL.team(); if (ct) { var tb = t.querySelector('[data-v="' + ct + '"]'); if (tb) tb.setAttribute('aria-pressed', 'true'); }
+  var gp = document.getElementById('grps');
+  gp.innerHTML = BL.config.groups.map(function (g) { return '<button class="chip" data-v="' + BL.esc(g.id) + '"><b>' + BL.esc(g.name) + '</b> · ' + BL.esc(g.lead) + '</button>'; }).join('');
+  BL.choice(gp, { onChange: function (v) { BL.setGroup(v); BL.chrome('Workshop home'); } });
+  function mark() {
+    [[t, BL.team()], [gp, BL.group()]].forEach(function (x) { [].forEach.call(x[0].querySelectorAll('[data-v]'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-v') === x[1] ? 'true' : 'false'); }); });
+  }
+  mark();
+  BL.findMe(document.getElementById('findme'), function () { mark(); BL.chrome('Workshop home'); });
+  if (!document.getElementById('findme').innerHTML) { document.getElementById('g').textContent = 'About you'; document.getElementById('meintro').textContent = 'Pick your team and breakout group. Your answers stay anonymous.'; }
   var MULTI = { friction: 1, fixit: 1 };
   document.querySelectorAll('.act').forEach(function (a) {
     var k = a.getAttribute('data-a');
     if (k === 'map' || !BL.mine(k).length) return;
+    if (k === 'pulse') { a.querySelector('.when').innerHTML = '<span class="done-dot">\u2713 Done</span><span class="see">See or change \u2192</span>'; return; }
     var page = a.getAttribute('href');
     a.setAttribute('href', 'wall.html?view=' + k);
     a.setAttribute('target', '_blank');
