@@ -117,20 +117,20 @@
 
   /* Shared content used by several pages and the results wall. */
   BL.STAGES = [
-    { id: 'aware', n: 1, name: 'Awareness', short: 'They find us', who: 'Usually marketing', ex: 'Search, ads, social, a designer telling someone, a referral' },
-    { id: 'inquiry', n: 2, name: 'Inquiry', short: 'They get in touch', who: 'Marketing and service', ex: 'A form, a swatch order, a call, an email to an inbox' },
-    { id: 'qualify', n: 3, name: 'Qualification', short: 'We work out who they are', who: 'Triage and admin', ex: 'Trade or consumer, priority, trade approval, who owns it' },
-    { id: 'opp', n: 4, name: 'Opportunity', short: 'We shape the project', who: 'Sales', ex: 'Fibers, sizes, samples, months of conversation, the quote' },
-    { id: 'sale', n: 5, name: 'Sale', short: 'They place the order', who: 'Sales and accounting', ex: 'The order, payment, confirmation' },
-    { id: 'handoff', n: 6, name: 'Handoff', short: 'We make it and ship it', who: 'Operations', ex: 'Production, freight, install dates' },
-    { id: 'customer', n: 7, name: 'Customer', short: 'We look after them', who: 'Customer service', ex: 'Questions, issues, updates, problems with an order' },
-    { id: 'repeat', n: 8, name: 'Repeat & referral', short: 'They come back', who: 'Sales and marketing', ex: 'Reorders, the next project, telling a colleague' }
+    { id: 'aware', n: 1, name: 'Awareness', short: 'They find us', who: 'Usually marketing', ex: 'Ads, search, social media, word of mouth' },
+    { id: 'inquiry', n: 2, name: 'Inquiry', short: 'They contact us', who: 'Marketing and customer service', ex: 'A form, a swatch order, a call or an email' },
+    { id: 'qualify', n: 3, name: 'Qualification', short: 'We figure out who they are', who: 'Whoever sorts new requests', ex: 'Trade or consumer? How urgent? Who should handle it?' },
+    { id: 'opp', n: 4, name: 'Opportunity', short: 'We plan the project with them', who: 'Sales', ex: 'Products, samples, sizes and the quote' },
+    { id: 'sale', n: 5, name: 'Sale', short: 'They place the order', who: 'Sales and accounting', ex: 'The order, payment and confirmation' },
+    { id: 'handoff', n: 6, name: 'Handoff', short: 'We make it and ship it', who: 'Operations', ex: 'Production, shipping and install dates' },
+    { id: 'customer', n: 7, name: 'Customer', short: 'We take care of them', who: 'Customer service', ex: 'Questions, updates, problems with an order' },
+    { id: 'repeat', n: 8, name: 'Repeat & referral', short: 'They come back or refer us', who: 'Sales and marketing', ex: 'Reorders, new projects, telling a friend' }
   ];
 
   BL.BUCKETS = [
-    { id: 'data', name: 'Data problem', hint: 'The information is missing, wrong, duplicated, or lives somewhere else.' },
-    { id: 'process', name: 'Process problem', hint: 'No clear step, owner or rule, so it depends on who is working that day.' },
-    { id: 'comm', name: 'Communication problem', hint: 'The right person never hears about it, or hears too late.' }
+    { id: 'data', name: 'Missing or wrong information', hint: 'We can’t find it, it’s out of date, or it lives in someone’s inbox.' },
+    { id: 'process', name: 'No clear process', hint: 'Nobody owns it, or it depends on who’s working that day.' },
+    { id: 'comm', name: 'Someone wasn’t told', hint: 'The right person finds out late, or not at all.' }
   ];
   /* Proposed roadmap sequence (staff-facing wording, no figures). */
   BL.ROADMAP = [

@@ -2,142 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Friction Finder</title>
-<meta name="description" content="Breakout 1: where does revenue get stuck at Curran?">
-<link rel="icon" href="../assets/bigleap-logo.png">
-<link rel="stylesheet" href="../assets/workshop.css">
-<style>
-  .prompts { display:grid; gap:6px; margin-top:8px; }
-  .prompts button { text-align:left; background:var(--sky); border:0; border-radius:10px; padding:10px 12px; font-size:14px; color:var(--navy); cursor:pointer; min-height:44px; }
-  .prompts button:hover { background:var(--blue-soft); }
-  details summary { cursor:pointer; font-weight:700; color:var(--blue); padding:8px 0; min-height:44px; display:flex; align-items:center; }
-</style>
+<title>Friction to Flow</title>
+<meta http-equiv="refresh" content="0; url=breakout.html?step=1">
+<link rel="canonical" href="breakout.html?step=1">
+<style>body{font-family:"Open Sans",Arial,sans-serif;background:#F3F7FA;color:#143D55;padding:24px}</style>
 </head>
 <body>
-<header class="top"><div class="in"><a href="index.html"><img src="../assets/bigleap-logo.png" alt="Big Leap: workshop home"></a><div class="tag">Breakout 1</div></div></header>
-<main class="wrap">
-  <div class="eyebrow">Breakout 1 · Friction Finder</div>
-  <h1 class="h1">Where does revenue get stuck?</h1>
-  <p class="lede">Think about a real customer or project. Where do we lose <b>information</b>, <b>time</b>, <b>momentum</b> or an <b>opportunity</b>? Add as many as you like, one at a time.</p>
-  <p class="small" style="margin-top:8px"><span id="groupLabel"></span> &middot; <a href="#" id="chg">change</a></p>
-
-  <section class="card" id="groupAsk" hidden aria-labelledby="ga">
-    <h2 id="ga" style="font-size:18px">Which group are you in?</h2>
-    <p class="small" style="margin-top:4px">Your facilitator will tell you. We only ask once, and it just groups answers on the results wall.</p>
-    <div class="chips" id="groups" style="margin-top:10px"></div>
-    <h3 style="margin-top:18px;font-size:16px" id="teamAskH" hidden>And which team do you work on?</h3>
-    <div class="chips" id="teams" style="margin-top:8px" hidden></div>
-  </section>
-
-  <form id="f" class="card" data-sticky-submit novalidate>
-    <div class="prog" aria-hidden="true"><i id="p1"></i><i id="p2"></i><i id="p3"></i><i id="p4"></i></div>
-
-    <div class="step" style="margin-top:12px"><span class="n">1</span><h2 style="font-size:18px">Where does the friction happen?</h2></div>
-    <div class="tiles t4" id="stage"></div>
-
-    <div class="step" style="margin-top:20px"><span class="n">2</span><h2 style="font-size:18px">What gets lost?</h2></div>
-    <div class="chips" id="lost"><button class="chip" data-v="info">Information</button><button class="chip" data-v="time">Time</button><button class="chip" data-v="momentum">Momentum</button><button class="chip" data-v="opportunity">Opportunity</button></div>
-
-    <div class="step" style="margin-top:20px"><span class="n">3</span><h2 style="font-size:18px">Describe it in a sentence</h2></div>
-    <label class="sr" for="what">Describe the friction</label>
-    <textarea id="what" maxlength="240" placeholder="e.g. When a swatch order comes in, nobody is sure whose it is, so follow-up waits."></textarea>
-    <div class="count"><span id="wc">0</span>/240 · Describe the situation, not a person</div>
-    <details>
-      <summary>Stuck? Tap a prompt to start from it</summary>
-      <div class="prompts" id="prompts"></div>
-    </details>
-
-    <div class="step" style="margin-top:20px"><span class="n">4</span><h2 style="font-size:18px">Which kind of problem is it? <span class="small">(pick all that apply)</span></h2></div>
-    <div class="tiles t3" id="bucket"></div>
-
-    <div class="step" style="margin-top:20px"><span class="n">5</span><h2 style="font-size:18px">How much does it hurt? <span class="small">(pick all that apply)</span></h2></div>
-    <div class="chips" id="hurt"><button class="chip" data-v="1">Annoying</button><button class="chip" data-v="2">Costs us time</button><button class="chip" data-v="3">Costs us deals or customers</button></div>
-
-    <div class="row"><button class="btn block" id="go" type="submit" disabled>Add to the wall</button></div>
-  </form>
-
-  <section class="card" id="mineCard" hidden>
-    <h2>Your answers <span class="small" id="mineN"></span></h2>
-    <ul class="mine" id="mine"></ul>
-    <div class="row"><a class="btn ghost" href="wall.html?view=friction" target="_blank" rel="noopener">See the room’s answers</a><a class="btn navy" href="index.html">Done: back to toolkits</a></div>
-  </section>
-  <p style="text-align:center;margin-top:16px"><span id="mode"></span></p>
-</main>
-<script src="../assets/config.js"></script>
-<script src="../assets/workshop.js"></script>
-<script>
-  var PROMPTS = [
-    'Someone has to manually move information from one system to another.',
-    'Two systems hold different versions of the truth about the same customer.',
-    'Sales doesn’t know what the customer already did with marketing.',
-    'Marketing doesn’t know which inquiries turned into customers.',
-    'Following up depends on someone remembering to do it.',
-    'Leadership can’t easily answer a basic “how are we doing?” question.',
-    'Customers have to repeat themselves to a different person.',
-    'A handoff depends on someone remembering to send an email.',
-    'There’s no defined next step when a project stalls.',
-    'What we learn from customers doesn’t make it back to marketing.'
-  ];
-  var stage = document.getElementById('stage'), lost = document.getElementById('lost'), bucket = document.getElementById('bucket'), hurt = document.getElementById('hurt'), what = document.getElementById('what'), go = document.getElementById('go');
-  stage.innerHTML = BL.STAGES.map(function (s) { return '<button class="tile" data-v="' + s.id + '"><span class="num">' + s.n + '</span><b>' + s.short + '</b><span class="who">' + s.who + '</span><span>' + s.ex + '</span></button>'; }).join('');
-  bucket.innerHTML = BL.BUCKETS.map(function (b) { return '<button class="tile ' + b.id + '" data-v="' + b.id + '"><b>' + b.name + '</b><span>' + b.hint + '</span></button>'; }).join('');
-  document.getElementById('prompts').innerHTML = PROMPTS.map(function (p) { return '<button type="button">' + p + '</button>'; }).join('');
-  document.querySelectorAll('#prompts button').forEach(function (b) { b.addEventListener('click', function () { what.value = b.textContent + ' For example: '; what.focus(); check(); }); });
-  function check() {
-    var s = BL.val(stage), l = BL.val(lost, true), w = what.value.trim(), b = BL.val(bucket, true), h = BL.val(hurt, true);
-    document.getElementById('wc').textContent = what.value.length;
-    ['p1', 'p2', 'p3', 'p4'].forEach(function (id, i) { document.getElementById(id).classList.toggle('on', [s, w.length > 8, b.length, h.length][i] ? true : false); });
-    go.disabled = !(s && w.length > 8 && b.length && h.length);
-    h = h.map(Number);
-    return { stage: s, lost: l, text: w, bucket: b[0] || '', buckets: b, hurt: h.length ? Math.max.apply(null, h) : 0, hurts: h };
-  }
-  BL.choice(stage, { onChange: check }); BL.choice(lost, { multi: true, onChange: check }); BL.choice(bucket, { multi: true, onChange: check }); BL.choice(hurt, { multi: true, onChange: check });
-  what.addEventListener('input', check);
-  function renderMine() {
-    var m = BL.mine('friction'); if (!m.length) return;
-    document.getElementById('mineCard').hidden = false;
-    document.getElementById('mineN').textContent = '(' + m.length + ')';
-    document.getElementById('mine').innerHTML = m.slice().reverse().map(function (r) {
-      var st = BL.STAGES.filter(function (x) { return x.id === r.payload.stage; })[0];
-      return '<li><span class="pill">' + (st ? st.name : '') + '</span>' + (r.payload.buckets || [r.payload.bucket]).map(function (b) { return '<span class="pill ' + b + '">' + b + '</span>'; }).join('') + '<br>' + BL.esc(r.payload.text) + '</li>';
-    }).join('');
-  }
-  document.getElementById('f').addEventListener('submit', function (e) {
-    e.preventDefault(); var v = check(); if (go.disabled) return;
-    go.disabled = true;
-    BL.submit('friction', v).then(function () {
-      BL.toast('Added. Got another? Keep going.');
-      what.value = ''; [stage, lost, bucket, hurt].forEach(BL.reset); check(); renderMine();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  });
-  // Group is only asked here, the first place it matters, and only until it's answered.
-  var ask = document.getElementById('groupAsk'), gWrap = document.getElementById('groups');
-  var tH = document.getElementById('teamAskH'), tWrap = document.getElementById('teams');
-  BL.config.groups.forEach(function (x) {
-    var b = document.createElement('button'); b.className = 'chip'; b.setAttribute('data-v', x.id);
-    b.innerHTML = '<b>' + BL.esc(x.name) + '</b> \u00b7 ' + BL.esc(x.lead); gWrap.appendChild(b);
-  });
-  BL.choice(gWrap, { onChange: function (v) { BL.setGroup(v); BL.chrome('Breakout 1'); maybeClose(); } });
-  tWrap.innerHTML = BL.config.teams.map(function (x) { return '<button class="chip" data-v="' + BL.esc(x) + '">' + BL.esc(x) + '</button>'; }).join('');
-  BL.choice(tWrap, { onChange: function (v) { BL.setTeam(v); BL.chrome('Breakout 1'); maybeClose(); } });
-  function maybeClose() { if (BL.group() && BL.team()) { ask.hidden = true; } }
-  function openAsk() {
-    ask.hidden = false;
-    var needTeam = !BL.team(); tH.hidden = !needTeam; tWrap.hidden = !needTeam;
-    var cg = BL.group(); if (cg) { var b = gWrap.querySelector('[data-v="' + cg + '"]'); if (b) b.setAttribute('aria-pressed', 'true'); }
-    var ct = BL.team(); if (ct) { var tb = tWrap.querySelector('[data-v="' + ct + '"]'); if (tb) tb.setAttribute('aria-pressed', 'true'); }
-  }
-  if (!BL.group()) openAsk();
-  document.getElementById('chg').addEventListener('click', function (e) {
-    e.preventDefault(); openAsk(); tH.hidden = false; tWrap.hidden = false;
-    ask.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-
-  renderMine(); check();
-  BL.chrome('Breakout 1');
-</script>
+<p>The Friction Finder is now step 1 of the breakout. <a href="breakout.html?step=1">Go to the breakout</a>.</p>
+<script>location.replace('breakout.html?step=1');</script>
 </body>
 </html>

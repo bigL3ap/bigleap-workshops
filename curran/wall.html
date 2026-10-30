@@ -200,7 +200,8 @@
     friction: function (rows, sel) {
       var cell = {}, stageTot = {}, max = 1, teams = {};
       function bk(p) { return p.buckets && p.buckets.length ? p.buckets : [p.bucket]; }
-      rows.forEach(function (r) { var p = r.payload; bk(p).forEach(function (bb) { var k = p.stage + '|' + bb; cell[k] = (cell[k] || 0) + 1; max = Math.max(max, cell[k]); }); stageTot[p.stage] = (stageTot[p.stage] || 0) + 1; if (r.team) { (teams[p.stage] = teams[p.stage] || {})[r.team] = 1; } });
+      function sk(p) { return p.stages && p.stages.length ? p.stages : [p.stage]; }
+      rows.forEach(function (r) { var p = r.payload; sk(p).forEach(function (st) { bk(p).forEach(function (bb) { var k = st + '|' + bb; cell[k] = (cell[k] || 0) + 1; max = Math.max(max, cell[k]); }); stageTot[st] = (stageTot[st] || 0) + 1; }); if (r.team) { sk(p).forEach(function (st) { (teams[st] = teams[st] || {})[r.team] = 1; }); } });
       var top = Object.keys(stageTot).sort(function (a, b) { return stageTot[b] - stageTot[a]; })[0];
       var shared = Object.keys(teams).filter(function (s) { return Object.keys(teams[s]).length >= 3; }).map(stageName);
       var g = '<div class="heatwrap"><div class="heat"><div></div>' + BL.STAGES.map(function (s) { return '<div class="h">' + s.n + '. ' + s.name + '</div>'; }).join('');
@@ -212,9 +213,9 @@
         });
       });
       g += '<div></div>' + BL.STAGES.map(function (s) { return '<div class="tot">' + (stageTot[s.id] || 0) + '</div>'; }).join('') + '</div></div><p class="swipe">Swipe the grid sideways to see every stage.</p>';
-      var list = rows.filter(function (r) { return !sel || bk(r.payload).some(function (bb) { return (r.payload.stage + '|' + bb) === sel; }); }).sort(function (a, b) { return (b.payload.hurt || 0) - (a.payload.hurt || 0); });
+      var list = rows.filter(function (r) { return !sel || sk(r.payload).some(function (st) { return bk(r.payload).some(function (bb) { return (st + '|' + bb) === sel; }); }); }).sort(function (a, b) { return (b.payload.hurt || 0) - (a.payload.hurt || 0); });
       var hurtL = ['', 'Annoying', 'Costs time', 'Costs deals'];
-      var items = list.map(function (r) { var p = r.payload; return '<div class="item"><button class="x" data-hide="' + E(key(r)) + '" title="Hide from wall" aria-label="Hide">×</button><div class="meta"><span class="pill">' + stageName(p.stage) + '</span>' + bk(p).map(function (bb) { var m = BL.BUCKETS.filter(function (x) { return x.id === bb; })[0]; return '<span class="pill ' + bb + '">' + (m ? m.name.replace(' problem', '') : bb) + '</span>'; }).join('') + (r.team ? '<span class="pill">' + E(r.team) + '</span>' : '') + (p.hurts && p.hurts.length ? p.hurts : [p.hurt || 1]).map(function (h) { return '<span class="pill">' + hurtL[h] + '</span>'; }).join('') + '</div><div class="txt">' + E(p.text) + '</div></div>'; }).join('');
+      var items = list.map(function (r) { var p = r.payload; return '<div class="item"><button class="x" data-hide="' + E(key(r)) + '" title="Hide from wall" aria-label="Hide">×</button><div class="meta">' + sk(p).map(function (st) { return '<span class="pill">' + stageName(st) + '</span>'; }).join('') + bk(p).map(function (bb) { var m = BL.BUCKETS.filter(function (x) { return x.id === bb; })[0]; return '<span class="pill ' + bb + '">' + (m ? m.name.replace(' problem', '') : bb) + '</span>'; }).join('') + (r.team ? '<span class="pill">' + E(r.team) + '</span>' : '') + (p.hurts && p.hurts.length ? p.hurts : [p.hurt || 1]).map(function (h) { return '<span class="pill">' + hurtL[h] + '</span>'; }).join('') + '</div><div class="txt">' + E(p.text) + '</div></div>'; }).join('');
       return header('Breakout · Step 1', 'Where does revenue get stuck?', 'Darker means more people flagged it. Click a square to see what’s behind it.', rows.length) +
         '<section class="panel" style="margin-top:20px">' + g + '</section>' +
         '<div class="grid2"><section class="panel"><div class="k">' + (sel ? stageName(sel.split('|')[0]) + ' · ' + sel.split('|')[1] + ' <button class="linkbtn" data-clear="1">show all</button>' : 'Everything flagged, worst first') + '</div><div class="items">' + (items || '<div class="empty">Nothing here yet</div>') + '</div></section>' +
@@ -239,7 +240,7 @@
       var cards = props.map(function (r) { var p = r.payload, k = key(r);
         return '<article class="pc' + (k === top ? ' win' : '') + '"><div class="votes"><b>' + (vc[k] || 0) + '</b><span>votes</span></div><div class="g">' + E(BL.groupName(r.group) || 'A group') + '</div><h3>' + E(p.title || p.problem) + '</h3>' +
           (p.title ? '<div class="sec"><span class="g">The problem</span>' + E(p.problem) + '</div>' : '') +
-          '<div class="sec"><span class="g">Our fix</span>When ' + E(p.trigText).toLowerCase() + ':<ul>' + (p.actText || []).map(function (t) { return '<li>' + E(t) + '</li>'; }).join('') + '</ul>A person still owns: ' + E(p.owner) + (p.human ? ': ' + E(p.human) : '') + '</div>' +
+          '<div class="sec"><span class="g">Our fix</span>When ' + E(p.trigText).toLowerCase() + ':<ul>' + (p.actText || []).map(function (t) { return '<li>' + E(t) + '</li>'; }).join('') + '</ul>In charge: ' + E(p.owner) + (p.human ? ': ' + E(p.human) : '') + '</div>' +
           '<div class="sec"><span class="g">Why it matters</span>' + E(p.measText) + (p.minutes ? ' · about ' + fmt(p.minutes) + ' back' : '') + (p.instead ? ', for ' + E(p.instead) : '') + '</div>' +
           '<button class="x" data-hide="' + E(k) + '" aria-label="Hide">×</button></article>'; }).join('');
       return header('Friction to Flow', 'Which fix should Curran do first?', 'Each group’s proposal. Vote from your phone; the winner goes to Curran’s leadership.', nv) +
