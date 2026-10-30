@@ -282,12 +282,14 @@
   function markPicks() { document.querySelectorAll('#picks button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-t') === prob.value.trim() ? 'true' : 'false'); }); }
   function loadPicks() {
     var picks = $('picks'); picks.innerHTML = '<p class="small">Loading your group’s answers…</p>';
-    BL.load('friction').then(function (rows) {
+    function mineRows() { return BL.mine('friction').filter(function (r) { return r.payload && r.payload.text; }); }
+    BL.load('friction').catch(function () { return []; }).then(function (rows) {
       picks.innerHTML = ''; var g = BL.group(), seen = {};
-      rows.filter(function (r) { return r.payload && r.payload.text && (!g || r.group === g); })
+      /* The group's answers from the shared sheet, plus everything added on this phone (so your own answers always show, even if the sheet is slow). */
+      rows.filter(function (r) { return r.payload && r.payload.text && (!g || String(r.group).trim().toLowerCase() === g); }).concat(mineRows())
         .sort(function (a, b) { return (b.payload.hurt || 0) - (a.payload.hurt || 0); })
         .forEach(function (r) { var t = r.payload.text; if (seen[t]) return; seen[t] = 1; var st = BL.STAGES.filter(function (x) { return x.id === r.payload.stage; })[0]; picks.appendChild(pickBtn('Your group' + (st ? ' · ' + st.name : ''), t)); });
-      if (!picks.children.length) picks.innerHTML = '<p class="small">No answers from your group yet. Start from an example below.</p>';
+      if (!picks.children.length) picks.innerHTML = '<p class="small">No answers from your group yet. Tap “Refresh our answers” in a moment, or start from an example below.</p>';
       SEEDS.forEach(function (t) { picks.appendChild(pickBtn('Example', t)); });
       markPicks();
     }).catch(function () { picks.innerHTML = ''; SEEDS.forEach(function (t) { picks.appendChild(pickBtn('Example', t)); }); markPicks(); });
