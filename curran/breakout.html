@@ -214,7 +214,7 @@
     S.step = n; save();
     for (var i = 1; i <= 6; i++) $('s' + i).hidden = i !== n;
     stepsNav();
-    if (n >= 2 && n <= 5 && window.pullDraft) window.pullDraft(true); if (n === 2) loadPicks(); if (n === 3) { $('probtext').textContent = S.problem || 'No problem picked yet. Go back to step 2 and pick one.'; } if (n === 4) renderSorter(); if (n === 5) renderProp(); if (n === 6) loadVotes();
+    if (n >= 2 && n <= 5 && window.pullDraft) window.pullDraft(true); if (n === 2) loadPicks(); if (n === 3) { $('probtext').textContent = S.problem || 'No problem picked yet. Tap “Change it” to choose one.'; } if (n === 4) renderSorter(); if (n === 5) renderProp(); if (n === 6) loadVotes();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   document.addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b) { e.preventDefault(); go(+b.getAttribute('data-go')); } });
@@ -355,7 +355,7 @@
   }
   function renderSorter() {
     var p = parts(), el = $('sorter');
-    if (!p.length) { el.innerHTML = '<p class="small">Pick what the system should do in step 3 first.</p>'; return; }
+    if (!p.length) { el.innerHTML = '<p class="small">Your fix doesn’t have any automatic steps yet, so there’s nothing to sort.</p>'; return; }
     el.innerHTML = p.map(function (x) { var cur = S.sort[x.id] || x.d; S.sort[x.id] = cur; return '<div class="srow"><div class="t">' + BL.esc(x.t) + '</div><div class="chips" data-part="' + x.id + '">' + ['robot', 'both', 'human'].map(function (c) { return '<button class="chip" type="button" data-c="' + c + '" aria-pressed="' + (cur === c) + '">' + c.charAt(0).toUpperCase() + c.slice(1) + '</button>'; }).join('') + '</div></div>'; }).join('');
     save();
   }
@@ -382,7 +382,7 @@
   function renderProp() {
     var v = proposal(), E = function (x) { return x ? BL.esc(x) : '<span class="empty">not set yet</span>'; }, g = BL.group();
     var ph = phases(v);
-    $('prop').innerHTML = '<div class="k">' + BL.esc(g ? BL.groupName(g) : 'Your group') + ' · Friction to Flow proposal</div><h2 style="margin-top:6px">' + (v.title ? BL.esc(v.title) : (v.problem ? 'Our proposal' : 'Pick a problem in step 2')) + '</h2>' +
+    $('prop').innerHTML = '<div class="k">' + BL.esc(g ? BL.groupName(g) : 'Your group') + ' · Friction to Flow proposal</div><h2 style="margin-top:6px">' + (v.title ? BL.esc(v.title) : 'Our proposal') + '</h2>' +
       '<div class="sec"><div class="k">The problem</div><p>' + E(v.problem) + '</p></div>' +
       '<div class="sec"><div class="k">Our fix</div><p><b>When</b> ' + E(v.trigText) + '</p><ul>' + (v.actText.length ? v.actText.map(function (t) { return '<li>' + BL.esc(t) + '</li>'; }).join('') : '<li class="empty">the system’s part is not set yet</li>') + '</ul><p style="margin-top:6px"><b>In charge:</b> ' + E(v.owner + (v.human ? ': ' + v.human : '')) + '</p></div>' +
       '<div class="sec"><div class="k">How it would work</div><ul>' + v.sorts.map(function (s) { return '<li>' + BL.esc(s.t) + ' · <b>' + s.c + '</b></li>'; }).join('') + '</ul></div>' +
@@ -431,11 +431,12 @@
   };
   function planSteps(v) {
     var f = S.fix || fixVal(), st = [], E = BL.esc;
-    st.push({ t: 'Agree on the problem and who owns the fix', d: E(v.problem || 'Pick a problem in step 2.') + (v.owner ? ' In charge: ' + E(v.owner) + '.' : '') });
-    if (v.measText) st.push({ t: 'Write down today’s number before you change anything', d: 'So you can tell if it worked: ' + E(v.measText) + '.' });
+    st.push({ t: 'Agree on the problem and who owns the fix', d: (v.problem ? E(v.problem) : 'Write the problem in one sentence that everyone agrees on.') + (v.owner ? ' In charge: ' + E(v.owner) + '.' : ' Name one person or team who owns the fix.') });
+    st.push({ t: 'Write down today’s number before you change anything', d: v.measText ? 'So you can tell if it worked: ' + E(v.measText) + '.' : 'Pick one number that should get better, such as how fast customers hear back, and write down where it is today.' });
     var trig = arr(f.trig);
-    st.push({ t: 'Create the workflow', d: 'In HubSpot go to Automation › Workflows › Create workflow › From scratch. ' + (trig.length ? trig.map(function (t) { return HOW_TRIG[t]; }).join(' Or: ') : 'Pick what starts it (step 3, question 1).') });
+    st.push({ t: 'Create the workflow', d: 'In HubSpot go to Automation › Workflows › Create workflow › From scratch. ' + (trig.length ? trig.map(function (t) { return HOW_TRIG[t]; }).join(' Or: ') : 'Then choose the trigger: the event that should start it, such as a form submission, a deal moving to a new stage, or a property changing.') });
     (f.act || []).forEach(function (a) { var h = HOW_ACT[a]; if (h) st.push({ t: h[0], d: h[1], warn: a === 'sync' || a === 'log' }); });
+    if (!(f.act || []).length) st.push({ t: 'Add the actions', d: 'Add what HubSpot should do each time it starts, such as <i>Rotate record to owner</i>, <i>Create task</i> or <i>Send email</i>.' });
     if (f.human) st.push({ t: 'Keep the human part human', d: 'A person still does this: ' + E(f.human) + '. Write it into the team’s routine so it doesn’t get skipped.' });
     st.push({ t: 'Test it, then switch it on', d: 'Run it on a test contact or deal first. Check every action did what you expected, then turn the workflow on.' });
     st.push({ t: 'Check back in 30 days', d: 'Compare against the number you wrote down. Adjust the timing or the wording, and share the result with your team.' + (v.minutes ? ' Target: about ' + fmt(v.minutes).toLowerCase() + ' back.' : '') });
@@ -499,7 +500,7 @@
     prob.value = S.problem; markPicks();
     var f = S.fix || {}; setChoice(trig, f.trig); setChoice(act, f.act); setChoice(own, f.owner); setChoice(meas, f.meas); human.value = f.human || '';
     if (S.mins != null) { mins.value = S.mins; minsOut.textContent = fmt(+S.mins); } instead.value = S.instead; title.value = S.title;
-    $('probtext').textContent = S.problem || 'No problem picked yet. Go back to step 2 and pick one.';
+    $('probtext').textContent = S.problem || 'No problem picked yet. Tap “Change it” to choose one.';
     if (S.step === 4) renderSorter(); if (S.step === 5) renderProp();
     lastSent = draftKey(draft());
     try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
