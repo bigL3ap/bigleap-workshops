@@ -145,10 +145,7 @@
   <div class="tabs" role="tablist" id="tabs">
     <button role="tab" data-v="pulse">Group Think</button>
     <button role="tab" data-v="friction">Friction</button>
-    <button role="tab" data-v="fixit">Fix-its</button>
     <button role="tab" data-v="proposals">Proposals &amp; votes</button>
-    <button role="tab" data-v="robot">Human / Robot</button>
-    <button role="tab" data-v="moves">First Moves</button>
   </div>
   <div class="ctl">
     <span id="status"><span class="live-dot"></span>Live</span>
@@ -217,7 +214,7 @@
       var list = rows.filter(function (r) { return !sel || (r.payload.stage + '|' + r.payload.bucket) === sel; }).sort(function (a, b) { return (b.payload.hurt || 0) - (a.payload.hurt || 0); });
       var hurtL = ['', 'Annoying', 'Costs time', 'Costs deals'];
       var items = list.map(function (r) { var p = r.payload; return '<div class="item"><button class="x" data-hide="' + E(key(r)) + '" title="Hide from wall" aria-label="Hide">×</button><div class="meta"><span class="pill">' + stageName(p.stage) + '</span><span class="pill ' + p.bucket + '">' + p.bucket + '</span>' + (r.team ? '<span class="pill">' + E(r.team) + '</span>' : '') + '<span class="pill">' + hurtL[p.hurt || 1] + '</span></div><div class="txt">' + E(p.text) + '</div></div>'; }).join('');
-      return header('Breakout 1 · Friction Finder', 'Where does revenue get stuck?', 'Darker means more people flagged it. Click a square to see what’s behind it.', rows.length) +
+      return header('Breakout · Step 1', 'Where does revenue get stuck?', 'Darker means more people flagged it. Click a square to see what’s behind it.', rows.length) +
         '<section class="panel" style="margin-top:20px">' + g + '</section>' +
         '<div class="grid2"><section class="panel"><div class="k">' + (sel ? stageName(sel.split('|')[0]) + ' · ' + sel.split('|')[1] + ' <button class="linkbtn" data-clear="1">show all</button>' : 'Everything flagged, worst first') + '</div><div class="items">' + (items || '<div class="empty">Nothing here yet</div>') + '</div></section>' +
         '<section style="display:grid;gap:16px;align-content:start">' + (top ? '<div class="callout"><div class="k">Most friction</div><b>' + stageName(top) + '</b></div>' : '') +
