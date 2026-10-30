@@ -199,7 +199,8 @@
     },
     friction: function (rows, sel) {
       var cell = {}, stageTot = {}, max = 1, teams = {};
-      rows.forEach(function (r) { var p = r.payload, k = p.stage + '|' + p.bucket; cell[k] = (cell[k] || 0) + 1; stageTot[p.stage] = (stageTot[p.stage] || 0) + 1; max = Math.max(max, cell[k]); if (r.team) { (teams[p.stage] = teams[p.stage] || {})[r.team] = 1; } });
+      function bk(p) { return p.buckets && p.buckets.length ? p.buckets : [p.bucket]; }
+      rows.forEach(function (r) { var p = r.payload; bk(p).forEach(function (bb) { var k = p.stage + '|' + bb; cell[k] = (cell[k] || 0) + 1; max = Math.max(max, cell[k]); }); stageTot[p.stage] = (stageTot[p.stage] || 0) + 1; if (r.team) { (teams[p.stage] = teams[p.stage] || {})[r.team] = 1; } });
       var top = Object.keys(stageTot).sort(function (a, b) { return stageTot[b] - stageTot[a]; })[0];
       var shared = Object.keys(teams).filter(function (s) { return Object.keys(teams[s]).length >= 3; }).map(stageName);
       var g = '<div class="heatwrap"><div class="heat"><div></div>' + BL.STAGES.map(function (s) { return '<div class="h">' + s.n + '. ' + s.name + '</div>'; }).join('');
@@ -211,9 +212,9 @@
         });
       });
       g += '<div></div>' + BL.STAGES.map(function (s) { return '<div class="tot">' + (stageTot[s.id] || 0) + '</div>'; }).join('') + '</div></div><p class="swipe">Swipe the grid sideways to see every stage.</p>';
-      var list = rows.filter(function (r) { return !sel || (r.payload.stage + '|' + r.payload.bucket) === sel; }).sort(function (a, b) { return (b.payload.hurt || 0) - (a.payload.hurt || 0); });
+      var list = rows.filter(function (r) { return !sel || bk(r.payload).some(function (bb) { return (r.payload.stage + '|' + bb) === sel; }); }).sort(function (a, b) { return (b.payload.hurt || 0) - (a.payload.hurt || 0); });
       var hurtL = ['', 'Annoying', 'Costs time', 'Costs deals'];
-      var items = list.map(function (r) { var p = r.payload; return '<div class="item"><button class="x" data-hide="' + E(key(r)) + '" title="Hide from wall" aria-label="Hide">×</button><div class="meta"><span class="pill">' + stageName(p.stage) + '</span><span class="pill ' + p.bucket + '">' + p.bucket + '</span>' + (r.team ? '<span class="pill">' + E(r.team) + '</span>' : '') + '<span class="pill">' + hurtL[p.hurt || 1] + '</span></div><div class="txt">' + E(p.text) + '</div></div>'; }).join('');
+      var items = list.map(function (r) { var p = r.payload; return '<div class="item"><button class="x" data-hide="' + E(key(r)) + '" title="Hide from wall" aria-label="Hide">×</button><div class="meta"><span class="pill">' + stageName(p.stage) + '</span>' + bk(p).map(function (bb) { var m = BL.BUCKETS.filter(function (x) { return x.id === bb; })[0]; return '<span class="pill ' + bb + '">' + (m ? m.name.replace(' problem', '') : bb) + '</span>'; }).join('') + (r.team ? '<span class="pill">' + E(r.team) + '</span>' : '') + (p.hurts && p.hurts.length ? p.hurts : [p.hurt || 1]).map(function (h) { return '<span class="pill">' + hurtL[h] + '</span>'; }).join('') + '</div><div class="txt">' + E(p.text) + '</div></div>'; }).join('');
       return header('Breakout · Step 1', 'Where does revenue get stuck?', 'Darker means more people flagged it. Click a square to see what’s behind it.', rows.length) +
         '<section class="panel" style="margin-top:20px">' + g + '</section>' +
         '<div class="grid2"><section class="panel"><div class="k">' + (sel ? stageName(sel.split('|')[0]) + ' · ' + sel.split('|')[1] + ' <button class="linkbtn" data-clear="1">show all</button>' : 'Everything flagged, worst first') + '</div><div class="items">' + (items || '<div class="empty">Nothing here yet</div>') + '</div></section>' +

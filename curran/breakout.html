@@ -77,9 +77,9 @@
       <textarea id="what" maxlength="240" placeholder="e.g. When a swatch order comes in, nobody is sure whose it is, so follow-up waits."></textarea>
       <div class="count"><span id="wc">0</span>/240</div>
       <details><summary>Stuck? Tap a prompt to start from it</summary><div class="prompts" id="prompts"></div></details>
-      <div class="step" style="margin-top:18px"><span class="n">4</span><h3>Which kind of problem is it mostly?</h3></div>
+      <div class="step" style="margin-top:18px"><span class="n">4</span><h3>Which kind of problem is it? <span class="small">(pick all that apply)</span></h3></div>
       <div class="tiles t3" id="bucket"></div>
-      <div class="step" style="margin-top:18px"><span class="n">5</span><h3>How much does it hurt?</h3></div>
+      <div class="step" style="margin-top:18px"><span class="n">5</span><h3>How much does it hurt? <span class="small">(pick all that apply)</span></h3></div>
       <div class="chips" id="hurt"><button class="chip" data-v="1">Annoying</button><button class="chip" data-v="2">Costs us time</button><button class="chip" data-v="3">Costs us deals or customers</button></div>
       <div class="row"><button class="btn block" id="go1" type="submit" disabled>Add it</button></div>
     </form>
@@ -223,12 +223,13 @@
   $('prompts').innerHTML = PROMPTS.map(function (p) { return '<button type="button">' + p + '</button>'; }).join('');
   document.querySelectorAll('#prompts button').forEach(function (b) { b.addEventListener('click', function () { what.value = b.textContent + ' For example: '; what.focus(); check1(); }); });
   function check1() {
-    var v = { stage: BL.val(stage), lost: BL.val(lost, true), text: what.value.trim(), bucket: BL.val(bucket), hurt: +BL.val(hurt) };
+    var b = BL.val(bucket, true), h = BL.val(hurt, true).map(Number);
+    var v = { stage: BL.val(stage), lost: BL.val(lost, true), text: what.value.trim(), bucket: b[0] || '', buckets: b, hurt: h.length ? Math.max.apply(null, h) : 0, hurts: h };
     $('wc').textContent = what.value.length;
     go1.disabled = !(v.stage && v.text.length > 8 && v.bucket && v.hurt);
     return v;
   }
-  BL.choice(stage, { onChange: check1 }); BL.choice(lost, { multi: true, onChange: check1 }); BL.choice(bucket, { onChange: check1 }); BL.choice(hurt, { onChange: check1 });
+  BL.choice(stage, { onChange: check1 }); BL.choice(lost, { multi: true, onChange: check1 }); BL.choice(bucket, { multi: true, onChange: check1 }); BL.choice(hurt, { multi: true, onChange: check1 });
   what.addEventListener('input', check1);
   function renderMine() {
     var m = BL.mine('friction'); if (!m.length) return;

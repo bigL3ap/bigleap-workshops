@@ -49,10 +49,10 @@
       <div class="prompts" id="prompts"></div>
     </details>
 
-    <div class="step" style="margin-top:20px"><span class="n">4</span><h2 style="font-size:18px">Which kind of problem is it mostly?</h2></div>
+    <div class="step" style="margin-top:20px"><span class="n">4</span><h2 style="font-size:18px">Which kind of problem is it? <span class="small">(pick all that apply)</span></h2></div>
     <div class="tiles t3" id="bucket"></div>
 
-    <div class="step" style="margin-top:20px"><span class="n">5</span><h2 style="font-size:18px">How much does it hurt?</h2></div>
+    <div class="step" style="margin-top:20px"><span class="n">5</span><h2 style="font-size:18px">How much does it hurt? <span class="small">(pick all that apply)</span></h2></div>
     <div class="chips" id="hurt"><button class="chip" data-v="1">Annoying</button><button class="chip" data-v="2">Costs us time</button><button class="chip" data-v="3">Costs us deals or customers</button></div>
 
     <div class="row"><button class="btn block" id="go" type="submit" disabled>Add to the wall</button></div>
@@ -86,13 +86,14 @@
   document.getElementById('prompts').innerHTML = PROMPTS.map(function (p) { return '<button type="button">' + p + '</button>'; }).join('');
   document.querySelectorAll('#prompts button').forEach(function (b) { b.addEventListener('click', function () { what.value = b.textContent + ' For example: '; what.focus(); check(); }); });
   function check() {
-    var s = BL.val(stage), l = BL.val(lost, true), w = what.value.trim(), b = BL.val(bucket), h = BL.val(hurt);
+    var s = BL.val(stage), l = BL.val(lost, true), w = what.value.trim(), b = BL.val(bucket, true), h = BL.val(hurt, true);
     document.getElementById('wc').textContent = what.value.length;
-    ['p1', 'p2', 'p3', 'p4'].forEach(function (id, i) { document.getElementById(id).classList.toggle('on', [s, w.length > 8, b, h][i] ? true : false); });
-    go.disabled = !(s && w.length > 8 && b && h);
-    return { stage: s, lost: l, text: w, bucket: b, hurt: +h };
+    ['p1', 'p2', 'p3', 'p4'].forEach(function (id, i) { document.getElementById(id).classList.toggle('on', [s, w.length > 8, b.length, h.length][i] ? true : false); });
+    go.disabled = !(s && w.length > 8 && b.length && h.length);
+    h = h.map(Number);
+    return { stage: s, lost: l, text: w, bucket: b[0] || '', buckets: b, hurt: h.length ? Math.max.apply(null, h) : 0, hurts: h };
   }
-  BL.choice(stage, { onChange: check }); BL.choice(lost, { multi: true, onChange: check }); BL.choice(bucket, { onChange: check }); BL.choice(hurt, { onChange: check });
+  BL.choice(stage, { onChange: check }); BL.choice(lost, { multi: true, onChange: check }); BL.choice(bucket, { multi: true, onChange: check }); BL.choice(hurt, { multi: true, onChange: check });
   what.addEventListener('input', check);
   function renderMine() {
     var m = BL.mine('friction'); if (!m.length) return;
@@ -100,7 +101,7 @@
     document.getElementById('mineN').textContent = '(' + m.length + ')';
     document.getElementById('mine').innerHTML = m.slice().reverse().map(function (r) {
       var st = BL.STAGES.filter(function (x) { return x.id === r.payload.stage; })[0];
-      return '<li><span class="pill">' + (st ? st.name : '') + '</span><span class="pill ' + r.payload.bucket + '">' + r.payload.bucket + '</span><br>' + BL.esc(r.payload.text) + '</li>';
+      return '<li><span class="pill">' + (st ? st.name : '') + '</span>' + (r.payload.buckets || [r.payload.bucket]).map(function (b) { return '<span class="pill ' + b + '">' + b + '</span>'; }).join('') + '<br>' + BL.esc(r.payload.text) + '</li>';
     }).join('');
   }
   document.getElementById('f').addEventListener('submit', function (e) {
