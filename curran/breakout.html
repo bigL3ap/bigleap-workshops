@@ -437,13 +437,13 @@
       el.innerHTML = props.map(function (r) { var p = r.payload, k = pkey(r), mine = S.vote === k;
         return '<div class="vc"><span class="pill">' + BL.esc(BL.groupName(r.group) || 'A group') + '</span><b style="margin-top:6px">' + BL.esc(p.title || p.problem) + '</b>' + (p.title ? '<p class="small">' + BL.esc(p.problem) + '</p>' : '') +
           ((p.plan && p.plan.length) || p.act ? '<details class="vplan"><summary>See the step-by-step plan</summary><ol>' + (p.plan && p.plan.length ? p.plan : BL.buildPlan(p).map(function (x) { var d = document.createElement('div'); d.innerHTML = x.d; return { t: x.t, d: d.textContent }; })).map(function (x) { return '<li><b>' + BL.esc(x.t) + '</b> ' + BL.esc(x.d) + '</li>'; }).join('') + '</ol></details>' : '') +
-          '<button class="btn ' + (mine ? 'navy' : '') + '" type="button" data-vote="' + BL.esc(k) + '" data-g="' + BL.esc(r.group) + '"' + (S.vote ? ' disabled' : '') + '>' + (mine ? '✓ Your vote' : 'Vote for this') + '</button></div>'; }).join('');
+          '<button class="btn ' + (mine ? 'navy' : '') + '" type="button" data-vote="' + BL.esc(k) + '" data-g="' + BL.esc(r.group) + '"' + (mine ? ' aria-pressed="true"' : '') + '>' + (mine ? '✓ Your vote' : S.vote ? 'Switch my vote to this' : 'Vote for this') + '</button></div>'; }).join('') + (S.vote ? '<p class="small" style="margin-top:2px">You have one vote. Changed your mind? Tap another proposal to move it.</p>' : '');
     }).catch(function () { el.innerHTML = '<p class="small">Can’t load proposals right now. Try refresh.</p>'; });
   }
   $('vote').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-vote]'); if (!b || S.vote) return;
-    S.vote = b.getAttribute('data-vote'); save();
-    BL.submit('moves', { kind: 'vote', target: S.vote, targetGroup: b.getAttribute('data-g') }).then(function () { BL.toast('Vote counted. Thank you!'); loadVotes(); });
+    var b = e.target.closest('[data-vote]'); if (!b || b.getAttribute('data-vote') === S.vote) return;
+    var moved = !!S.vote; S.vote = b.getAttribute('data-vote'); save();
+    BL.submit('moves', { _id: 'vote', kind: 'vote', target: S.vote, targetGroup: b.getAttribute('data-g') }).then(function () { BL.toast(moved ? 'Vote moved. Only your latest vote counts.' : 'Vote counted. Thank you!'); loadVotes(); });
   });
   $('vrefresh').addEventListener('click', loadVotes);
 

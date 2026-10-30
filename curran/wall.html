@@ -248,7 +248,9 @@
       var props = rows.filter(function (r) { return r.payload.kind === 'proposal'; }), all = props.slice();
       var latest = {}; props.forEach(function (r) { var k = r.group || r.cid; if (!latest[k] || String(r.ts) > String(latest[k].ts)) latest[k] = r; });
       props = Object.keys(latest).map(function (k) { return latest[k]; });
-      var vc = {}; (votes || []).forEach(function (r) { if (r.payload.kind === 'vote') vc[r.payload.target] = (vc[r.payload.target] || 0) + 1; });
+      /* One vote per phone: if someone changed their vote, count only the newest. */
+      var lastV = {}; (votes || []).forEach(function (r) { if (r.payload.kind !== 'vote') return; var c = r.cid || Math.random(); if (!lastV[c] || String(r.ts) >= String(lastV[c].ts)) lastV[c] = r; });
+      var vc = {}; Object.keys(lastV).forEach(function (c) { var t = lastV[c].payload.target; vc[t] = (vc[t] || 0) + 1; });
       props.sort(function (a, b) { return (vc[key(b)] || 0) - (vc[key(a)] || 0); });
       var top = props.length && vc[key(props[0])] ? key(props[0]) : '';
       var nv = Object.keys(vc).reduce(function (a, k) { return a + vc[k]; }, 0);
