@@ -45,6 +45,11 @@
   .probbox .k { font:700 11px "Open Sans",Arial,sans-serif; letter-spacing:.06em; text-transform:uppercase; color:#8CC6E6; }
   .probbox p { margin:4px 0 2px; font-size:16px; color:#fff; font-weight:600; }
   .probbox .linkbtn { color:#8CC6E6; }
+  .plan { margin:12px 0 0; padding-left:22px; display:grid; gap:10px; }
+  .plan li { font-size:15px; color:var(--navy); } .plan li b { display:block; } .plan li span { display:block; color:var(--muted,#4D6575); font-size:14px; margin-top:2px; }
+  .plan li.warn span { color:#8A4B00; }
+  .next { background:var(--sky); border-radius:12px; padding:12px 14px; margin-top:16px; font-size:14.5px; color:var(--navy); }
+  .next ul { margin:6px 0 0; padding-left:18px; } .next li { margin-top:4px; }
   .exbox { background:var(--sky); border-radius:12px; padding:10px 12px; margin:8px 0 10px; }
   .exbox .k { font:700 11px "Open Sans",Arial,sans-serif; letter-spacing:.06em; text-transform:uppercase; color:var(--blue); }
   .exbox p { margin:4px 0 2px; font-size:15px; color:var(--navy); }
@@ -159,6 +164,21 @@
       <div class="row"><button class="btn block" id="go5" type="button" disabled>Share our proposal with the room</button></div>
       <p class="small" style="margin-top:10px">When it's time to share, present it in three parts: <b>here's the problem</b>, <b>here's our fix</b>, <b>here's how it would work</b>.</p>
     </div>
+    <div class="card" id="planCard">
+      <div class="eyebrow">Your step-by-step plan</div>
+      <h2>How to build it in HubSpot</h2>
+      <p class="small" style="margin-top:4px">Built from your group's choices. Anyone with HubSpot access can follow it, one step at a time.</p>
+      <ol class="plan" id="plan"></ol>
+      <div class="next">
+        <b>What happens after today is up to you.</b> Big Leap isn't committing to build this as part of the workshop. Three ways to move it forward:
+        <ul><li><b>Make the case:</b> send this plan to your manager and ask for the time to build it.</li><li><b>Build it yourselves:</b> follow the steps above with your HubSpot admin.</li><li><b>Get help:</b> ask Big Leap to scope it with you.</li></ul>
+      </div>
+      <div class="row" style="flex-wrap:wrap;gap:8px">
+        <a class="btn" id="mailMgr" href="#">Email this plan to my manager</a>
+        <button class="btn ghost" id="copyPlan" type="button">Copy the plan</button>
+        <a class="btn ghost" id="mailBL" href="#">Ask Big Leap about it</a>
+      </div>
+    </div>
     <div class="navrow"><button class="btn ghost" type="button" data-go="4">Back</button><button class="btn navy" type="button" data-go="6">Next: vote</button></div>
   </section>
 
@@ -167,7 +187,7 @@
     <div class="card">
       <div class="eyebrow">Share and vote · Everyone</div>
       <h2>Which fix should Curran do first?</h2>
-      <p class="small" style="margin-top:4px">After every group presents, vote for one. The winning idea goes to Curran's leadership.</p>
+      <p class="small" style="margin-top:4px">After every group presents, vote for one. The winning idea goes to Curran's leadership to consider.</p>
       <div class="vote" id="vote"></div>
       <button class="linkbtn" id="vrefresh" type="button" style="margin-top:8px">Refresh proposals</button>
       <div class="row" style="justify-content:center"><a class="btn ghost" href="wall.html?view=proposals" target="_blank" rel="noopener">See the results</a></div>
@@ -368,11 +388,69 @@
       (ph.length ? '<div class="sec"><div class="k">Already on the plan</div>' + ph.map(function (p) { return '<span class="tagp">' + BL.esc(p.name) + '</span>'; }).join('') + '</div>' : '');
     $('go5').disabled = !(v.problem && v.trig.length && v.act.length && v.owner && v.meas.length);
     if (S.shared) { $('go5').textContent = 'Shared. Update and share again'; }
+    renderPlan();
   }
   $('go5').addEventListener('click', function () {
     var v = proposal(); if (!BL.group()) { openAsk(); BL.toast('Pick your group first'); return; }
     $('go5').disabled = true;
     BL.submit('fixit', v).then(function () { S.shared = true; save(); BL.toast('Proposal shared with the room'); renderProp(); });
+  });
+
+  /* Step 5b: a step-by-step plan built from the group's picks (HubSpot's standard tools only). */
+  var HOW_TRIG = {
+    form: 'Trigger: <i>Form submission</i>, and pick the website form.',
+    swatch: 'Trigger: the form (or property) that marks a swatch or web order, for example a <i>Swatch request</i> form submission.',
+    trade: 'Trigger: the property that marks a trade account as approved changes to <i>Approved</i>.',
+    inbox: 'First connect the shared inbox to HubSpot (Settings › Inbox › Connect a channel › Team email) so every email becomes a conversation on the right record. Then trigger on the new conversation.',
+    call: 'Trigger: a call is logged on the contact. Calls need to be made or logged in HubSpot for this to work.',
+    quote: 'Trigger (deal-based workflow): the deal moves to the stage that means a quote was sent.',
+    quiet: 'Trigger: <i>Last activity date</i> is more than 3 days ago (pick the number of days that fits).',
+    won: 'Trigger (deal-based workflow): the deal stage becomes <i>Closed won</i>.',
+    ship: 'Trigger: the order status changes to shipped or delivered. This needs order status in HubSpot, so check that first.',
+    lost: 'Trigger (deal-based workflow): the deal stage becomes <i>Closed lost</i>.'
+  };
+  var HOW_ACT = {
+    owner: ['Assign it to the right person', 'Add the action <i>Rotate record to owner</i> (to share work across a team) or <i>Set property value › Owner</i> (for one person).'],
+    task: ['Create a to-do with a due date', 'Add the action <i>Create task</i>. Give it a clear title, assign it to the record owner, and set it due in 1 business day.'],
+    notify: ['Let the right person or team know', 'Add the action <i>Send internal notification</i> to the owner or team. Use tokens so it shows the customer’s name and what they need.'],
+    reply: ['Email the customer a confirmation or follow-up', 'Write the email first (Marketing › Email › Automated), then add the action <i>Send email</i>. Keep it short and personal.'],
+    nurture: ['Add the customer to regular check-in emails', 'Add the action <i>Enroll in another workflow</i> that sends a few spaced-out check-in emails, or add them to a list your team emails.'],
+    stage: ['Move it to the next step', 'Add the action <i>Set property value</i> to move the lead, lifecycle or deal stage to the next one.'],
+    nudge: ['Remind the person in charge if nothing happens', 'Add a <i>Delay</i> (for example 2 business days), then an <i>If/then branch</i>: if there’s been no activity, create a task or send the owner a reminder.'],
+    context: ['Pass the full history to the next team', 'Add a <i>Create task</i> or <i>Send internal notification</i> for the next team, with the key details pulled in as tokens. Make sure emails, calls and notes are logged on the record so the history is there.'],
+    reason: ['Record the reason (for example, why we lost)', 'Use a dropdown property such as <i>Closed lost reason</i>, and make it required when a deal moves to that stage (pipeline settings › edit stage properties).'],
+    log: ['Save the email or call to the customer’s record', 'Have each person connect their inbox to HubSpot and turn on email logging. Make or log calls from HubSpot so they land on the right record.'],
+    sync: ['Update the other system so both match', 'Map the matching fields in the integration settings so both systems stay in step. This one usually needs your HubSpot admin or integration partner.'],
+    report: ['Count it in a report', 'Create a report (Reporting › Reports › Create report) that counts these records, and add it to your team’s dashboard.']
+  };
+  function planSteps(v) {
+    var f = S.fix || fixVal(), st = [], E = BL.esc;
+    st.push({ t: 'Agree on the problem and who owns the fix', d: E(v.problem || 'Pick a problem in step 2.') + (v.owner ? ' In charge: ' + E(v.owner) + '.' : '') });
+    if (v.measText) st.push({ t: 'Write down today’s number before you change anything', d: 'So you can tell if it worked: ' + E(v.measText) + '.' });
+    var trig = arr(f.trig);
+    st.push({ t: 'Create the workflow', d: 'In HubSpot go to Automation › Workflows › Create workflow › From scratch. ' + (trig.length ? trig.map(function (t) { return HOW_TRIG[t]; }).join(' Or: ') : 'Pick what starts it (step 3, question 1).') });
+    (f.act || []).forEach(function (a) { var h = HOW_ACT[a]; if (h) st.push({ t: h[0], d: h[1], warn: a === 'sync' || a === 'log' }); });
+    if (f.human) st.push({ t: 'Keep the human part human', d: 'A person still does this: ' + E(f.human) + '. Write it into the team’s routine so it doesn’t get skipped.' });
+    st.push({ t: 'Test it, then switch it on', d: 'Run it on a test contact or deal first. Check every action did what you expected, then turn the workflow on.' });
+    st.push({ t: 'Check back in 30 days', d: 'Compare against the number you wrote down. Adjust the timing or the wording, and share the result with your team.' + (v.minutes ? ' Target: about ' + fmt(v.minutes).toLowerCase() + ' back.' : '') });
+    return st;
+  }
+  function planText(v) {
+    var g = BL.group(), steps = planSteps(v), strip = function (h) { var d = document.createElement('div'); d.innerHTML = h; return d.textContent; };
+    var out = 'Friction to Flow proposal' + (v.title ? ': ' + v.title : '') + (g ? ' (' + BL.groupName(g) + ')' : '') + '\n\nThe problem: ' + v.problem + '\n\nOur fix: when ' + (v.trigText || '').toLowerCase() + ', ' + (v.actText || []).join('; ').toLowerCase() + '.' + (v.owner ? '\nIn charge: ' + v.owner : '') + (v.measText ? '\nWe’ll know it works when: ' + v.measText : '') + (v.minutes ? '\nTime back: about ' + fmt(v.minutes).toLowerCase() + (v.instead ? ', for ' + v.instead : '') : '') + '\n\nStep-by-step plan (HubSpot):\n';
+    steps.forEach(function (x, i) { out += '\n' + (i + 1) + '. ' + x.t + '\n   ' + strip(x.d) + '\n'; });
+    return out;
+  }
+  function renderPlan() {
+    var v = proposal(), steps = planSteps(v);
+    $('plan').innerHTML = steps.map(function (x) { return '<li' + (x.warn ? ' class="warn"' : '') + '><b>' + x.t + '</b><span>' + x.d + '</span></li>'; }).join('');
+    var txt = planText(v), subj = 'Friction to Flow: ' + (v.title || 'a fix our team came up with');
+    $('mailMgr').href = 'mailto:?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent('Hi,\n\nIn today’s workshop our group designed a fix for a problem we run into. Could we find time to build it? The full plan is below.\n\n' + txt);
+    $('mailBL').href = 'mailto:dallas@bigleap.com?cc=zach@bigleap.com&subject=' + encodeURIComponent(subj + ' (Curran)') + '&body=' + encodeURIComponent('Hi Dallas and Zach,\n\nWe’d like to talk about this one.\n\n' + txt);
+  }
+  $('copyPlan').addEventListener('click', function () {
+    var t = planText(proposal());
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { BL.toast('Plan copied'); }).catch(function () { var a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); BL.toast('Plan copied'); } catch (e) {} a.remove(); });
   });
 
   /* Step 6: vote (one vote per phone; stored as a 'moves' row so the existing results sheet accepts it) */
