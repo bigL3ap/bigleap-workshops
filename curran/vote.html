@@ -71,7 +71,9 @@
   var S = (function () { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; } })();
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
   var $ = function (id) { return document.getElementById(id); };
-  function pkey(r) { return r.cid + '|' + r.ts; }
+  /* Identify a proposal by the stable id the breakout mints, so a group that updates and re-shares
+     keeps the votes already cast for it. Rows shared before ids existed fall back to cid|ts. */
+  function pkey(r) { return (r.payload && r.payload._id) || (r.cid + '|' + r.ts); }
 
   /* One pick each. Carries over a single vote made on the old breakout step 6 or an earlier two-pick round. */
   function vote() {
@@ -85,7 +87,7 @@
   }
 
   /* Live tally: only each phone's newest vote counts, so changing your mind moves the count. */
-  function tally(voteRows) {
+  function tally(voteRows, valid) {
     var last = {};
     (voteRows || []).forEach(function (r) {
       if (!r.payload || r.payload.kind !== 'vote') return;
@@ -95,7 +97,8 @@
     var counts = {}, voters = 0;
     Object.keys(last).forEach(function (c) {
       var pl = last[c].payload, t = pl.target || ((pl.targets && pl.targets.length) ? pl.targets[0] : '');
-      if (!t) return;
+      /* Ignore a vote whose proposal is no longer on the board, so a stale target can't inflate the total. */
+      if (!t || (valid && !valid[t])) return;
       voters++; counts[t] = (counts[t] || 0) + 1;
     });
     return { counts: counts, voters: voters };
@@ -115,7 +118,8 @@
       props = Object.keys(latest).map(function (k) { return latest[k]; })
         .sort(function (a, b) { return String(a.ts) < String(b.ts) ? -1 : 1; });
 
-      var t = tally(res[1]), counts = t.counts;
+      var valid = {}; props.forEach(function (r) { valid[pkey(r)] = 1; });
+      var t = tally(res[1], valid), counts = t.counts;
       if (!props.length) { el.innerHTML = '<p class="small">No proposals yet. They appear here as groups share them.</p>'; setCount(0); return; }
 
       var mine = vote();
