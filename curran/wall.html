@@ -211,36 +211,42 @@
             '<div class="tonel">' + L.map(function (l, i) { return '<span><i style="background:' + K[i] + '"></i>' + l + ' <b>' + pc[i] + '%</b></span>'; }).join('') + '</div>'; })() + '<div class="dist">' + dist.map(function (d) { return '<div style="height:' + Math.round(100 * d / dmax) + '%"><b>' + d + '</b></div>'; }).join('') + '</div><div class="dist-l"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div></section></div>';
     },
     friction: function (rows, sel) {
-      var cell = {}, stageTot = {}, max = 1, teams = {};
-      function bk(p) { return p.buckets && p.buckets.length ? p.buckets : [p.bucket]; }
-      function sk(p) { return p.stages && p.stages.length ? p.stages : [p.stage]; }
-      rows.forEach(function (r) { var p = r.payload; sk(p).forEach(function (st) { bk(p).forEach(function (bb) { var k = st + '|' + bb; cell[k] = (cell[k] || 0) + 1; max = Math.max(max, cell[k]); }); stageTot[st] = (stageTot[st] || 0) + 1; }); if (r.team) { sk(p).forEach(function (st) { (teams[st] = teams[st] || {})[r.team] = 1; }); } });
-      var topN = Math.max.apply(null, [0].concat(Object.keys(stageTot).map(function (k) { return stageTot[k]; })));
-      var tops = BL.STAGES.filter(function (x) { return topN && stageTot[x.id] === topN; }).map(function (x) { return x.id; }), top = tops[0];
-      var shared = Object.keys(teams).filter(function (s) { return Object.keys(teams[s]).length >= 3; }).map(stageName);
-      var g = '<div class="heatwrap"><div class="heat"><div></div>' + BL.STAGES.map(function (s) { return '<div class="h">' + s.n + '. ' + s.name + '</div>'; }).join('');
-      BL.BUCKETS.forEach(function (b) {
-        g += '<div class="rl"><span class="pill ' + b.id + '" style="font-size:13px">' + b.name.replace(' problem', '') + '</span></div>';
-        BL.STAGES.forEach(function (s) {
-          var n = cell[s.id + '|' + b.id] || 0, a = n ? .15 + .85 * n / max : 0, c = HX[b.id];
-          g += '<button class="c" data-cell="' + s.id + '|' + b.id + '" aria-pressed="' + (sel === s.id + '|' + b.id) + '" style="background:' + (n ? 'rgba(' + c.join(',') + ',' + a.toFixed(2) + ')' : '#EEF2F5') + ';color:' + (a > .55 ? '#fff' : 'var(--navy)') + '">' + (n || '') + '</button>';
+      /* Step 1 is written in people's own words now, so the grid groups by what KIND of
+         problem it is against what it COSTS, rather than by a journey stage nobody picks. */
+      var HURTS = [{ id: '1', name: 'Annoying' }, { id: '2', name: 'Costs time' }, { id: '3', name: 'Costs deals' }];
+      var cell = {}, bucketTot = {}, hurtTot = {}, max = 1, teams = {};
+      function bk(p) { return p.buckets && p.buckets.length ? p.buckets : (p.bucket ? [p.bucket] : []); }
+      function hk(p) { return (p.hurts && p.hurts.length ? p.hurts : (p.hurt ? [p.hurt] : [])).map(String); }
+      rows.forEach(function (r) {
+        var p = r.payload;
+        bk(p).forEach(function (bb) {
+          hk(p).forEach(function (hh) { var k = bb + '|' + hh; cell[k] = (cell[k] || 0) + 1; max = Math.max(max, cell[k]); hurtTot[hh] = (hurtTot[hh] || 0) + 1; });
+          bucketTot[bb] = (bucketTot[bb] || 0) + 1;
+          if (r.team) { (teams[bb] = teams[bb] || {})[r.team] = 1; }
         });
       });
-      g += '<div></div>' + BL.STAGES.map(function (s) { return '<div class="tot">' + (stageTot[s.id] || 0) + '</div>'; }).join('') + '</div></div><p class="swipe">Swipe the grid sideways to see every stage.</p>';
-      var list = rows.filter(function (r) { return !sel || sk(r.payload).some(function (st) { return bk(r.payload).some(function (bb) { return (st + '|' + bb) === sel; }); }); }).sort(function (a, b) { return (b.payload.hurt || 0) - (a.payload.hurt || 0); });
-      var hurtL = ['', 'Annoying', 'Costs time', 'Costs deals'];
-      var items = list.map(function (r) { var p = r.payload; return '<div class="item"><button class="x" data-hide="' + E(key(r)) + '" title="Hide from wall" aria-label="Hide">×</button><div class="meta">' + sk(p).map(function (st) { return '<span class="pill">' + stageName(st) + '</span>'; }).join('') + bk(p).map(function (bb) { var m = BL.BUCKETS.filter(function (x) { return x.id === bb; })[0]; return '<span class="pill ' + bb + '">' + (m ? m.name.replace(' problem', '') : bb) + '</span>'; }).join('') + (r.team ? '<span class="pill">' + E(r.team) + '</span>' : '') + (p.hurts && p.hurts.length ? p.hurts : [p.hurt || 1]).map(function (h) { return '<span class="pill">' + hurtL[h] + '</span>'; }).join('') + '</div><div class="txt">' + E(p.text) + '</div></div>'; }).join('');
-      return header('Breakout · Step 1', 'Where does revenue get stuck?', 'Darker means more people flagged it. Click a square to see what’s behind it.', rows.length) +
+      function bName(id) { var m = BL.BUCKETS.filter(function (x) { return x.id === id; })[0]; return m ? m.name.replace(' problem', '') : id; }
+      function hName(id) { var m = HURTS.filter(function (x) { return x.id === String(id); })[0]; return m ? m.name : id; }
+      var topN = Math.max.apply(null, [0].concat(Object.keys(bucketTot).map(function (k) { return bucketTot[k]; })));
+      var tops = BL.BUCKETS.filter(function (x) { return topN && bucketTot[x.id] === topN; }).map(function (x) { return x.id; }), top = tops[0];
+      var shared = Object.keys(teams).filter(function (b) { return Object.keys(teams[b]).length >= 3; }).map(bName);
+      var g = '<div class="heatwrap"><div class="heat" style="grid-template-columns:minmax(150px,1fr) repeat(' + HURTS.length + ',minmax(120px,1fr))"><div></div>' + HURTS.map(function (h) { return '<div class="h">' + h.name + '</div>'; }).join('');
+      BL.BUCKETS.forEach(function (b) {
+        g += '<div class="rl"><span class="pill ' + b.id + '" style="font-size:13px">' + b.name.replace(' problem', '') + '</span></div>';
+        HURTS.forEach(function (h) {
+          var k = b.id + '|' + h.id, n = cell[k] || 0, a = n ? .15 + .85 * n / max : 0, c = HX[b.id];
+          g += '<button class="c" data-cell="' + k + '" aria-pressed="' + (sel === k) + '" style="background:' + (n ? 'rgba(' + c.join(',') + ',' + a.toFixed(2) + ')' : '#EEF2F5') + ';color:' + (a > .55 ? '#fff' : 'var(--navy)') + '">' + (n || '') + '</button>';
+        });
+      });
+      g += '<div></div>' + HURTS.map(function (h) { return '<div class="tot">' + (hurtTot[h.id] || 0) + '</div>'; }).join('') + '</div></div>';
+      var list = rows.filter(function (r) { return !sel || bk(r.payload).some(function (bb) { return hk(r.payload).some(function (hh) { return (bb + '|' + hh) === sel; }); }); }).sort(function (a, b) { return (b.payload.hurt || 0) - (a.payload.hurt || 0); });
+      var items = list.map(function (r) { var p = r.payload; return '<div class="item"><button class="x" data-hide="' + E(key(r)) + '" title="Hide from wall" aria-label="Hide">×</button><div class="meta">' + bk(p).map(function (bb) { return '<span class="pill ' + bb + '">' + E(bName(bb)) + '</span>'; }).join('') + (r.team ? '<span class="pill">' + E(r.team) + '</span>' : '') + hk(p).map(function (h) { return '<span class="pill">' + E(hName(h)) + '</span>'; }).join('') + '</div><div class="txt">' + E(p.text) + '</div></div>'; }).join('');
+      return header('Breakout · Step 1', 'Where does the work get stuck?', 'In the room\u2019s own words. Darker means more people flagged it. Click a square to read what\u2019s behind it.', rows.length) +
         '<section class="panel" style="margin-top:20px">' + g + '</section>' +
-        '<div class="grid2"><section class="panel"><div class="k">' + (sel ? stageName(sel.split('|')[0]) + ' · ' + sel.split('|')[1] + ' <button class="linkbtn" data-clear="1">show all</button>' : 'Everything flagged, worst first') + '</div><div class="items">' + (items || '<div class="empty">Nothing here yet</div>') + '</div></section>' +
-        '<section style="display:grid;gap:16px;align-content:start">' + (top ? '<div class="callout"><div class="k">' + (tops.length > 1 ? 'Most friction · tied' : 'Most friction') + '</div><b>' + tops.map(stageName).join(' &amp; ') + '</b></div>' : '') +
-        (shared.length ? '<div class="callout" style="background:#7B5EA7"><div class="k" style="color:#E6DCF5">Same problem, different seats</div><b>' + shared.join(', ') + '</b><p style="margin-top:6px;color:#EFE8F8">Three or more teams flagged this stage. That’s usually one RevOps problem showing up in different ways.</p></div>' : '') +
-        '<div class="panel"><div class="k">Prompt for the room</div><p style="margin-top:6px;font-size:18px">In step 2, each group picks the one problem it wants to fix.</p></div></section></div>';
-    },
-    fixit: function (rows) {
-      var ph = function (id) { return BL.ROADMAP.filter(function (p) { return p.id === id; })[0]; };
-      var cards = rows.slice().reverse().map(function (r) { var p = r.payload; return '<article class="rc"><button class="x" data-hide="' + E(key(r)) + '" aria-label="Hide">×</button><h3>' + E(p.problem) + '</h3><div style="margin-top:10px"><div class="ln"><span>When</span><span>' + E(p.trigText) + '</span></div><div class="ln"><span>System</span><span>' + (p.actText || []).map(E).join('<br>') + '</span></div><div class="ln"><span>Person</span><span>' + E(p.owner) + (p.human ? ': ' + E(p.human) : '') + '</span></div><div class="ln"><span>Measure</span><span>' + E(p.measText) + '</span></div></div>' + (p.phases || []).map(function (id) { var x = ph(id); return x ? '<span class="tagp">' + E(x.when) + ' · ' + E(x.name) + '</span>' : ''; }).join('') + '</article>'; }).join('');
-      return header('What could HubSpot do about it?', 'The room’s fix-it recipes', 'Each recipe is tagged with where it already sits in the plan.', rows.length) + '<div class="cards">' + (cards || '<div class="empty">No recipes yet</div>') + '</div>';
+        '<div class="grid2"><section class="panel"><div class="k">' + (sel ? E(bName(sel.split('|')[0])) + ' · ' + E(hName(sel.split('|')[1])) + ' <button class="linkbtn" data-clear="1">show all</button>' : 'Everything flagged, worst first') + '</div><div class="items">' + (items || '<div class="empty">Nothing here yet</div>') + '</div></section>' +
+        '<section style="display:grid;gap:16px;align-content:start">' + (top ? '<div class="callout"><div class="k">' + (tops.length > 1 ? 'Most friction · tied' : 'Most friction') + '</div><b>' + tops.map(bName).join(' &amp; ') + '</b></div>' : '') +
+        (shared.length ? '<div class="callout" style="background:#7B5EA7"><div class="k" style="color:#E6DCF5">Same problem, different seats</div><b>' + shared.join(', ') + '</b><p style="margin-top:6px;color:#EFE8F8">Three or more teams flagged this, so it is not one team\u2019s problem.</p></div>' : '') +
+        '</section></div>';
     },
     proposals: function (rows, sel, votes) {
       function planOf(p) { if (p.plan && p.plan.length) return p.plan; var d = document.createElement('div'); return BL.buildPlan(p).map(function (x) { d.innerHTML = x.d; return { t: x.t, d: d.textContent }; }); }

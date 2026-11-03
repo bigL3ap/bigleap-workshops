@@ -14,6 +14,11 @@
   .steps button i { display:block; height:5px; border-radius:3px; background:#D9E2E8; margin-bottom:5px; }
   .steps button.on { color:var(--navy); } .steps button.on i { background:var(--blue); }
   .steps button.done i { background:var(--navy); }
+  .egbox { background:var(--sky); border-radius:12px; padding:11px 14px; margin-top:10px; }
+  .egbox .k { font:800 11px "Open Sans",Arial,sans-serif; letter-spacing:.06em; text-transform:uppercase; color:var(--blue); margin-bottom:6px; }
+  .egbox ul { margin:0; padding-left:18px; }
+  .egbox li { font-size:14px; line-height:1.5; color:var(--navy); margin:5px 0; font-style:italic; }
+  .egbox .egn { margin:8px 0 0; font-size:13px; color:#4A5D6B; }
   .howto { border:1.5px solid var(--line); border-left:5px solid var(--blue); border-radius:12px; padding:12px 14px; margin-top:14px; background:#fff; }
   .howto .k { font:800 11px "Open Sans",Arial,sans-serif; letter-spacing:.06em; text-transform:uppercase; color:var(--blue); margin-bottom:5px; }
   .howto p { margin:0; font-size:14.5px; line-height:1.5; color:var(--navy); }
@@ -65,9 +70,6 @@
   .next ul { margin:6px 0 0; padding-left:18px; } .next li { margin-top:4px; }
   .vplan { margin-top:8px; } .vplan summary { cursor:pointer; font-weight:700; color:var(--blue); min-height:36px; display:flex; align-items:center; }
   .vplan ol { margin:6px 0 0; padding-left:20px; font-size:14px; color:var(--navy); } .vplan li { margin-top:6px; } .vplan li b { display:block; }
-  .exbox { background:var(--sky); border-radius:12px; padding:10px 12px; margin:8px 0 10px; }
-  .exbox .k { font:700 11px "Open Sans",Arial,sans-serif; letter-spacing:.06em; text-transform:uppercase; color:var(--blue); }
-  .exbox p { margin:4px 0 2px; font-size:15px; color:var(--navy); }
   .mine { list-style:none; padding:0; margin:10px 0 0; display:grid; gap:8px; }
   .mine li { background:var(--sky); border-radius:10px; padding:10px 12px; font-size:14px; }
 </style>
@@ -97,25 +99,32 @@
       <div class="eyebrow">Step 1 · Everyone, on your own phone</div>
       <h2>Find the friction</h2>
       <p class="small" style="margin-top:4px">Think of a real moment with a customer or a project where something got stuck. Add as many as you like, one at a time. Describe the situation, not a person.</p>
-      <div class="howto"><div class="k">How to do this step</div><p><b>Everyone does this one, on their own phone.</b> Think of one real thing that went wrong or took too long in the last month. Tap where it happens and what it costs, then describe it in a sentence. Then add another.</p>
+      <div class="howto"><div class="k">How to do this step</div><p><b>Everyone does this one, on their own phone.</b> Think of one real thing that went wrong or took too long in the last month. Write it in your own words, then tap what kind of problem it is and what it costs. Then add another.</p>
       <ul>
         <li><span class="eg">&ldquo;A designer asks for three swatches. The request sits in the shared inbox over the weekend because nobody owns it.&rdquo;</span></li>
         <li><span class="eg">&ldquo;Sales promises a rush install date, but operations only finds out when the order lands, so we have to call the customer back.&rdquo;</span></li>
       </ul>
       <p class="fac"><b>Facilitators:</b> don't give your own example first &mdash; they'll just hand it back to you. If a group is quiet, ask: &ldquo;walk one customer from first contact to install, and tell me where it gets slow.&rdquo;</p></div>
-      <div class="step" style="margin-top:16px"><span class="n">1</span><h3>Where in your process are you seeing friction? <span class="small">(your own internal process, or what the customer goes through &mdash; pick all that apply)</span></h3></div>
-      <div class="tiles t4" id="stage"></div>
-      <div class="step" style="margin-top:18px"><span class="n">2</span><h3>What kind of problem is it? <span class="small">(pick all that apply)</span></h3></div>
+      <div class="step" style="margin-top:16px"><span class="n">1</span><h3>Identify the moment that creates friction &mdash; for you, or for your customer</h3></div>
+      <p class="small" style="margin-top:2px">In your own words &mdash; one moment, a sentence or two.</p>
+      <div class="egbox">
+        <div class="k">A few examples</div>
+        <ul>
+          <li>&ldquo;A designer asks for three swatches and the request sits in the shared inbox over the weekend, because nobody owns it.&rdquo;</li>
+          <li>&ldquo;Sales promises a rush install date and operations only finds out when the order lands, so we have to call the customer back.&rdquo;</li>
+          <li>&ldquo;A customer calls about their order and whoever picks up has to go digging through email before they can answer.&rdquo;</li>
+        </ul>
+        <p class="egn">Yours won't look like these. That's the point &mdash; we want the one that actually happened to you.</p>
+      </div>
+      <label class="sr" for="what">Describe the friction</label>
+      <textarea id="what" maxlength="240" placeholder="What happens, and what goes wrong?"></textarea>
+      <div class="count"><span id="wc">0</span>/240</div>
+      <div class="step" style="margin-top:20px"><span class="n">2</span><h3>What kind of problem is it? <span class="small">(pick all that apply)</span></h3></div>
       <div class="tiles t3" id="bucket"></div>
       <div class="step" style="margin-top:18px"><span class="n">3</span><h3>What gets lost? <span class="small">(pick all that apply)</span></h3></div>
       <div class="tiles t4" id="lost"></div>
       <div class="step" style="margin-top:18px"><span class="n">4</span><h3>What does it cost us? <span class="small">(pick all that apply)</span></h3></div>
       <div class="chips" id="hurt"><button class="chip" data-v="1">It's annoying</button><button class="chip" data-v="2">It wastes time</button><button class="chip" data-v="3">We lose sales or customers</button></div>
-      <div class="step" style="margin-top:18px"><span class="n">5</span><h3>Now describe what happens, in one sentence</h3></div>
-      <div class="exbox" id="exbox"><div class="k">Example based on what you picked</div><p id="extext"></p><button class="linkbtn" type="button" id="exuse">Start from this example</button></div>
-      <label class="sr" for="what">Describe the friction</label>
-      <textarea id="what" maxlength="240" placeholder="What happens, and what goes wrong?"></textarea>
-      <div class="count"><span id="wc">0</span>/240</div>
       <div class="row"><button class="btn block" id="go1" type="submit" disabled>Add my answer</button></div>
     </form>
     <section class="card" id="mineCard" hidden>
@@ -294,47 +303,29 @@
     { id: 'momentum', name: 'Speed', hint: 'Things stall or wait on someone' },
     { id: 'opportunity', name: 'A sale or customer', hint: 'We lose the order, the project or the referral' }
   ];
-  /* An example sentence for every journey stage and problem type, shown once they pick both. */
-  var EX = {
-    aware:    { data: 'We can’t tell which ad, search or referral brought a customer in, so we don’t know what’s working.', process: 'Referrals from designers come in different ways, and there’s no set way to track them.', comm: 'Marketing runs a promotion, and sales hears about it from a customer first.' },
-    inquiry:  { data: 'A swatch request comes in without a phone number or project details, so we have to chase them.', process: 'A swatch request comes in and nobody’s sure whose it is, so follow-up waits.', comm: 'A customer emails a shared inbox and nobody lets them know we got it.' },
-    qualify:  { data: 'We can’t easily see whether someone is trade or a consumer, so they get the wrong follow-up.', process: 'There’s no set rule for who takes a new lead, so it depends on who’s in that day.', comm: 'Sales doesn’t hear that a trade account was approved, so the customer waits.' },
-    opp:      { data: 'Samples, sizes and notes from earlier calls are spread across emails, so the rep starts over.', process: 'A quote goes out and there’s no set follow-up, so the project goes quiet.', comm: 'Notes from the first call don’t reach the person closing the deal, so the customer repeats themselves.' },
-    sale:     { data: 'Order details get typed into two systems, and they don’t always match.', process: 'There’s no set check before an order goes in, so mistakes get caught late.', comm: 'Accounting finds out about special pricing after the invoice goes out.' },
-    handoff:  { data: 'Operations can’t see what sales promised, like a rush date or a custom size.', process: 'There’s no set handoff from sales to operations, so details get asked for again.', comm: 'An install date changes and the customer is the last to hear.' },
-    customer: { data: 'Customer service can’t see the order history, so the customer waits on hold while we check.', process: 'Issues come in by phone, email and text, and there’s no one place to track them.', comm: 'A delivery is delayed and the customer finds out before we tell them.' },
-    repeat:   { data: 'We can’t see when a past customer is likely to reorder.', process: 'There’s no set way to ask happy customers for a review or a referral.', comm: 'Sales doesn’t hear when a long-time customer has gone quiet.' }
-  };
-  var stage = $('stage'), lost = $('lost'), bucket = $('bucket'), hurt = $('hurt'), what = $('what'), go1 = $('go1');
-  stage.innerHTML = BL.STAGES.map(function (s) { return '<button class="tile" data-v="' + s.id + '"><span class="num">' + s.n + '</span><b>' + s.short + '</b><span class="who">' + s.who + '</span><span>' + s.ex + '</span></button>'; }).join('');
+  var lost = $('lost'), bucket = $('bucket'), hurt = $('hurt'), what = $('what'), go1 = $('go1');
   bucket.innerHTML = BL.BUCKETS.map(function (b) { return '<button class="tile ' + b.id + '" data-v="' + b.id + '"><b>' + b.name + '</b><span>' + b.hint + '</span></button>'; }).join('');
   lost.innerHTML = LOST.map(function (l) { return '<button class="tile" data-v="' + l.id + '"><b>' + l.name + '</b><span>' + l.hint + '</span></button>'; }).join('');
-  function example(st, bk) {
-    var a = st[0] || 'inquiry', b = bk[0] || 'process';
-    return (EX[a] || EX.inquiry)[b] || EX.inquiry.process;
-  }
-  $('exuse').addEventListener('click', function () { what.value = $('extext').textContent; what.focus(); check1(); });
   function check1() {
-    var st = BL.val(stage, true), b = BL.val(bucket, true), h = BL.val(hurt, true).map(Number);
-    var v = { stage: st[0] || '', stages: st, lost: BL.val(lost, true), text: what.value.trim(), bucket: b[0] || '', buckets: b, hurt: h.length ? Math.max.apply(null, h) : 0, hurts: h };
+    var b = BL.val(bucket, true), h = BL.val(hurt, true).map(Number);
+    var v = { lost: BL.val(lost, true), text: what.value.trim(), bucket: b[0] || '', buckets: b, hurt: h.length ? Math.max.apply(null, h) : 0, hurts: h };
     $('wc').textContent = what.value.length;
-    $('extext').textContent = example(st, b);
-    $('exbox').querySelector('.k').textContent = st.length || b.length ? 'Example based on what you picked' : 'Example';
-    go1.disabled = !(st.length && v.text.length > 8 && b.length && h.length);
+    /* Their own words come first and are required; the rest is tapping. */
+    go1.disabled = !(v.text.length > 8 && b.length && h.length);
     return v;
   }
-  BL.choice(stage, { multi: true, onChange: check1 }); BL.choice(lost, { multi: true, onChange: check1 }); BL.choice(bucket, { multi: true, onChange: check1 }); BL.choice(hurt, { multi: true, onChange: check1 });
+  BL.choice(lost, { multi: true, onChange: check1 }); BL.choice(bucket, { multi: true, onChange: check1 }); BL.choice(hurt, { multi: true, onChange: check1 });
   what.addEventListener('input', check1);
   function renderMine() {
     var m = BL.mine('friction'); if (!m.length) return;
     $('mineCard').hidden = false; $('mineN').textContent = '(' + m.length + ')';
-    $('mine').innerHTML = m.slice().reverse().map(function (r) { var sts = (r.payload.stages && r.payload.stages.length ? r.payload.stages : [r.payload.stage]).map(function (id) { var st = BL.STAGES.filter(function (x) { return x.id === id; })[0]; return st ? '<span class="pill">' + st.name + '</span> ' : ''; }).join(''); return '<li>' + sts + BL.esc(r.payload.text) + '</li>'; }).join('');
+    $('mine').innerHTML = m.slice().reverse().map(function (r) { var bs = (r.payload.buckets && r.payload.buckets.length ? r.payload.buckets : [r.payload.bucket]).map(function (id) { var bb = BL.BUCKETS.filter(function (x) { return x.id === id; })[0]; return bb ? '<span class="pill">' + bb.name.replace(' problem', '') + '</span> ' : ''; }).join(''); return '<li>' + bs + BL.esc(r.payload.text) + '</li>'; }).join('');
   }
   $('f1').addEventListener('submit', function (e) {
     e.preventDefault(); var v = check1(); if (go1.disabled) return;
     if (!BL.group()) { openAsk(); BL.toast('Pick your group first'); return; }
     go1.disabled = true;
-    BL.submit('friction', v).then(function () { BL.toast('Added. Got another? Keep going.'); what.value = ''; [stage, lost, bucket, hurt].forEach(BL.reset); check1(); renderMine(); });
+    BL.submit('friction', v).then(function () { BL.toast('Added. Got another? Keep going.'); what.value = ''; [lost, bucket, hurt].forEach(BL.reset); check1(); renderMine(); });
   });
 
   /* Step 2: pick the problem */
@@ -362,7 +353,7 @@
       /* The group's answers from the shared sheet, plus everything added on this phone (so your own answers always show, even if the sheet is slow). */
       rows.filter(function (r) { return r.payload && r.payload.text && (!g || String(r.group).trim().toLowerCase() === g); }).concat(mineRows())
         .sort(function (a, b) { return (b.payload.hurt || 0) - (a.payload.hurt || 0); })
-        .forEach(function (r) { var t = r.payload.text; if (seen[t]) return; seen[t] = 1; var st = BL.STAGES.filter(function (x) { return x.id === r.payload.stage; })[0]; picks.appendChild(pickBtn('Your group' + (st ? ' · ' + st.name : ''), t)); });
+        .forEach(function (r) { var t = r.payload.text; if (seen[t]) return; seen[t] = 1; var bb = BL.BUCKETS.filter(function (x) { return x.id === r.payload.bucket; })[0]; picks.appendChild(pickBtn('Your group' + (bb ? ' · ' + bb.name.replace(' problem', '') : ''), t)); });
       if (!picks.children.length) {
         picks.innerHTML = '<p class="small">No answers from your group yet. They appear here as people add them in step 1. If your group is stuck, you can start from one of these examples.</p>';
         SEEDS.forEach(function (t) { picks.appendChild(pickBtn('Example', t)); });
