@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Vote on the fixes</title>
-<meta name="description" content="Every Friction to Flow proposal the room built. Pick your top two.">
+<meta name="description" content="Every Friction to Flow proposal the room built. Pick the one Curran should do first.">
 <link rel="icon" href="../assets/bigleap-logo.png">
 <link rel="stylesheet" href="../assets/workshop.css">
 <style>
@@ -26,6 +26,13 @@
   .live { font:700 12px "Open Sans",Arial,sans-serif; color:var(--blue); margin-top:10px; }
   .counter { position:sticky; top:0; z-index:5; background:var(--navy); color:#fff; border-radius:12px; padding:10px 14px; margin-top:12px; font-weight:800; display:flex; justify-content:space-between; align-items:center; gap:12px; }
   .counter span.n { font-size:18px; }
+  .vc { position:relative; }
+  .tally { display:flex; align-items:center; gap:9px; margin-top:9px; }
+  .tally .bt { flex:1; height:8px; border-radius:999px; background:var(--sky); overflow:hidden; }
+  .tally .bt i { display:block; height:100%; border-radius:999px; background:var(--blue); transition:width .45s ease; }
+  .tally .n { font:800 13px "Open Sans",Arial,sans-serif; color:var(--navy); white-space:nowrap; min-width:58px; text-align:right; }
+  .vc.lead { border-color:var(--blue); box-shadow:0 0 0 1px var(--blue); }
+  .vc.lead .tally .n { color:var(--blue); }
   .seeroom { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; background:var(--sky); border-radius:12px; padding:11px 13px; margin-top:14px; }
   .seeroom span { font-weight:700; color:var(--navy); font-size:14px; }
 </style>
@@ -41,12 +48,12 @@
     <ol>
       <li>Listen to each group present.</li>
       <li>Read the proposals here &mdash; tap <b>See the step-by-step plan</b> on any one for the detail.</li>
-      <li>Tap <b>your top two</b>. Tap a pick again to swap it.</li>
+      <li>Tap <b>the one</b> you think Curran should do first. Tap another card to change your mind.</li>
     </ol>
-    <p style="margin-top:8px"><b>Votes are anonymous.</b> Nobody can see how you voted, and everyone votes &mdash; facilitators too. The fixes the room ranks highest go to Curran's leadership first.</p>
+    <p style="margin-top:8px"><b>Votes are anonymous.</b> Nobody can see how you voted, and everyone votes &mdash; facilitators too. The vote count under each one updates live. The fix the room picks goes to Curran's leadership first.</p>
   </div>
 
-  <div class="counter"><span>Your picks</span><span class="n" id="count">0 of 2</span></div>
+  <div class="counter"><span>Your pick</span><span class="n" id="count">Not yet</span></div>
 
   <div class="vote" id="vote"><p class="small">Loading the proposals…</p></div>
   <p class="live" id="voteLive">Updating automatically as groups share.</p>
@@ -60,29 +67,45 @@
 <script src="../assets/config.js"></script>
 <script src="../assets/workshop.js"></script>
 <script>
-  var MAX = 2;
   var KEY = 'bl_ws_' + BL.config.session + '_vote';
   var S = (function () { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; } })();
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
   var $ = function (id) { return document.getElementById(id); };
   function pkey(r) { return r.cid + '|' + r.ts; }
 
-  /* Everyone picks their top two. Carries over a vote made on the old breakout step 6. */
-  function votes() {
-    if (!S.votes) {
+  /* One pick each. Carries over a single vote made on the old breakout step 6 or an earlier two-pick round. */
+  function vote() {
+    if (S.vote == null) {
       var old = {};
       try { old = JSON.parse(localStorage.getItem('bl_ws_' + BL.config.session + '_breakout') || '{}'); } catch (e) {}
-      S.votes = (old.votes && old.votes.length) ? old.votes.slice(0, MAX) : (old.vote ? [old.vote] : []);
+      S.vote = (S.votes && S.votes.length) ? S.votes[0] : ((old.votes && old.votes.length) ? old.votes[0] : (old.vote || ''));
+      delete S.votes; save();
     }
-    return S.votes;
+    return S.vote || '';
   }
-  function setCount() { $('count').textContent = votes().length + ' of ' + MAX; }
+
+  /* Live tally: only each phone's newest vote counts, so changing your mind moves the count. */
+  function tally(voteRows) {
+    var last = {};
+    (voteRows || []).forEach(function (r) {
+      if (!r.payload || r.payload.kind !== 'vote') return;
+      var c = r.cid || Math.random();
+      if (!last[c] || String(r.ts) >= String(last[c].ts)) last[c] = r;
+    });
+    var counts = {}, voters = 0;
+    Object.keys(last).forEach(function (c) {
+      var pl = last[c].payload, t = pl.target || ((pl.targets && pl.targets.length) ? pl.targets[0] : '');
+      if (!t) return;
+      voters++; counts[t] = (counts[t] || 0) + 1;
+    });
+    return { counts: counts, voters: voters };
+  }
 
   function loadVotes(quiet) {
     var el = $('vote');
-    if (!quiet) el.innerHTML = '<p class="small">Loading the proposals…</p>';
-    BL.load('fixit').then(function (rows) {
-      var props = rows.filter(function (r) { return r.payload && r.payload.kind === 'proposal'; });
+    if (!quiet) el.innerHTML = '<p class="small">Loading the proposals\u2026</p>';
+    Promise.all([BL.load('fixit'), BL.load('moves')]).then(function (res) {
+      var props = res[0].filter(function (r) { return r.payload && r.payload.kind === 'proposal'; });
       /* Newest version of each proposal; a group may share more than one. */
       var latest = {};
       props.forEach(function (r) {
@@ -91,37 +114,48 @@
       });
       props = Object.keys(latest).map(function (k) { return latest[k]; })
         .sort(function (a, b) { return String(a.ts) < String(b.ts) ? -1 : 1; });
-      if (!props.length) { el.innerHTML = '<p class="small">No proposals yet. They appear here as groups share them.</p>'; setCount(); return; }
-      var chosen = votes();
+
+      var t = tally(res[1]), counts = t.counts;
+      if (!props.length) { el.innerHTML = '<p class="small">No proposals yet. They appear here as groups share them.</p>'; setCount(0); return; }
+
+      var mine = vote();
+      var top = 0;
+      props.forEach(function (r) { top = Math.max(top, counts[pkey(r)] || 0); });
+
       el.innerHTML = props.map(function (r) {
-        var p = r.payload, k = pkey(r), rank = chosen.indexOf(k), mine = rank >= 0;
-        var plan = (p.plan && p.plan.length) ? p.plan : BL.buildPlan(p).map(function (x) {
+        var pl = r.payload, k = pkey(r), picked = k === mine, n = counts[k] || 0;
+        var plan = (pl.plan && pl.plan.length) ? pl.plan : BL.buildPlan(pl).map(function (x) {
           var d = document.createElement('div'); d.innerHTML = x.d; return { t: x.t, d: d.textContent };
         });
-        return '<div class="vc' + (mine ? ' picked' : '') + '"><span class="pill">' + BL.esc(BL.groupName(r.group) || 'A group') + '</span>' +
-          '<b style="margin-top:6px">' + BL.esc(p.title || p.problem) + '</b>' +
-          (p.title ? '<p class="small">' + BL.esc(p.problem) + '</p>' : '') +
+        return '<div class="vc' + (picked ? ' picked' : '') + (n && n === top ? ' lead' : '') + '"><span class="pill">' + BL.esc(BL.groupName(r.group) || 'A group') + '</span>' +
+          '<b style="margin-top:6px">' + BL.esc(pl.title || pl.problem) + '</b>' +
+          (pl.title ? '<p class="small">' + BL.esc(pl.problem) + '</p>' : '') +
           (plan.length ? '<details class="vplan"><summary>See the step-by-step plan</summary><ol>' +
             plan.map(function (x) { return '<li><b>' + BL.esc(x.t) + '</b> ' + BL.esc(x.d) + '</li>'; }).join('') + '</ol></details>' : '') +
-          '<button class="btn ' + (mine ? 'navy' : '') + '" type="button" data-vote="' + BL.esc(k) + '" data-g="' + BL.esc(r.group) + '"' + (mine ? ' aria-pressed="true"' : '') + '>' +
-          (mine ? '✓ Picked (' + (rank + 1) + ' of ' + MAX + ')' : chosen.length >= MAX ? 'Tap one of your picks to swap' : 'Pick this one') + '</button></div>';
+          '<div class="tally"><div class="bt"><i style="width:' + (top ? Math.round(100 * n / top) : 0) + '%"></i></div>' +
+          '<span class="n">' + n + (n === 1 ? ' vote' : ' votes') + '</span></div>' +
+          '<button class="btn ' + (picked ? 'navy' : '') + '" type="button" data-vote="' + BL.esc(k) + '" data-g="' + BL.esc(r.group) + '"' + (picked ? ' aria-pressed="true"' : '') + '>' +
+          (picked ? '\u2713 This is your pick' : mine ? 'Pick this one instead' : 'Pick this one') + '</button></div>';
       }).join('') +
-        '<p class="small" style="margin-top:2px">' + (chosen.length ? 'You’ve picked <b>' + chosen.length + ' of ' + MAX + '</b>. Tap a pick again to remove it.' : 'Pick up to two. Tap a card to add it.') + '</p>';
-      setCount();
-    }).catch(function () { el.innerHTML = '<p class="small">Can’t load the proposals right now. Tap refresh.</p>'; });
+        '<p class="small" style="margin-top:2px">' + (mine ? 'Your pick is in. Tap another card to change it, or tap your own to clear it.' : 'Pick one. Tap a card to cast your vote.') +
+        ' <b>' + t.voters + (t.voters === 1 ? ' person has' : ' people have') + ' voted</b> so far.</p>';
+      setCount(t.voters);
+    }).catch(function () { el.innerHTML = '<p class="small">Can\u2019t load the proposals right now. Tap refresh.</p>'; });
   }
+
+  function setCount() { $('count').textContent = vote() ? 'In \u2713' : 'Not yet'; }
 
   $('vote').addEventListener('click', function (e) {
     var b = e.target.closest('[data-vote]'); if (!b) return;
-    var k = b.getAttribute('data-vote'), v = votes(), at = v.indexOf(k);
-    if (at >= 0) { v.splice(at, 1); BL.toast('Removed. ' + v.length + ' of ' + MAX + ' picked.'); }
-    else if (v.length >= MAX) { BL.toast('You have two. Tap one of them to swap it out.'); return; }
-    else { v.push(k); }
-    S.votes = v; save();
+    var k = b.getAttribute('data-vote'), had = vote();
+    /* Tapping your own pick clears it; tapping any other card moves your single vote there. */
+    S.vote = (k === had) ? '' : k;
+    save(); setCount();
+    BL.toast(!S.vote ? 'Pick cleared. Tap a card to vote.' : had ? 'Changed to this one. Thank you!' : 'Vote in. Thank you!');
     var groups = {};
     document.querySelectorAll('[data-vote]').forEach(function (x) { groups[x.getAttribute('data-vote')] = x.getAttribute('data-g'); });
-    BL.submit('moves', { _id: 'vote', kind: 'vote', targets: v, targetGroups: v.map(function (x) { return groups[x] || ''; }), target: v[0] || '' })
-      .then(function () { if (v.length === MAX) BL.toast('Both picks in. Thank you!'); loadVotes(true); });
+    BL.submit('moves', { _id: 'vote', kind: 'vote', target: S.vote, targets: S.vote ? [S.vote] : [], targetGroups: S.vote ? [groups[S.vote] || ''] : [] })
+      .then(function () { loadVotes(true); });
   });
   $('vrefresh').addEventListener('click', function () { loadVotes(); });
 
