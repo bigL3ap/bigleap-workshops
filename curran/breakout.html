@@ -191,12 +191,12 @@
     <div class="card">
       <div class="eyebrow">Step 4 · Human or robot</div>
       <h2>Who does each part?</h2>
-      <div class="howto"><div class="k">How to do this step</div><p>Go through each part of your fix and decide who should do it: a <b>person</b>, a <b>system</b>, or both. The rule of thumb: if it's typing, copying, chasing or reminding, a system should do it. If it needs judgement or a relationship, a person should.</p>
+      <div class="howto"><div class="k">How to do this step</div><p>Go through each part of your fix and decide who should do it: a <b>person</b> or a <b>system</b>. It is one or the other — pick whichever should own it. The rule of thumb: if it's typing, copying, chasing or reminding, a system should do it. If it needs judgement or a relationship, a person should.</p>
       <ul>
         <li><span class="eg">System: logging the request, assigning it, sending the &ldquo;we got it&rdquo; reply, reminding the rep on day three.</span></li>
         <li><span class="eg">Person: calling the designer to talk through the project and what will actually work in their space.</span></li>
       </ul></div>
-      <p class="small" style="margin-top:4px">For each part of your fix, tap who should do it.<br><b>Robot</b>: the system does it on its own. <b>Human</b>: a person needs to do it. <b>Both</b>: the system does the legwork, a person makes the call.</p>
+      <p class="small" style="margin-top:4px">For each part of your fix, tap who should do it.<br><b>Robot</b>: the system does it on its own. <b>Human</b>: a person needs to do it.</p>
       <div class="sorter" id="sorter"></div>
       <div class="step" style="margin-top:18px"><span class="n">?</span><h3>About how much time could this save the team each week?</h3></div>
       <label class="sr" for="mins">Time back per week</label>
@@ -416,7 +416,7 @@
   function renderSorter() {
     var p = parts(), el = $('sorter');
     if (!p.length) { el.innerHTML = '<p class="small">Your fix doesn’t have any automatic steps yet, so there’s nothing to sort.</p>'; return; }
-    el.innerHTML = p.map(function (x) { var cur = S.sort[x.id] || x.d; S.sort[x.id] = cur; return '<div class="srow"><div class="t">' + BL.esc(x.t) + '</div><div class="chips" data-part="' + x.id + '">' + ['robot', 'both', 'human'].map(function (c) { return '<button class="chip" type="button" data-c="' + c + '" aria-pressed="' + (cur === c) + '">' + c.charAt(0).toUpperCase() + c.slice(1) + '</button>'; }).join('') + '</div></div>'; }).join('');
+    el.innerHTML = p.map(function (x) { var cur = S.sort[x.id] || x.d; if (cur === 'both') cur = 'robot'; S.sort[x.id] = cur; return '<div class="srow"><div class="t">' + BL.esc(x.t) + '</div><div class="chips" data-part="' + x.id + '">' + ['robot', 'human'].map(function (c) { return '<button class="chip" type="button" data-c="' + c + '" aria-pressed="' + (cur === c) + '">' + c.charAt(0).toUpperCase() + c.slice(1) + '</button>'; }).join('') + '</div></div>'; }).join('');
     save();
   }
   $('sorter').addEventListener('click', function (e) {
