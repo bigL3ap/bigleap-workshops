@@ -58,6 +58,7 @@
   </nav>
 
   <p style="text-align:center;margin-top:18px"><span id="mode"></span></p>
+  <p style="text-align:center;margin-top:6px"><button class="linkbtn" type="button" id="freshBtn">Start fresh on this phone</button></p>
 </main>
 <footer class="foot">Built by <a href="https://www.bigleap.com/" rel="noopener">Big Leap</a> for Curran's team · Anonymous by design</footer>
 <script src="../assets/config.js"></script>
@@ -80,6 +81,24 @@
     a.insertAdjacentElement('afterend', see);
   });
   BL.chrome('Workshop home');
+  /* A phone that was used for testing keeps its old answers. Two taps wipe this device clean;
+     anything already sent to the room is untouched. */
+  (function () {
+    var b = document.getElementById('freshBtn'), armed = false, t = null;
+    if (!b) return;
+    b.addEventListener('click', function () {
+      if (!armed) {
+        armed = true; b.textContent = 'Tap again to clear this phone';
+        b.style.color = '#C8442E'; b.style.fontWeight = '800';
+        t = setTimeout(function () { armed = false; b.textContent = 'Start fresh on this phone'; b.style.color = ''; b.style.fontWeight = ''; }, 5000);
+        return;
+      }
+      clearTimeout(t);
+      BL.clearDevice();
+      b.textContent = 'Cleared. Reloading\u2026';
+      location.replace('index.html?cleared=1');
+    });
+  })();
 </script>
 </body>
 </html>

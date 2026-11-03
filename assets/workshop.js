@@ -7,6 +7,22 @@
              set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
   var store = 'bl_ws_' + (C.session || 'default') + '_';
 
+  /* ?reset=1 must be handled here, as this file loads: every page's own script reads its saved
+     state immediately and writes it straight back, so clearing any later leaves the old answers. */
+  (function () {
+    try {
+      if (!/[?&]reset=/.test(location.search)) return;
+      var kill = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf(store) === 0) kill.push(k);
+      }
+      kill.forEach(function (k) { localStorage.removeItem(k); });
+      try { sessionStorage.clear(); } catch (e) {}
+      location.replace(location.pathname + '?cleared=1');
+    } catch (e) {}
+  })();
+
   function cid() {
     var id = LS.get(store + 'cid', null);
     if (!id) { id = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); LS.set(store + 'cid', id); }
@@ -148,7 +164,24 @@
     },
     reset: function (el) { el.querySelectorAll('[data-v]').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); }); },
 
+    /* Wipe everything this workshop has stored on this phone: group, team, client id, drafts and votes.
+       Answers already sent to the room stay there; this only gives the device a clean slate. */
+    clearDevice: function () {
+      var kill = [];
+      try {
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          if (k && k.indexOf(store) === 0) kill.push(k);
+        }
+        kill.forEach(function (k) { localStorage.removeItem(k); });
+      } catch (e) {}
+      try { sessionStorage.clear(); } catch (e) {}
+      track('workshop_reset', { keys: kill.length });
+      return kill.length;
+    },
+
     chrome: function (label) {
+      if (BL.params.get('cleared')) setTimeout(function () { BL.toast('This phone was reset. Starting fresh.'); }, 300);
       var top = document.querySelector('.top .tag');
       if (top && label) top.innerHTML = '<b>' + BL.esc(C.client || '') + '</b> · ' + BL.esc(label);
       var m = document.getElementById('mode');
