@@ -99,7 +99,7 @@
       <div class="eyebrow">Step 1 · Everyone, on your own phone</div>
       <h2>Find the friction</h2>
       <p class="small" style="margin-top:4px">Think of a real moment with a customer or a project where something got stuck. Add as many as you like, one at a time. Describe the situation, not a person.</p>
-      <div class="howto"><div class="k">How to do this step</div><p><b>Everyone does this one, on their own phone.</b> Think of one real thing that went wrong or took too long in the last month. Write it in your own words, then tap what kind of problem it is and what it costs. Then add another.</p>
+      <div class="howto"><div class="k">How to do this step</div><p><b>Everyone does this one, on their own phone.</b> Think of one real thing that went wrong or took too long in the last month. Write it in your own words, then tap where it happens, what kind of problem it is and what it costs. Then add another.</p>
       <ul>
         <li><span class="eg">&ldquo;A designer asks for three swatches. The request sits in the shared inbox over the weekend because nobody owns it.&rdquo;</span></li>
         <li><span class="eg">&ldquo;Sales promises a rush install date, but operations only finds out when the order lands, so we have to call the customer back.&rdquo;</span></li>
@@ -119,11 +119,13 @@
       <label class="sr" for="what">Describe the friction</label>
       <textarea id="what" maxlength="240" placeholder="What happens, and what goes wrong?"></textarea>
       <div class="count"><span id="wc">0</span>/240</div>
-      <div class="step" style="margin-top:20px"><span class="n">2</span><h3>What kind of problem is it? <span class="small">(pick all that apply)</span></h3></div>
+      <div class="step" style="margin-top:20px"><span class="n">2</span><h3>Where does it happen? <span class="small">(pick all that apply)</span></h3></div>
+      <div class="tiles t3" id="where"></div>
+      <div class="step" style="margin-top:18px"><span class="n">3</span><h3>What kind of problem is it? <span class="small">(pick all that apply)</span></h3></div>
       <div class="tiles t3" id="bucket"></div>
-      <div class="step" style="margin-top:18px"><span class="n">3</span><h3>What gets lost? <span class="small">(pick all that apply)</span></h3></div>
+      <div class="step" style="margin-top:18px"><span class="n">4</span><h3>What gets lost? <span class="small">(pick all that apply)</span></h3></div>
       <div class="tiles t4" id="lost"></div>
-      <div class="step" style="margin-top:18px"><span class="n">4</span><h3>What does it cost us? <span class="small">(pick all that apply)</span></h3></div>
+      <div class="step" style="margin-top:18px"><span class="n">5</span><h3>What does it cost us? <span class="small">(pick all that apply)</span></h3></div>
       <div class="chips" id="hurt"><button class="chip" data-v="1">It's annoying</button><button class="chip" data-v="2">It wastes time</button><button class="chip" data-v="3">We lose sales or customers</button></div>
       <div class="row"><button class="btn block" id="go1" type="submit" disabled>Add my answer</button></div>
     </form>
@@ -303,18 +305,26 @@
     { id: 'momentum', name: 'Speed', hint: 'Things stall or wait on someone' },
     { id: 'opportunity', name: 'A sale or customer', hint: 'We lose the order, the project or the referral' }
   ];
-  var lost = $('lost'), bucket = $('bucket'), hurt = $('hurt'), what = $('what'), go1 = $('go1');
+  /* Where the friction sits: inside one team, at a handoff, or in front of the customer. */
+  var WHERE = [
+    { id: 'internal', name: 'Inside my own team', hint: 'It slows me or my team down. Nobody outside the team sees it.' },
+    { id: 'handoff',  name: 'Between teams',      hint: 'It happens when work passes from one team to another.' },
+    { id: 'customer', name: 'The customer feels it', hint: 'They wait, repeat themselves, or have to chase us.' }
+  ];
+  var lost = $('lost'), bucket = $('bucket'), hurt = $('hurt'), what = $('what'), go1 = $('go1'), whereEl = $('where');
+  whereEl.innerHTML = WHERE.map(function (w) { return '<button class="tile" data-v="' + w.id + '"><b>' + w.name + '</b><span>' + w.hint + '</span></button>'; }).join('');
   bucket.innerHTML = BL.BUCKETS.map(function (b) { return '<button class="tile ' + b.id + '" data-v="' + b.id + '"><b>' + b.name + '</b><span>' + b.hint + '</span></button>'; }).join('');
   lost.innerHTML = LOST.map(function (l) { return '<button class="tile" data-v="' + l.id + '"><b>' + l.name + '</b><span>' + l.hint + '</span></button>'; }).join('');
   function check1() {
-    var b = BL.val(bucket, true), h = BL.val(hurt, true).map(Number);
-    var v = { lost: BL.val(lost, true), text: what.value.trim(), bucket: b[0] || '', buckets: b, hurt: h.length ? Math.max.apply(null, h) : 0, hurts: h };
+    var b = BL.val(bucket, true), h = BL.val(hurt, true).map(Number), wh = BL.val(whereEl, true);
+    var v = { lost: BL.val(lost, true), text: what.value.trim(), bucket: b[0] || '', buckets: b,
+              where: wh[0] || '', wheres: wh, hurt: h.length ? Math.max.apply(null, h) : 0, hurts: h };
     $('wc').textContent = what.value.length;
     /* Their own words come first and are required; the rest is tapping. */
-    go1.disabled = !(v.text.length > 8 && b.length && h.length);
+    go1.disabled = !(v.text.length > 8 && wh.length && b.length && h.length);
     return v;
   }
-  BL.choice(lost, { multi: true, onChange: check1 }); BL.choice(bucket, { multi: true, onChange: check1 }); BL.choice(hurt, { multi: true, onChange: check1 });
+  BL.choice(whereEl, { multi: true, onChange: check1 }); BL.choice(lost, { multi: true, onChange: check1 }); BL.choice(bucket, { multi: true, onChange: check1 }); BL.choice(hurt, { multi: true, onChange: check1 });
   what.addEventListener('input', check1);
   function renderMine() {
     var m = BL.mine('friction'); if (!m.length) return;
@@ -325,7 +335,7 @@
     e.preventDefault(); var v = check1(); if (go1.disabled) return;
     if (!BL.group()) { openAsk(); BL.toast('Pick your group first'); return; }
     go1.disabled = true;
-    BL.submit('friction', v).then(function () { BL.toast('Added. Got another? Keep going.'); what.value = ''; [lost, bucket, hurt].forEach(BL.reset); check1(); renderMine(); });
+    BL.submit('friction', v).then(function () { BL.toast('Added. Got another? Keep going.'); what.value = ''; [whereEl, lost, bucket, hurt].forEach(BL.reset); check1(); renderMine(); });
   });
 
   /* Step 2: pick the problem */

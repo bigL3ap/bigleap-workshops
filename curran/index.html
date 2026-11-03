@@ -48,16 +48,6 @@
     <p>Three activities today, in this order. Everything you add is anonymous — we never ask for your name.</p>
   </section>
 
-  <section class="card" aria-labelledby="g">
-    <h2 id="g">Who are you?</h2>
-    <p class="small" id="meintro" style="margin-top:4px">Find your name and we'll fill in your team and breakout group. Your answers stay anonymous; your name never leaves this phone.</p>
-    <div id="findme" style="margin-top:12px"></div>
-    <h3 style="font-size:16px;margin-top:16px">Which team do you work on?</h3>
-    <div class="chips" id="teams"></div>
-    <h3 style="font-size:16px;margin-top:16px">Which group are you in?</h3>
-    <p class="small" style="margin-top:2px">Change it any time. Your answers move with you.</p>
-    <div class="chips" id="grps"></div>
-  </section>
 
   <h2 style="font-size:20px;font-weight:800;margin-top:26px">Today's activities</h2>
   <p class="small" style="margin:4px 0 10px">Your facilitator will tell you when each one opens.</p>
@@ -73,18 +63,6 @@
 <script src="../assets/config.js"></script>
 <script src="../assets/workshop.js"></script>
 <script>
-  var t = document.getElementById('teams');
-  t.innerHTML = BL.config.teams.map(function (x) { return '<button class="chip" data-v="' + BL.esc(x) + '">' + BL.esc(x) + '</button>'; }).join('');
-  BL.choice(t, { onChange: function (v) { BL.setTeam(v); } });
-  var gp = document.getElementById('grps');
-  gp.innerHTML = BL.config.groups.map(function (g) { return '<button class="chip" data-v="' + BL.esc(g.id) + '"><b>' + BL.esc(g.name) + '</b> · ' + BL.esc(g.lead) + '</button>'; }).join('');
-  BL.choice(gp, { onChange: function (v) { BL.setGroup(v); BL.chrome('Workshop home'); } });
-  function mark() {
-    [[t, BL.team()], [gp, BL.group()]].forEach(function (x) { [].forEach.call(x[0].querySelectorAll('[data-v]'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-v') === x[1] ? 'true' : 'false'); }); });
-  }
-  mark();
-  BL.findMe(document.getElementById('findme'), function () { mark(); BL.chrome('Workshop home'); });
-  if (!document.getElementById('findme').innerHTML) { document.getElementById('g').textContent = 'About you'; document.getElementById('meintro').textContent = 'Pick your team and breakout group. Your answers stay anonymous.'; }
 
   /* A finished activity keeps its own link (people re-enter it), and gains a
      separate "see the room" link. Those are the only two places to go from here. */

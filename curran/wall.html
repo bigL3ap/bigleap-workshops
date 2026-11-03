@@ -226,6 +226,10 @@
         });
       });
       function bName(id) { var m = BL.BUCKETS.filter(function (x) { return x.id === id; })[0]; return m ? m.name.replace(' problem', '') : id; }
+      var WHERE = { internal: 'Inside one team', handoff: 'Between teams', customer: 'Customer feels it' };
+      function wk(p) { return p.wheres && p.wheres.length ? p.wheres : (p.where ? [p.where] : []); }
+      var whereTot = {};
+      rows.forEach(function (r) { wk(r.payload).forEach(function (w) { whereTot[w] = (whereTot[w] || 0) + 1; }); });
       function hName(id) { var m = HURTS.filter(function (x) { return x.id === String(id); })[0]; return m ? m.name : id; }
       var topN = Math.max.apply(null, [0].concat(Object.keys(bucketTot).map(function (k) { return bucketTot[k]; })));
       var tops = BL.BUCKETS.filter(function (x) { return topN && bucketTot[x.id] === topN; }).map(function (x) { return x.id; }), top = tops[0];
@@ -240,11 +244,15 @@
       });
       g += '<div></div>' + HURTS.map(function (h) { return '<div class="tot">' + (hurtTot[h.id] || 0) + '</div>'; }).join('') + '</div></div>';
       var list = rows.filter(function (r) { return !sel || bk(r.payload).some(function (bb) { return hk(r.payload).some(function (hh) { return (bb + '|' + hh) === sel; }); }); }).sort(function (a, b) { return (b.payload.hurt || 0) - (a.payload.hurt || 0); });
-      var items = list.map(function (r) { var p = r.payload; return '<div class="item"><button class="x" data-hide="' + E(key(r)) + '" title="Hide from wall" aria-label="Hide">×</button><div class="meta">' + bk(p).map(function (bb) { return '<span class="pill ' + bb + '">' + E(bName(bb)) + '</span>'; }).join('') + (r.team ? '<span class="pill">' + E(r.team) + '</span>' : '') + hk(p).map(function (h) { return '<span class="pill">' + E(hName(h)) + '</span>'; }).join('') + '</div><div class="txt">' + E(p.text) + '</div></div>'; }).join('');
+      var items = list.map(function (r) { var p = r.payload; return '<div class="item"><button class="x" data-hide="' + E(key(r)) + '" title="Hide from wall" aria-label="Hide">×</button><div class="meta">' + wk(p).map(function (w) { return '<span class="pill" style="background:#143D55;color:#fff">' + E(WHERE[w] || w) + '</span>'; }).join('') + bk(p).map(function (bb) { return '<span class="pill ' + bb + '">' + E(bName(bb)) + '</span>'; }).join('') + (r.team ? '<span class="pill">' + E(r.team) + '</span>' : '') + hk(p).map(function (h) { return '<span class="pill">' + E(hName(h)) + '</span>'; }).join('') + '</div><div class="txt">' + E(p.text) + '</div></div>'; }).join('');
       return header('Breakout · Step 1', 'Where does the work get stuck?', 'In the room\u2019s own words. Darker means more people flagged it. Click a square to read what\u2019s behind it.', rows.length) +
         '<section class="panel" style="margin-top:20px">' + g + '</section>' +
         '<div class="grid2"><section class="panel"><div class="k">' + (sel ? E(bName(sel.split('|')[0])) + ' · ' + E(hName(sel.split('|')[1])) + ' <button class="linkbtn" data-clear="1">show all</button>' : 'Everything flagged, worst first') + '</div><div class="items">' + (items || '<div class="empty">Nothing here yet</div>') + '</div></section>' +
         '<section style="display:grid;gap:16px;align-content:start">' + (top ? '<div class="callout"><div class="k">' + (tops.length > 1 ? 'Most friction · tied' : 'Most friction') + '</div><b>' + tops.map(bName).join(' &amp; ') + '</b></div>' : '') +
+        (Object.keys(whereTot).length ? '<div class="callout" style="background:#1C5878"><div class="k" style="color:#CFE1EC">Where it sits</div>' +
+          ['internal','handoff','customer'].filter(function (w) { return whereTot[w]; })
+            .map(function (w) { return '<div style="display:flex;justify-content:space-between;gap:14px;font-weight:700"><span>' + WHERE[w] + '</span><span>' + whereTot[w] + '</span></div>'; }).join('') +
+          '</div>' : '') +
         (shared.length ? '<div class="callout" style="background:#7B5EA7"><div class="k" style="color:#E6DCF5">Same problem, different seats</div><b>' + shared.join(', ') + '</b><p style="margin-top:6px;color:#EFE8F8">Three or more teams flagged this, so it is not one team\u2019s problem.</p></div>' : '') +
         '</section></div>';
     },
