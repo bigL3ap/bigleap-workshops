@@ -39,6 +39,8 @@
   .picks { display:grid; gap:8px; margin-top:10px; }
   .picks button { text-align:left; min-height:48px; border-radius:12px; border:1.5px solid var(--line); background:#fff; padding:10px 12px; font-size:14px; color:var(--navy); cursor:pointer; }
   .picks button[aria-pressed="true"] { border-color:var(--navy); background:var(--navy); color:#fff; }
+  .picks button.cust { border-color:var(--blue); box-shadow:0 0 0 1px var(--blue); }
+  .picks button.cust .src { color:var(--navy); font-weight:800; }
   .picks button[aria-pressed="true"] .src { color:#8CC6E6; }
   .picks .src { display:block; font:700 11px "Open Sans",Arial,sans-serif; letter-spacing:.05em; text-transform:uppercase; color:var(--blue); margin-bottom:2px; }
   .sorter { display:grid; gap:8px; margin-top:10px; }
@@ -144,12 +146,12 @@
       <div class="eyebrow">Step 2 · One phone per group</div>
       <h2>Pick your group's top problem</h2>
       <div class="howto"><div class="k">How to do this step</div>
-        <p><b>One phone now drives, and the group talks it through.</b> Read your group's answers together and pick the one problem that is either the most expensive or happens the most often. You can't fix everything &mdash; pick one.</p>
-        <ul><li><span class="eg">Good pick: &ldquo;swatch requests sit unowned&rdquo; &mdash; happens weekly, costs sales.</span></li>
-        <li><span class="eg">Weak pick: &ldquo;the printer jams&rdquo; &mdash; annoying, but it isn't a customer problem.</span></li></ul>
-        <p class="fac"><b>Facilitators:</b> if the group is split, ask &ldquo;which one would the customer notice first?&rdquo; and go with that.</p>
+        <p><b>One phone now drives, and the group talks it through.</b> Start with one your <b>customer</b> feels &mdash; those are marked &#9733; and sorted to the top. Fix that one first, then come back for the others.</p>
+        <ul><li><span class="eg">Good first pick: &ldquo;swatch requests sit unowned over the weekend&rdquo; &mdash; the customer is waiting.</span></li>
+        <li><span class="eg">Save for round two: &ldquo;we rebuild the same report by hand&rdquo; &mdash; real, but nobody outside the team feels it.</span></li></ul>
+        <p class="fac"><b>Facilitators:</b> if your group has no customer-facing answers yet, send them back to step 1 for one. If they're split, ask &ldquo;which one would the customer notice first?&rdquo;</p>
       </div>
-      <p class="small" style="margin-top:4px">These are everyone's answers from step 1. As a group, tap the <b>one</b> problem you want to fix. Steps 2 to 5 are shared, so everyone in your group sees the same choice on their phone.</p>
+      <p class="small" style="margin-top:4px">These are everyone's answers from step 1, with the ones your <b>customer</b> feels at the top. As a group, tap the <b>one</b> you want to fix first. Steps 2 to 5 are shared, so everyone in your group sees the same choice on their phone.</p>
       <div class="picks" id="picks"></div>
       <p class="live" id="picksLive">Updating automatically as your group adds answers.</p>
       <button class="linkbtn" id="refresh" type="button" style="margin-top:8px">Refresh our answers</button>
@@ -216,13 +218,13 @@
         <li><span class="eg">&ldquo;No swatch request left behind&rdquo;</span></li>
         <li><span class="eg">&ldquo;Operations knows before the truck does&rdquo;</span></li>
       </ul>
-      <p class="fac"><b>Facilitators:</b> a name people can repeat beats an accurate one. Keep it to about five words.</p></div>
+      <p class="fac"><b>Facilitators:</b> a name people can repeat beats an accurate one. Keep it to about five words. Once it's shared, send them back for a handoff or internal one if there's time.</p></div>
       <label class="f" for="title">Name your fix <span class="small">(optional)</span></label>
       <input type="text" id="title" maxlength="60" placeholder="e.g. No swatch order left behind">
       <div class="prop" id="prop" aria-live="polite"></div>
       <div class="row"><button class="btn block" id="go5" type="button" disabled>Share our proposal with the room</button></div>
       <p class="small" style="margin-top:10px">When it's time to share, present it in three parts: <b>here's the problem</b>, <b>here's our fix</b>, <b>here's how it would work</b>.</p>
-      <div class="seeroom"><span>Shared it, and still have time? Take a second problem through the same five steps.</span><button class="btn ghost" type="button" id="another">Start another fix</button></div>
+      <div class="seeroom"><span>Shared it, and still have time? Go again &mdash; this time take a <b>between teams</b> or <b>inside one team</b> problem through the same five steps.</span><button class="btn ghost" type="button" id="another">Start another fix</button></div>
     </div>
     <div class="card" id="planCard">
       <div class="eyebrow">Your step-by-step plan</div>
@@ -348,9 +350,14 @@
   var prob = $('prob');
   prob.value = S.problem || '';
   prob.addEventListener('input', function () { S.problem = prob.value.trim(); save(); markPicks(); });
-  function pickBtn(label, text) {
+  var WHERE_NAME = { internal: 'Inside one team', handoff: 'Between teams', customer: 'The customer feels it' };
+  function whereKeys(p) { return p.wheres && p.wheres.length ? p.wheres : (p.where ? [p.where] : []); }
+  function whereNames(p) { return whereKeys(p).map(function (w) { return WHERE_NAME[w] || w; }); }
+  function isCust(p) { return whereKeys(p).indexOf('customer') >= 0; }
+  function pickBtn(label, text, cust) {
     var b = document.createElement('button'); b.type = 'button'; b.setAttribute('data-t', text);
-    b.innerHTML = '<span class="src">' + label + '</span>' + BL.esc(text);
+    if (cust) b.className = 'cust';
+    b.innerHTML = '<span class="src">' + (cust ? '★ ' : '') + label + '</span>' + BL.esc(text);
     b.addEventListener('click', function () { prob.value = text; S.problem = text; save(); markPicks(); });
     return b;
   }
@@ -362,8 +369,19 @@
       picks.innerHTML = ''; var g = BL.group(), seen = {};
       /* The group's answers from the shared sheet, plus everything added on this phone (so your own answers always show, even if the sheet is slow). */
       rows.filter(function (r) { return r.payload && r.payload.text && (!g || String(r.group).trim().toLowerCase() === g); }).concat(mineRows())
-        .sort(function (a, b) { return (b.payload.hurt || 0) - (a.payload.hurt || 0); })
-        .forEach(function (r) { var t = r.payload.text; if (seen[t]) return; seen[t] = 1; var bb = BL.BUCKETS.filter(function (x) { return x.id === r.payload.bucket; })[0]; picks.appendChild(pickBtn('Your group' + (bb ? ' · ' + bb.name.replace(' problem', '') : ''), t)); });
+        .sort(function (a, b) {
+          /* Customer-facing first: the room is asked to solve one of those before anything internal. */
+          var ca = isCust(a.payload) ? 1 : 0, cb = isCust(b.payload) ? 1 : 0;
+          if (ca !== cb) return cb - ca;
+          return (b.payload.hurt || 0) - (a.payload.hurt || 0);
+        })
+        .forEach(function (r) {
+          var t = r.payload.text; if (seen[t]) return; seen[t] = 1;
+          var bb = BL.BUCKETS.filter(function (x) { return x.id === r.payload.bucket; })[0];
+          var bits = whereNames(r.payload);
+          if (bb) bits.push(bb.name.replace(' problem', ''));
+          picks.appendChild(pickBtn(bits.join(' · ') || 'Your group', t, isCust(r.payload)));
+        });
       if (!picks.children.length) {
         picks.innerHTML = '<p class="small">No answers from your group yet. They appear here as people add them in step 1. If your group is stuck, you can start from one of these examples.</p>';
         SEEDS.forEach(function (t) { picks.appendChild(pickBtn('Example', t)); });
@@ -464,7 +482,7 @@
     if (!S.shared) { BL.toast('Share this one first'); return; }
     S.propId = ''; S.shared = false; S.problem = ''; S.fix = null; S.sort = {}; S.mins = null; S.instead = ''; S.title = '';
     save();
-    BL.toast('Starting a second fix. Pick another problem.');
+    BL.toast('Round two. Try a handoff or an internal one.');
     go(2);
   });
 
