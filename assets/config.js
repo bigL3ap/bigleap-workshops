@@ -9,7 +9,7 @@ window.BL_CONFIG = {
   groups: [
     { id: "a", name: "Group A", lead: "Zach" },
     { id: "b", name: "Group B", lead: "Dallas" },
-    { id: "c", name: "Group C", lead: "Patrick" }
+    { id: "c", name: "Group C", lead: "Barbara" }
   ],
   /* "Your team" choices. Used to show the same problem surfacing from different teams. */
   teams: ["Sales", "Marketing", "Operations & fulfillment", "Customer service", "Leadership", "Other"],
