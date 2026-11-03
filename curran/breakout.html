@@ -14,6 +14,19 @@
   .steps button i { display:block; height:5px; border-radius:3px; background:#D9E2E8; margin-bottom:5px; }
   .steps button.on { color:var(--navy); } .steps button.on i { background:var(--blue); }
   .steps button.done i { background:var(--navy); }
+  .howto { border:1.5px solid var(--line); border-left:5px solid var(--blue); border-radius:12px; padding:12px 14px; margin-top:14px; background:#fff; }
+  .howto .k { font:800 11px "Open Sans",Arial,sans-serif; letter-spacing:.06em; text-transform:uppercase; color:var(--blue); margin-bottom:5px; }
+  .howto p { margin:0; font-size:14.5px; line-height:1.5; color:var(--navy); }
+  .howto ul { margin:8px 0 0; padding-left:18px; }
+  .howto li { font-size:14px; line-height:1.5; margin:5px 0; color:var(--navy); }
+  .howto .eg { display:block; font-style:italic; color:#4A5D6B; }
+  .howto .fac { margin-top:9px; padding-top:9px; border-top:1px dashed var(--line); font-size:13.5px; color:#4A5D6B; }
+  .howto .fac b { color:var(--navy); }
+  .anon { background:var(--sky); color:var(--navy); border-radius:12px; padding:10px 12px; font-size:14px; margin-top:10px; }
+  .anon b { font-weight:800; }
+  .seeroom { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; background:var(--sky); border-radius:12px; padding:11px 13px; margin-top:12px; }
+  .seeroom span { font-weight:700; color:var(--navy); font-size:14px; }
+  .live { font:700 12px "Open Sans",Arial,sans-serif; color:var(--blue); }
   .who-note { background:var(--amber-soft); color:#7A4A00; border-radius:12px; padding:10px 12px; font-size:14px; margin-top:12px; }
   .prompts { display:grid; gap:6px; margin-top:8px; }
   .prompts button { text-align:left; background:var(--sky); border:0; border-radius:10px; padding:10px 12px; font-size:14px; color:var(--navy); cursor:pointer; min-height:44px; }
@@ -65,6 +78,7 @@
   <div class="eyebrow">Breakout · Friction to Flow</div>
   <h1 class="h1">You're on the RevOps team now</h1>
   <p class="lede">Find where things get stuck, pick your group's top problem, and turn it into a fix you'll present to the room.</p>
+  <p class="anon"><b>Everything here is anonymous.</b> We never ask for your name, and nothing you add is tied to you &mdash; only to your group.</p>
   <p class="small" style="margin-top:8px"><span id="groupLabel"></span> &middot; <a href="#" id="chg">change</a></p>
   <nav class="steps" id="steps" aria-label="Breakout steps"></nav>
 
@@ -83,7 +97,13 @@
       <div class="eyebrow">Step 1 · Everyone, on your own phone</div>
       <h2>Find the friction</h2>
       <p class="small" style="margin-top:4px">Think of a real moment with a customer or a project where something got stuck. Add as many as you like, one at a time. Describe the situation, not a person.</p>
-      <div class="step" style="margin-top:16px"><span class="n">1</span><h3>Where in the customer's journey does it happen? <span class="small">(pick all that apply)</span></h3></div>
+      <div class="howto"><div class="k">How to do this step</div><p><b>Everyone does this one, on their own phone.</b> Think of one real thing that went wrong or took too long in the last month. Tap where it happens and what it costs, then describe it in a sentence. Then add another.</p>
+      <ul>
+        <li><span class="eg">&ldquo;A designer asks for three swatches. The request sits in the shared inbox over the weekend because nobody owns it.&rdquo;</span></li>
+        <li><span class="eg">&ldquo;Sales promises a rush install date, but operations only finds out when the order lands, so we have to call the customer back.&rdquo;</span></li>
+      </ul>
+      <p class="fac"><b>Facilitators:</b> don't give your own example first &mdash; they'll just hand it back to you. If a group is quiet, ask: &ldquo;walk one customer from first contact to install, and tell me where it gets slow.&rdquo;</p></div>
+      <div class="step" style="margin-top:16px"><span class="n">1</span><h3>Where in your process are you seeing friction? <span class="small">(your own internal process, or what the customer goes through &mdash; pick all that apply)</span></h3></div>
       <div class="tiles t4" id="stage"></div>
       <div class="step" style="margin-top:18px"><span class="n">2</span><h3>What kind of problem is it? <span class="small">(pick all that apply)</span></h3></div>
       <div class="tiles t3" id="bucket"></div>
@@ -102,6 +122,7 @@
       <h2>Your answers <span class="small" id="mineN"></span></h2>
       <ul class="mine" id="mine"></ul>
     </section>
+    <div class="seeroom"><span>Added yours? See what the whole room is flagging, live.</span><a class="btn ghost" href="wall.html?view=friction" target="_blank" rel="noopener">See the room</a></div>
     <div class="who-note"><b>When your group is ready:</b> one person (your facilitator or a volunteer) takes steps 2 to 5 on one phone while the group talks it through. Everyone else can keep adding.</div>
     <div class="navrow"><button class="btn navy" type="button" data-go="2">Next: pick your top problem</button></div>
   </section>
@@ -111,8 +132,15 @@
     <div class="card">
       <div class="eyebrow">Step 2 · One phone per group</div>
       <h2>Pick your group's top problem</h2>
+      <div class="howto"><div class="k">How to do this step</div>
+        <p><b>One phone now drives, and the group talks it through.</b> Read your group's answers together and pick the one problem that is either the most expensive or happens the most often. You can't fix everything &mdash; pick one.</p>
+        <ul><li><span class="eg">Good pick: &ldquo;swatch requests sit unowned&rdquo; &mdash; happens weekly, costs sales.</span></li>
+        <li><span class="eg">Weak pick: &ldquo;the printer jams&rdquo; &mdash; annoying, but it isn't a customer problem.</span></li></ul>
+        <p class="fac"><b>Facilitators:</b> if the group is split, ask &ldquo;which one would the customer notice first?&rdquo; and go with that.</p>
+      </div>
       <p class="small" style="margin-top:4px">These are everyone's answers from step 1. As a group, tap the <b>one</b> problem you want to fix. Steps 2 to 5 are shared, so everyone in your group sees the same choice on their phone.</p>
       <div class="picks" id="picks"></div>
+      <p class="live" id="picksLive">Updating automatically as your group adds answers.</p>
       <button class="linkbtn" id="refresh" type="button" style="margin-top:8px">Refresh our answers</button>
       <textarea id="prob" hidden aria-hidden="true"></textarea>
     </div>
@@ -124,6 +152,11 @@
     <div class="card">
       <div class="eyebrow">Step 3 · Design the fix</div>
       <h2>Design the fix</h2>
+      <div class="howto"><div class="k">How to do this step</div><p>Describe your fix as a recipe in four parts: <b>when</b> it starts, <b>what happens automatically</b>, <b>who is in charge</b>, and <b>how you'd know it worked</b>. Just tap the options that fit &mdash; you're not writing software.</p>
+      <ul>
+        <li><span class="eg">When a swatch request comes in &rarr; it's assigned to a named rep and they get a reminder &rarr; Sales is in charge &rarr; we'd know it worked because no request sits unanswered.</span></li>
+      </ul>
+      <p class="fac"><b>Facilitators:</b> keep them out of the weeds. If someone starts naming HubSpot fields, pull back to &ldquo;what should just happen, on its own?&rdquo;</p></div>
       <div class="probbox" id="probbox"><div class="k">The problem you're fixing</div><p id="probtext"></p><button class="linkbtn" type="button" data-go="2">Change it</button></div>
       <p class="small" style="margin-top:4px">Think about what should happen, step by step, so this problem stops happening.</p>
       <div class="step" style="margin-top:14px"><span class="n">1</span><h3>When does the problem start? <span class="small">(pick all that apply)</span></h3></div>
@@ -145,6 +178,12 @@
     <div class="card">
       <div class="eyebrow">Step 4 · Human or robot</div>
       <h2>Who does each part?</h2>
+      <div class="howto"><div class="k">How to do this step</div><p>Go through each part of your fix and decide who should do it: a <b>person</b>, a <b>system</b>, or both. The rule of thumb: if it's typing, copying, chasing or reminding, a system should do it. If it needs judgement or a relationship, a person should.</p>
+      <ul>
+        <li><span class="eg">System: logging the request, assigning it, sending the &ldquo;we got it&rdquo; reply, reminding the rep on day three.</span></li>
+        <li><span class="eg">Person: calling the designer to talk through the project and what will actually work in their space.</span></li>
+      </ul>
+      <p class="fac"><b>Facilitators:</b> if they mark everything &ldquo;person&rdquo;, ask which part they'd happily never do again.</p></div>
       <p class="small" style="margin-top:4px">For each part of your fix, tap who should do it.<br><b>Robot</b>: the system does it on its own. <b>Human</b>: a person needs to do it. <b>Both</b>: the system does the legwork, a person makes the call.</p>
       <div class="sorter" id="sorter"></div>
       <div class="step" style="margin-top:18px"><span class="n">?</span><h3>About how much time could this save the team each week?</h3></div>
@@ -161,11 +200,18 @@
     <div class="card">
       <div class="eyebrow">Step 5 · Your Friction to Flow proposal</div>
       <h2>Give it a name, then share it</h2>
+      <div class="howto"><div class="k">How to do this step</div><p>Your proposal is written for you below &mdash; you just give it a short, memorable name and tap share. Then one person presents it to the room in three parts: here's the problem, here's our fix, here's how it would work.</p>
+      <ul>
+        <li><span class="eg">&ldquo;No swatch request left behind&rdquo;</span></li>
+        <li><span class="eg">&ldquo;Operations knows before the truck does&rdquo;</span></li>
+      </ul>
+      <p class="fac"><b>Facilitators:</b> a name people can repeat beats an accurate one. Keep it to about five words.</p></div>
       <label class="f" for="title">Name your fix <span class="small">(optional)</span></label>
       <input type="text" id="title" maxlength="60" placeholder="e.g. No swatch order left behind">
       <div class="prop" id="prop" aria-live="polite"></div>
       <div class="row"><button class="btn block" id="go5" type="button" disabled>Share our proposal with the room</button></div>
       <p class="small" style="margin-top:10px">When it's time to share, present it in three parts: <b>here's the problem</b>, <b>here's our fix</b>, <b>here's how it would work</b>.</p>
+      <div class="seeroom"><span>Shared it, and still have time? Take a second problem through the same five steps.</span><button class="btn ghost" type="button" id="another">Start another fix</button></div>
     </div>
     <div class="card" id="planCard">
       <div class="eyebrow">Your step-by-step plan</div>
@@ -189,11 +235,14 @@
   <section id="s6" class="pane" hidden>
     <div class="card">
       <div class="eyebrow">Share and vote · Everyone</div>
-      <h2>Which fix should Curran do first?</h2>
-      <p class="small" style="margin-top:4px">After every group presents, vote for one. The winning idea goes to Curran's leadership to consider.</p>
+      <h2>Which fixes should Curran do first?</h2>
+      <div class="howto"><div class="k">How to do this step</div><p>Every group presents, then <b>everyone</b> votes from their own phone &mdash; facilitators too. Tap your <b>top three</b>. Tap a pick again to remove it and choose a different one. Nobody can see how you voted.</p>
+      <p class="fac"><b>Facilitators:</b> put the wall on the screen first so the room can read all the proposals while they vote.</p></div>
+      <p class="small" style="margin-top:4px">After every group presents, pick your <b>top three</b>. Votes are anonymous. The fixes the room ranks highest go to Curran's leadership first.</p>
       <div class="vote" id="vote"></div>
-      <button class="linkbtn" id="vrefresh" type="button" style="margin-top:8px">Refresh proposals</button>
-      <div class="row" style="justify-content:center"><a class="btn ghost" href="wall.html?view=proposals" target="_blank" rel="noopener">See the results</a></div>
+      <p class="live" id="voteLive">Updating automatically as groups share.</p>
+      <button class="linkbtn" id="vrefresh" type="button" style="margin-top:8px">Refresh now</button>
+      <div class="seeroom"><span>See every proposal and the running vote on the big screen.</span><a class="btn ghost" href="wall.html?view=proposals" target="_blank" rel="noopener">See the room</a></div>
     </div>
   </section>
   <p style="text-align:center;margin-top:16px"><span id="mode"></span></p>
@@ -216,6 +265,7 @@
     for (var i = 1; i <= 6; i++) $('s' + i).hidden = i !== n;
     stepsNav();
     if (n >= 2 && n <= 5 && window.pullDraft) window.pullDraft(true); if (n === 2) loadPicks(); if (n === 3) { $('probtext').textContent = S.problem || 'No problem picked yet. Tap “Change it” to choose one.'; } if (n === 4) renderSorter(); if (n === 5) renderProp(); if (n === 6) loadVotes();
+    if (n === 2 || n === 6) startPoll(); else stopPoll();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   document.addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b) { e.preventDefault(); go(+b.getAttribute('data-go')); } });
@@ -378,7 +428,7 @@
   }
   function proposal() {
     var f = S.fix || fixVal(), p = parts();
-    return { kind: 'proposal', title: S.title || '', problem: S.problem || '', trig: arr(f.trig), trigText: arr(f.trig).map(function (t) { return TRIG[t]; }).join(', or '), act: f.act || [], actText: (f.act || []).map(function (a) { return ACT[a].t; }),
+    return { kind: 'proposal', _id: S.propId || '', title: S.title || '', problem: S.problem || '', trig: arr(f.trig), trigText: arr(f.trig).map(function (t) { return TRIG[t]; }).join(', or '), act: f.act || [], actText: (f.act || []).map(function (a) { return ACT[a].t; }),
       owner: arr(f.owner).join(', '), human: f.human || '', meas: arr(f.meas), measText: arr(f.meas).map(function (m) { return MEAS[m]; }).join(' · '),
       sorts: p.map(function (x) { return { t: x.t, c: S.sort[x.id] || x.d }; }), minutes: +(S.mins != null ? S.mins : mins.value), instead: S.instead || '', phases: phases(f).map(function (x) { return x.id; }) };
   }
@@ -396,13 +446,25 @@
     renderPlan();
   }
   $('go5').addEventListener('click', function () {
-    var v = proposal(); if (!BL.group()) { openAsk(); BL.toast('Pick your group first'); return; }
+    if (!BL.group()) { openAsk(); BL.toast('Pick your group first'); return; }
+    /* First share mints an id; sharing again updates that same proposal rather than making a new one. */
+    if (!S.propId) { S.propId = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); save(); }
+    var v = proposal();
     var strip = function (h) { var d = document.createElement('div'); d.innerHTML = h; return d.textContent; };
     v.plan = planSteps(v).map(function (x) { return { t: x.t, d: strip(x.d) }; });
     /* The results sheet caps each answer at 6,000 characters; trim step details if a very long plan would go over. */
     var cap = 260; while (JSON.stringify(v).length > 5600 && cap > 60) { v.plan = v.plan.map(function (x) { return { t: x.t, d: x.d.length > cap ? x.d.slice(0, cap - 1) + '\u2026' : x.d }; }); cap -= 40; }
     $('go5').disabled = true;
     BL.submit('fixit', v).then(function () { S.shared = true; save(); BL.toast('Proposal shared with the room'); renderProp(); });
+  });
+
+  /* A group with time left can take a second problem all the way through and share that too. */
+  $('another').addEventListener('click', function () {
+    if (!S.shared) { BL.toast('Share this one first'); return; }
+    S.propId = ''; S.shared = false; S.problem = ''; S.fix = null; S.sort = {}; S.mins = null; S.instead = ''; S.title = '';
+    save();
+    BL.toast('Starting a second fix. Pick another problem.');
+    go(2);
   });
 
   /* Step 5b: a step-by-step plan built from the group's picks (HubSpot's standard tools only). */
@@ -431,21 +493,56 @@
     var el = $('vote'); el.innerHTML = '<p class="small">Loading proposals…</p>';
     BL.load('fixit').then(function (rows) {
       var props = rows.filter(function (r) { return r.payload && r.payload.kind === 'proposal'; });
-      var latest = {}; props.forEach(function (r) { var k = r.group || r.cid; if (!latest[k] || String(r.ts) > String(latest[k].ts)) latest[k] = r; });
-      props = Object.keys(latest).map(function (k) { return latest[k]; });
+      /* Newest version of each proposal. A group may share more than one, so key on the proposal's
+         own id and fall back to the group for anything shared before ids existed. */
+      var latest = {}; props.forEach(function (r) { var k = (r.payload._id || '') || ('g:' + (r.group || r.cid)); if (!latest[k] || String(r.ts) > String(latest[k].ts)) latest[k] = r; });
+      props = Object.keys(latest).map(function (k) { return latest[k]; }).sort(function (a, b) { return String(a.ts) < String(b.ts) ? -1 : 1; });
       if (!props.length) { el.innerHTML = '<p class="small">No proposals yet. They appear here as groups share them.</p>'; return; }
-      el.innerHTML = props.map(function (r) { var p = r.payload, k = pkey(r), mine = S.vote === k;
+      var chosen = votes();
+      el.innerHTML = props.map(function (r) { var p = r.payload, k = pkey(r), rank = chosen.indexOf(k), mine = rank >= 0;
         return '<div class="vc"><span class="pill">' + BL.esc(BL.groupName(r.group) || 'A group') + '</span><b style="margin-top:6px">' + BL.esc(p.title || p.problem) + '</b>' + (p.title ? '<p class="small">' + BL.esc(p.problem) + '</p>' : '') +
           ((p.plan && p.plan.length) || p.act ? '<details class="vplan"><summary>See the step-by-step plan</summary><ol>' + (p.plan && p.plan.length ? p.plan : BL.buildPlan(p).map(function (x) { var d = document.createElement('div'); d.innerHTML = x.d; return { t: x.t, d: d.textContent }; })).map(function (x) { return '<li><b>' + BL.esc(x.t) + '</b> ' + BL.esc(x.d) + '</li>'; }).join('') + '</ol></details>' : '') +
-          '<button class="btn ' + (mine ? 'navy' : '') + '" type="button" data-vote="' + BL.esc(k) + '" data-g="' + BL.esc(r.group) + '"' + (mine ? ' aria-pressed="true"' : '') + '>' + (mine ? '✓ Your vote' : S.vote ? 'Switch my vote to this' : 'Vote for this') + '</button></div>'; }).join('') + (S.vote ? '<p class="small" style="margin-top:2px">You have one vote. Changed your mind? Tap another proposal to move it.</p>' : '');
+          '<button class="btn ' + (mine ? 'navy' : '') + '" type="button" data-vote="' + BL.esc(k) + '" data-g="' + BL.esc(r.group) + '"' + (mine ? ' aria-pressed="true"' : '') + '>' + (mine ? '✓ Picked (' + (rank + 1) + ' of 3)' : chosen.length >= 3 ? 'Tap one of your three to swap' : 'Pick this one') + '</button></div>'; }).join('') +
+        '<p class="small" style="margin-top:6px">' + (chosen.length ? 'You\u2019ve picked <b>' + chosen.length + ' of 3</b>. Tap a pick again to remove it.' : 'Pick up to three. Tap a card to add it.') + '</p>';
     }).catch(function () { el.innerHTML = '<p class="small">Can’t load proposals right now. Try refresh.</p>'; });
   }
+  /* Everyone picks their top three. S.votes is the list, in the order they picked.
+     S.vote is the old single-vote field, kept so a phone that voted earlier still counts. */
+  function votes() {
+    if (!S.votes) S.votes = S.vote ? [S.vote] : [];
+    return S.votes;
+  }
   $('vote').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-vote]'); if (!b || b.getAttribute('data-vote') === S.vote) return;
-    var moved = !!S.vote; S.vote = b.getAttribute('data-vote'); save();
-    BL.submit('moves', { _id: 'vote', kind: 'vote', target: S.vote, targetGroup: b.getAttribute('data-g') }).then(function () { BL.toast(moved ? 'Vote moved. Only your latest vote counts.' : 'Vote counted. Thank you!'); loadVotes(); });
+    var b = e.target.closest('[data-vote]'); if (!b) return;
+    var k = b.getAttribute('data-vote'), v = votes(), at = v.indexOf(k);
+    if (at >= 0) { v.splice(at, 1); BL.toast('Removed. ' + v.length + ' of 3 picked.'); }
+    else if (v.length >= 3) { BL.toast('You have three. Tap one of them to swap it out.'); return; }
+    else { v.push(k); }
+    S.votes = v; S.vote = v[0] || ''; save();
+    var groups = {}; document.querySelectorAll('[data-vote]').forEach(function (x) { groups[x.getAttribute('data-vote')] = x.getAttribute('data-g'); });
+    BL.submit('moves', { _id: 'vote', kind: 'vote', targets: v, targetGroups: v.map(function (x) { return groups[x] || ''; }), target: v[0] || '' })
+      .then(function () { if (v.length === 3) BL.toast('All three in. Thank you!'); loadVotes(); });
   });
-  $('vrefresh').addEventListener('click', loadVotes);
+  $('vrefresh').addEventListener('click', function () { loadVotes(); });
+
+  /* Auto-refresh: the shared views (your group's answers, and the proposals you vote on)
+     refresh on their own, so nobody has to pull down to see what changed. */
+  var poll = null;
+  function stopPoll() { if (poll) { clearInterval(poll); poll = null; } }
+  function startPoll() {
+    stopPoll();
+    var ms = Math.max(3, Number(BL.config.refreshSeconds) || 5) * 1000;
+    poll = setInterval(function () {
+      if (document.hidden) return;
+      if (S.step === 2) loadPicks(true);
+      else if (S.step === 6) loadVotes(true);
+      else stopPoll();
+    }, ms);
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) return;
+    if (S.step === 2) loadPicks(true); else if (S.step === 6) loadVotes(true);
+  });
 
   /* Group sync: steps 2 to 5 are shared by everyone in the same group, on any device.
      Each change is sent as a 'fixit' row with kind 'draft' (the results sheet only accepts its five activities);

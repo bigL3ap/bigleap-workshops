@@ -246,14 +246,22 @@
       function planOf(p) { if (p.plan && p.plan.length) return p.plan; var d = document.createElement('div'); return BL.buildPlan(p).map(function (x) { d.innerHTML = x.d; return { t: x.t, d: d.textContent }; }); }
       function planHTML(p, open) { var pl = planOf(p); if (!pl.length) return ''; var ol = '<ol class="pplan">' + pl.map(function (x) { return '<li><b>' + E(x.t) + '</b>' + E(x.d) + '</li>'; }).join('') + '</ol>'; return open ? ol : '<details class="pdet"><summary>See the step-by-step plan</summary>' + ol + '</details>'; }
       var props = rows.filter(function (r) { return r.payload.kind === 'proposal'; }), all = props.slice();
-      var latest = {}; props.forEach(function (r) { var k = r.group || r.cid; if (!latest[k] || String(r.ts) > String(latest[k].ts)) latest[k] = r; });
+      /* Newest version of each proposal. A group can share more than one, so key on the proposal's
+         own id; anything shared before ids existed still collapses to one per group. */
+      var latest = {}; props.forEach(function (r) { var k = (r.payload._id || '') || ('g:' + (r.group || r.cid)); if (!latest[k] || String(r.ts) > String(latest[k].ts)) latest[k] = r; });
       props = Object.keys(latest).map(function (k) { return latest[k]; });
-      /* One vote per phone: if someone changed their vote, count only the newest. */
+      /* Everyone picks up to three. Only each phone's newest set of picks counts. */
       var lastV = {}; (votes || []).forEach(function (r) { if (r.payload.kind !== 'vote') return; var c = r.cid || Math.random(); if (!lastV[c] || String(r.ts) >= String(lastV[c].ts)) lastV[c] = r; });
-      var vc = {}; Object.keys(lastV).forEach(function (c) { var t = lastV[c].payload.target; vc[t] = (vc[t] || 0) + 1; });
+      var vc = {}, voters = 0;
+      Object.keys(lastV).forEach(function (c) {
+        var pl = lastV[c].payload, ts = pl.targets && pl.targets.length ? pl.targets : (pl.target ? [pl.target] : []);
+        if (ts.length) voters++;
+        ts.forEach(function (t) { vc[t] = (vc[t] || 0) + 1; });
+      });
       props.sort(function (a, b) { return (vc[key(b)] || 0) - (vc[key(a)] || 0); });
       var top = props.length && vc[key(props[0])] ? key(props[0]) : '';
-      var nv = Object.keys(vc).reduce(function (a, k) { return a + vc[k]; }, 0);
+      /* The counter shows people, not picks: everyone makes up to three. */
+      var nv = voters;
       var fmt = function (m) { return !m ? '' : m >= 60 ? (Math.round(m / 6) / 10) + (m === 60 ? ' hr / week' : ' hrs / week') : m + ' min / week'; };
       var cards = props.map(function (r) { var p = r.payload, k = key(r);
         return '<article class="pc' + (k === top ? ' win' : '') + '"><div class="votes"><b>' + (vc[k] || 0) + '</b><span>votes</span></div><div class="g">' + E(BL.groupName(r.group) || 'A group') + '</div><h3>' + E(p.title || p.problem) + '</h3>' +
@@ -267,7 +275,7 @@
       var txt = all.map(function (r) { var p = r.payload; return '=== ' + (BL.groupName(r.group) || 'A group') + ' · ' + when(r.ts) + ' · ' + (vc[key(r)] || 0) + ' votes\n' + (p.title ? p.title + '\n' : '') + 'Problem: ' + p.problem + '\nFix: when ' + String(p.trigText || '').toLowerCase() + ', ' + (p.actText || []).join('; ').toLowerCase() + '\nIn charge: ' + (p.owner || '') + (p.measText ? '\nWe\u2019ll know it works when: ' + p.measText : '') + '\n\nStep-by-step plan:\n' + planOf(p).map(function (x, i) { return (i + 1) + '. ' + x.t + '\n   ' + x.d; }).join('\n') + '\n'; }).join('\n');
       var log = all.length ? '<section class="panel" style="margin-top:22px"><div class="row" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div class="k">Plan log · every proposal shared today (' + all.length + ')</div><a class="dlbtn" download="friction-to-flow-plans.txt" href="data:text/plain;charset=utf-8,' + encodeURIComponent(txt) + '">Download all plans</a></div>' +
         all.map(function (r) { var p = r.payload; return '<details class="plog"><summary><b>' + E(BL.groupName(r.group) || 'A group') + '</b> · ' + E(p.title || p.problem) + ' <span>' + E(when(r.ts)) + '</span></summary>' + planHTML(p, true) + '</details>'; }).join('') + '</section>' : '';
-      return header('Friction to Flow', 'Which fix should Curran do first?', 'Each group’s proposal. Vote from your phone; the winner goes to Curran’s leadership to consider.', nv) +
+      return header('Friction to Flow', 'Which fixes should Curran do first?', 'Every proposal the room built. Pick your top three from your phone — anonymously. The highest-ranked go to Curran’s leadership first.' + (voters ? ' ' + voters + (voters === 1 ? ' person has' : ' people have') + ' voted.' : ''), nv) +
         '<div class="pcards">' + (cards || '<div class="empty">Proposals appear here as groups share them</div>') + '</div>' + log;
     },
     robot: function (rows) {
