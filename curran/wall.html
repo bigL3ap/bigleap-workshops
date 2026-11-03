@@ -280,7 +280,7 @@
       var cards = props.map(function (r) { var p = r.payload, k = key(r);
         return '<article class="pc' + (k === top ? ' win' : '') + '"><div class="votes"><b>' + (vc[k] || 0) + '</b><span>votes</span></div><div class="g">' + E(BL.groupName(r.group) || 'A group') + '</div><h3>' + E(p.title || p.problem) + '</h3>' +
           (p.title ? '<div class="sec"><span class="g">The problem</span>' + E(p.problem) + '</div>' : '') +
-          '<div class="sec"><span class="g">Our fix</span>When ' + E(p.trigText).toLowerCase() + ':<ul>' + (p.actText || []).map(function (t) { return '<li>' + E(t) + '</li>'; }).join('') + '</ul>In charge: ' + E(p.owner) + (p.human ? ': ' + E(p.human) : '') + '</div>' +
+          '<div class="sec"><span class="g">Our fix</span>Starts when: ' + E(p.trigText) + '<ul>' + (p.actText || []).map(function (t) { return '<li>' + E(t) + '</li>'; }).join('') + '</ul>In charge: ' + E(p.owner) + (p.human ? ': ' + E(p.human) : '') + '</div>' +
           '<div class="sec"><span class="g">Why it matters</span>' + E(p.measText) + (p.minutes ? ' · about ' + fmt(p.minutes) + ' back' : '') + (p.instead ? ', for ' + E(p.instead) : '') + '</div>' +
           planHTML(p) +
           '<button class="x" data-hide="' + E(k) + '" aria-label="Hide">×</button></article>'; }).join('');

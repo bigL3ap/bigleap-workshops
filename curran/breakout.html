@@ -153,30 +153,35 @@
       <button class="linkbtn" id="refresh" type="button" style="margin-top:8px">Refresh our answers</button>
       <textarea id="prob" hidden aria-hidden="true"></textarea>
     </div>
-    <div class="navrow"><button class="btn ghost" type="button" data-go="1">Back</button><button class="btn navy" type="button" data-go="3" id="to3">Next: fix it</button></div>
+    <div class="navrow"><button class="btn ghost" type="button" data-go="1">Back</button><button class="btn navy" type="button" data-go="3" id="to3">Next: design the flow</button></div>
   </section>
 
   <!-- Step 3 -->
   <section id="s3" class="pane" hidden>
     <div class="card">
-      <div class="eyebrow">Step 3 · Design the fix</div>
-      <h2>Design the fix</h2>
-      <div class="howto"><div class="k">How to do this step</div><p>Describe your fix as a recipe in four parts: <b>when</b> it starts, <b>what happens automatically</b>, <b>who is in charge</b>, and <b>how you'd know it worked</b>. Just tap the options that fit &mdash; you're not writing software.</p>
+      <div class="eyebrow">Step 3 · Design the flow</div>
+      <h2>Design the flow</h2>
+      <div class="howto"><div class="k">How to do this step</div><p>Describe the flow as a recipe in four parts: <b>when</b> it starts, <b>what happens automatically</b>, <b>who is in charge</b>, and <b>how you'd know it worked</b>. Just tap the options that fit &mdash; you're not writing software.</p>
       <ul>
         <li><span class="eg">When a swatch request comes in &rarr; it's assigned to a named rep and they get a reminder &rarr; Sales is in charge &rarr; we'd know it worked because no request sits unanswered.</span></li>
       </ul></div>
       <div class="probbox" id="probbox"><div class="k">The problem you're fixing</div><p id="probtext"></p><button class="linkbtn" type="button" data-go="2">Change it</button></div>
       <p class="small" style="margin-top:4px">Think about what should happen, step by step, so this problem stops happening.</p>
-      <div class="step" style="margin-top:14px"><span class="n">1</span><h3>When does the problem start? <span class="small">(pick all that apply)</span></h3></div>
-      <div class="chips" id="trig"></div>
+      <div class="step" style="margin-top:14px"><span class="n">1</span><h3>When does the problem start?</h3></div>
+      <p class="small" style="margin-top:2px">In your own words — what kicks it off?</p>
+      <input type="text" id="trigtext" maxlength="160" placeholder="e.g. a designer emails asking for three swatches">
       <div class="step" style="margin-top:18px"><span class="n">2</span><h3>What should happen automatically? <span class="small">(pick all that apply)</span></h3></div>
       <div class="chips" id="act"></div>
+      <label class="f" for="actother">Something else it should do? <span class="small">(optional — in your own words)</span></label>
+      <input type="text" id="actother" maxlength="140" placeholder="e.g. flag the order for the install team">
       <div class="step" style="margin-top:18px"><span class="n">3</span><h3>Which team is in charge of it? <span class="small">(pick all that apply)</span></h3></div>
       <div class="chips" id="own"></div>
       <label class="f" for="human">What should a person still do? <span class="small">(optional)</span></label>
       <input type="text" id="human" maxlength="120" placeholder="e.g. call the customer to talk through the project">
       <div class="step" style="margin-top:18px"><span class="n">4</span><h3>How will we know it worked? <span class="small">(pick all that apply)</span></h3></div>
       <div class="chips" id="meas"></div>
+      <label class="f" for="measother">Another way you’d know? <span class="small">(optional — in your own words)</span></label>
+      <input type="text" id="measother" maxlength="140" placeholder="e.g. no designer waits more than a day for a swatch">
     </div>
     <div class="navrow"><button class="btn ghost" type="button" data-go="2">Back</button><button class="btn navy" type="button" data-go="4" id="to4">Next: human or robot</button></div>
   </section>
@@ -248,7 +253,7 @@
   var S = (function () { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; } })();
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} if (window.syncQueue) window.syncQueue(); }
   var $ = function (id) { return document.getElementById(id); };
-  var LABELS = ['Find', 'Pick', 'Fix', 'Human / robot', 'Proposal'];
+  var LABELS = ['Find', 'Pick', 'Flow', 'Human / robot', 'Proposal'];
 
   /* Steps */
   function stepsNav() {
@@ -382,16 +387,17 @@
   };
   var MEAS = { speed:'Customers hear back faster', untouched:'No request sits unanswered', owned:'Every customer has someone in charge', nextstep:'Every project has a clear next step', handoff:'Nobody has to ask the customer twice', repeat:'More customers come back', source:'We can see which marketing led to the sale' };
   function chips(el, map) { el.innerHTML = Object.keys(map).map(function (k) { return '<button class="chip" data-v="' + k + '">' + BL.esc(map[k].t || map[k]) + '</button>'; }).join(''); }
-  var trig = $('trig'), act = $('act'), own = $('own'), meas = $('meas'), human = $('human');
-  chips(trig, TRIG); chips(act, ACT); chips(meas, MEAS);
+  var act = $('act'), own = $('own'), meas = $('meas'), human = $('human');
+  var trigtext = $('trigtext'), actother = $('actother'), measother = $('measother');
+  chips(act, ACT); chips(meas, MEAS);
   own.innerHTML = BL.config.teams.filter(function (t) { return t !== 'Other'; }).map(function (t) { return '<button class="chip" data-v="' + BL.esc(t) + '">' + BL.esc(t) + '</button>'; }).join('');
   function setChoice(el, v) { el.querySelectorAll('[data-v]').forEach(function (b) { b.setAttribute('aria-pressed', [].concat(v || []).indexOf(b.getAttribute('data-v')) > -1 ? 'true' : 'false'); }); }
-  function fixVal() { return { trig: BL.val(trig, true), act: BL.val(act, true), owner: BL.val(own, true), human: human.value.trim(), meas: BL.val(meas, true) }; }
+  function fixVal() { return { trig: [], trigText: trigtext.value.trim(), act: BL.val(act, true), actOther: actother.value.trim(), owner: BL.val(own, true), human: human.value.trim(), meas: BL.val(meas, true), measOther: measother.value.trim() }; }
   function arr(x) { return [].concat(x || []).filter(Boolean); }
   function saveFix() { S.fix = fixVal(); save(); }
-  BL.choice(trig, { multi: true, onChange: saveFix }); BL.choice(act, { multi: true, onChange: saveFix }); BL.choice(own, { multi: true, onChange: saveFix }); BL.choice(meas, { multi: true, onChange: saveFix });
-  human.addEventListener('input', saveFix);
-  if (S.fix) { setChoice(trig, S.fix.trig); setChoice(act, S.fix.act); setChoice(own, S.fix.owner); setChoice(meas, S.fix.meas); human.value = S.fix.human || ''; }
+  BL.choice(act, { multi: true, onChange: saveFix }); BL.choice(own, { multi: true, onChange: saveFix }); BL.choice(meas, { multi: true, onChange: saveFix });
+  [human, trigtext, actother, measother].forEach(function (el) { el.addEventListener('input', saveFix); });
+  if (S.fix) { setChoice(act, S.fix.act); setChoice(own, S.fix.owner); setChoice(meas, S.fix.meas); human.value = S.fix.human || ''; trigtext.value = S.fix.trigText || ''; actother.value = S.fix.actOther || ''; measother.value = S.fix.measOther || ''; }
 
   /* Step 4: human or robot */
   S.sort = S.sort || {};
@@ -402,6 +408,7 @@
   instead.value = S.instead || ''; instead.addEventListener('input', function () { S.instead = instead.value.trim(); save(); });
   function parts() {
     var f = S.fix || fixVal(), list = (f.act || []).map(function (a) { return { id: a, t: ACT[a].t, d: 'robot' }; });
+    if (f.actOther) list.push({ id: 'actother', t: f.actOther, d: 'robot' });
     var ow = arr(f.owner).join(', ');
     if (ow || f.human) list.push({ id: 'person', t: (ow || 'A person') + (f.human ? ': ' + f.human : ''), d: 'human' });
     return list;
@@ -428,8 +435,8 @@
   }
   function proposal() {
     var f = S.fix || fixVal(), p = parts();
-    return { kind: 'proposal', _id: S.propId || '', title: S.title || '', problem: S.problem || '', trig: arr(f.trig), trigText: arr(f.trig).map(function (t) { return TRIG[t]; }).join(', or '), act: f.act || [], actText: (f.act || []).map(function (a) { return ACT[a].t; }),
-      owner: arr(f.owner).join(', '), human: f.human || '', meas: arr(f.meas), measText: arr(f.meas).map(function (m) { return MEAS[m]; }).join(' · '),
+    return { kind: 'proposal', _id: S.propId || '', title: S.title || '', problem: S.problem || '', trig: arr(f.trig), trigText: f.trigText || '', act: f.act || [], actText: (f.act || []).map(function (a) { return ACT[a].t; }).concat(f.actOther ? [f.actOther] : []),
+      owner: arr(f.owner).join(', '), human: f.human || '', meas: arr(f.meas), measText: arr(f.meas).map(function (m) { return MEAS[m]; }).concat(f.measOther ? [f.measOther] : []).join(' · '),
       sorts: p.map(function (x) { return { t: x.t, c: S.sort[x.id] || x.d }; }), minutes: +(S.mins != null ? S.mins : mins.value), instead: S.instead || '', phases: phases(f).map(function (x) { return x.id; }) };
   }
   function renderProp() {
@@ -437,7 +444,7 @@
     var ph = phases(v);
     $('prop').innerHTML = '<div class="k">' + BL.esc(g ? BL.groupName(g) : 'Your group') + ' · Friction to Flow proposal</div><h2 style="margin-top:6px">' + (v.title ? BL.esc(v.title) : 'Our proposal') + '</h2>' +
       '<div class="sec"><div class="k">The problem</div><p>' + E(v.problem) + '</p></div>' +
-      '<div class="sec"><div class="k">Our fix</div><p><b>When</b> ' + E(v.trigText) + '</p><ul>' + (v.actText.length ? v.actText.map(function (t) { return '<li>' + BL.esc(t) + '</li>'; }).join('') : '<li class="empty">the system’s part is not set yet</li>') + '</ul><p style="margin-top:6px"><b>In charge:</b> ' + E(v.owner + (v.human ? ': ' + v.human : '')) + '</p></div>' +
+      '<div class="sec"><div class="k">Our fix</div><p><b>Starts when:</b> ' + E(v.trigText) + '</p><ul>' + (v.actText.length ? v.actText.map(function (t) { return '<li>' + BL.esc(t) + '</li>'; }).join('') : '<li class="empty">the system’s part is not set yet</li>') + '</ul><p style="margin-top:6px"><b>In charge:</b> ' + E(v.owner + (v.human ? ': ' + v.human : '')) + '</p></div>' +
       '<div class="sec"><div class="k">How it would work</div><ul>' + v.sorts.map(function (s) { return '<li>' + BL.esc(s.t) + ' · <b>' + s.c + '</b></li>'; }).join('') + '</ul></div>' +
       '<div class="sec"><div class="k">Why it matters</div><p><b>We’ll know it works when:</b> ' + E(v.measText) + '</p><p><b>Time back:</b> about ' + fmt(v.minutes).toLowerCase() + (v.instead ? ', for ' + BL.esc(v.instead) : '') + '</p></div>' +
       (ph.length ? '<div class="sec"><div class="k">Already on the plan</div>' + ph.map(function (p) { return '<span class="tagp">' + BL.esc(p.name) + '</span>'; }).join('') + '</div>' : '');
@@ -521,7 +528,7 @@
     pulling = true;
     S.problem = d.problem || ''; S.fix = d.fix || null; S.sort = d.sort || {}; if (d.mins != null) S.mins = d.mins; S.instead = d.instead || ''; S.title = d.title || '';
     prob.value = S.problem; markPicks();
-    var f = S.fix || {}; setChoice(trig, f.trig); setChoice(act, f.act); setChoice(own, f.owner); setChoice(meas, f.meas); human.value = f.human || '';
+    var f = S.fix || {}; setChoice(act, f.act); setChoice(own, f.owner); setChoice(meas, f.meas); human.value = f.human || ''; trigtext.value = f.trigText || ''; actother.value = f.actOther || ''; measother.value = f.measOther || '';
     if (S.mins != null) { mins.value = S.mins; minsOut.textContent = fmt(+S.mins); } instead.value = S.instead; title.value = S.title;
     $('probtext').textContent = S.problem || 'No problem picked yet. Tap “Change it” to choose one.';
     if (S.step === 4) renderSorter(); if (S.step === 5) renderProp();
