@@ -9,7 +9,7 @@
 <link rel="icon" href="../assets/bigleap-logo.png">
 <link rel="stylesheet" href="../assets/workshop.css">
 <style>
-  .steps { display:grid; grid-template-columns:repeat(6,1fr); gap:4px; margin-top:14px; }
+  .steps { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; margin-top:14px; }
   .steps button { border:0; background:transparent; cursor:pointer; padding:0; text-align:left; font:700 11px/1.25 "Open Sans",Arial,sans-serif; color:var(--faint); min-height:44px; }
   .steps button i { display:block; height:5px; border-radius:3px; background:#D9E2E8; margin-bottom:5px; }
   .steps button.on { color:var(--navy); } .steps button.on i { background:var(--blue); }
@@ -217,7 +217,7 @@
       <div class="prop" id="prop" aria-live="polite"></div>
       <div class="row"><button class="btn block" id="go5" type="button" disabled>Share our proposal with the room</button></div>
       <p class="small" style="margin-top:10px">When it's time to share, present it in three parts: <b>here's the problem</b>, <b>here's our fix</b>, <b>here's how it would work</b>.</p>
-      <div class="seeroom"><span>Shared it, and still have time? Go again &mdash; this time take a <b>between teams</b> or <b>inside one team</b> problem through the same five steps.</span><button class="btn ghost" type="button" id="another">Start another fix</button></div>
+      <div class="seeroom"><span>Shared it? If you have time, go again &mdash; take a <b>between teams</b> or <b>inside one team</b> problem through the same five steps.</span><button class="btn navy" type="button" id="another">Submit another answer</button></div>
     </div>
     <div class="card" id="planCard">
       <div class="eyebrow">Your step-by-step plan</div>
@@ -234,32 +234,21 @@
         <a class="btn ghost" id="mailBL" href="#">Ask Big Leap about it</a>
       </div>
     </div>
-    <div class="navrow"><button class="btn ghost" type="button" data-go="4">Back</button><button class="btn navy" type="button" data-go="6">Next: vote</button></div>
+    <div class="navrow"><button class="btn ghost" type="button" data-go="4">Back</button></div>
   </section>
 
-  <!-- Step 6 -->
-  <section id="s6" class="pane" hidden>
-    <div class="card">
-      <div class="eyebrow">Share and vote · Everyone</div>
-      <h2>Which fixes should Curran do first?</h2>
-      <div class="howto"><div class="k">How to do this step</div><p>Every group presents, then <b>everyone</b> votes from their own phone &mdash; facilitators too. Tap your <b>top three</b>. Tap a pick again to remove it and choose a different one. Nobody can see how you voted.</p></div>
-      <p class="small" style="margin-top:4px">After every group presents, pick your <b>top three</b>. Votes are anonymous. The fixes the room ranks highest go to Curran's leadership first.</p>
-      <div class="vote" id="vote"></div>
-      <p class="live" id="voteLive">Updating automatically as groups share.</p>
-      <button class="linkbtn" id="vrefresh" type="button" style="margin-top:8px">Refresh now</button>
-      <div class="seeroom"><span>See every proposal and the running vote on the big screen.</span><span style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn ghost" href="wall.html?view=proposals" target="_blank" rel="noopener">See the room</a><a class="btn ghost" href="index.html">Back to today’s toolkits</a></span></div>
-    </div>
-  </section>
   <p style="text-align:center;margin-top:16px"><span id="mode"></span></p>
 </main>
 <script src="../assets/config.js"></script>
 <script src="../assets/workshop.js"></script>
 <script>
+  /* The printed vote QR points here with ?step=6. Voting now has its own page. */
+  if ((BL.params.get('step') || '') === '6') { location.replace('vote.html'); }
   var KEY = 'bl_ws_' + BL.config.session + '_breakout';
   var S = (function () { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; } })();
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} if (window.syncQueue) window.syncQueue(); }
   var $ = function (id) { return document.getElementById(id); };
-  var LABELS = ['Find', 'Pick', 'Fix', 'Human / robot', 'Proposal', 'Vote'];
+  var LABELS = ['Find', 'Pick', 'Fix', 'Human / robot', 'Proposal'];
 
   /* Steps */
   function stepsNav() {
@@ -267,10 +256,10 @@
   }
   function go(n) {
     S.step = n; save();
-    for (var i = 1; i <= 6; i++) $('s' + i).hidden = i !== n;
+    for (var i = 1; i <= LABELS.length; i++) $('s' + i).hidden = i !== n;
     stepsNav();
-    if (n >= 2 && n <= 5 && window.pullDraft) window.pullDraft(true); if (n === 2) loadPicks(); if (n === 3) { $('probtext').textContent = S.problem || 'No problem picked yet. Tap “Change it” to choose one.'; } if (n === 4) renderSorter(); if (n === 5) renderProp(); if (n === 6) loadVotes();
-    if (n === 2 || n === 6) startPoll(); else stopPoll();
+    if (n >= 2 && n <= 5 && window.pullDraft) window.pullDraft(true); if (n === 2) loadPicks(); if (n === 3) { $('probtext').textContent = S.problem || 'No problem picked yet. Tap “Change it” to choose one.'; } if (n === 4) renderSorter(); if (n === 5) renderProp();
+    if (n === 2) startPoll(); else stopPoll();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   document.addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b) { e.preventDefault(); go(+b.getAttribute('data-go')); } });
@@ -474,7 +463,7 @@
     if (!S.shared) { BL.toast('Share this one first'); return; }
     S.propId = ''; S.shared = false; S.problem = ''; S.fix = null; S.sort = {}; S.mins = null; S.instead = ''; S.title = '';
     save();
-    BL.toast('Round two. Try a handoff or an internal one.');
+    BL.toast('Round two. Pick another problem \u2014 try a handoff or an internal one.');
     go(2);
   });
 
@@ -498,43 +487,6 @@
     (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { BL.toast('Plan copied'); }).catch(function () { var a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); BL.toast('Plan copied'); } catch (e) {} a.remove(); });
   });
 
-  /* Step 6: vote (one vote per phone; stored as a 'moves' row so the existing results sheet accepts it) */
-  function pkey(r) { return r.cid + '|' + r.ts; }
-  function loadVotes() {
-    var el = $('vote'); el.innerHTML = '<p class="small">Loading proposals…</p>';
-    BL.load('fixit').then(function (rows) {
-      var props = rows.filter(function (r) { return r.payload && r.payload.kind === 'proposal'; });
-      /* Newest version of each proposal. A group may share more than one, so key on the proposal's
-         own id and fall back to the group for anything shared before ids existed. */
-      var latest = {}; props.forEach(function (r) { var k = (r.payload._id || '') || ('g:' + (r.group || r.cid)); if (!latest[k] || String(r.ts) > String(latest[k].ts)) latest[k] = r; });
-      props = Object.keys(latest).map(function (k) { return latest[k]; }).sort(function (a, b) { return String(a.ts) < String(b.ts) ? -1 : 1; });
-      if (!props.length) { el.innerHTML = '<p class="small">No proposals yet. They appear here as groups share them.</p>'; return; }
-      var chosen = votes();
-      el.innerHTML = props.map(function (r) { var p = r.payload, k = pkey(r), rank = chosen.indexOf(k), mine = rank >= 0;
-        return '<div class="vc"><span class="pill">' + BL.esc(BL.groupName(r.group) || 'A group') + '</span><b style="margin-top:6px">' + BL.esc(p.title || p.problem) + '</b>' + (p.title ? '<p class="small">' + BL.esc(p.problem) + '</p>' : '') +
-          ((p.plan && p.plan.length) || p.act ? '<details class="vplan"><summary>See the step-by-step plan</summary><ol>' + (p.plan && p.plan.length ? p.plan : BL.buildPlan(p).map(function (x) { var d = document.createElement('div'); d.innerHTML = x.d; return { t: x.t, d: d.textContent }; })).map(function (x) { return '<li><b>' + BL.esc(x.t) + '</b> ' + BL.esc(x.d) + '</li>'; }).join('') + '</ol></details>' : '') +
-          '<button class="btn ' + (mine ? 'navy' : '') + '" type="button" data-vote="' + BL.esc(k) + '" data-g="' + BL.esc(r.group) + '"' + (mine ? ' aria-pressed="true"' : '') + '>' + (mine ? '✓ Picked (' + (rank + 1) + ' of 3)' : chosen.length >= 3 ? 'Tap one of your three to swap' : 'Pick this one') + '</button></div>'; }).join('') +
-        '<p class="small" style="margin-top:6px">' + (chosen.length ? 'You\u2019ve picked <b>' + chosen.length + ' of 3</b>. Tap a pick again to remove it.' : 'Pick up to three. Tap a card to add it.') + '</p>';
-    }).catch(function () { el.innerHTML = '<p class="small">Can’t load proposals right now. Try refresh.</p>'; });
-  }
-  /* Everyone picks their top three. S.votes is the list, in the order they picked.
-     S.vote is the old single-vote field, kept so a phone that voted earlier still counts. */
-  function votes() {
-    if (!S.votes) S.votes = S.vote ? [S.vote] : [];
-    return S.votes;
-  }
-  $('vote').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-vote]'); if (!b) return;
-    var k = b.getAttribute('data-vote'), v = votes(), at = v.indexOf(k);
-    if (at >= 0) { v.splice(at, 1); BL.toast('Removed. ' + v.length + ' of 3 picked.'); }
-    else if (v.length >= 3) { BL.toast('You have three. Tap one of them to swap it out.'); return; }
-    else { v.push(k); }
-    S.votes = v; S.vote = v[0] || ''; save();
-    var groups = {}; document.querySelectorAll('[data-vote]').forEach(function (x) { groups[x.getAttribute('data-vote')] = x.getAttribute('data-g'); });
-    BL.submit('moves', { _id: 'vote', kind: 'vote', targets: v, targetGroups: v.map(function (x) { return groups[x] || ''; }), target: v[0] || '' })
-      .then(function () { if (v.length === 3) BL.toast('All three in. Thank you!'); loadVotes(); });
-  });
-  $('vrefresh').addEventListener('click', function () { loadVotes(); });
 
   /* Auto-refresh: the shared views (your group's answers, and the proposals you vote on)
      refresh on their own, so nobody has to pull down to see what changed. */
@@ -545,14 +497,12 @@
     var ms = Math.max(3, Number(BL.config.refreshSeconds) || 5) * 1000;
     poll = setInterval(function () {
       if (document.hidden) return;
-      if (S.step === 2) loadPicks(true);
-      else if (S.step === 6) loadVotes(true);
-      else stopPoll();
+      if (S.step === 2) loadPicks(true); else stopPoll();
     }, ms);
   }
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) return;
-    if (S.step === 2) loadPicks(true); else if (S.step === 6) loadVotes(true);
+    if (S.step === 2) loadPicks(true);
   });
 
   /* Group sync: steps 2 to 5 are shared by everyone in the same group, on any device.
@@ -592,7 +542,7 @@
   window.pullDraft = pullDraft;
   renderMine(); check1();
   BL.chrome('Breakout');
-  var start = +(BL.params.get('step') || S.step || 1); go(start >= 1 && start <= 6 ? start : 1);
+  var start = +(BL.params.get('step') || S.step || 1); go(start >= 1 && start <= LABELS.length ? start : 1);
 </script>
 </body>
 </html>
