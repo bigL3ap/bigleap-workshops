@@ -44,7 +44,7 @@
   .sorter { display:grid; gap:8px; margin-top:10px; }
   .srow { background:var(--sky); border-radius:12px; padding:10px 12px; }
   .srow .t { font-weight:700; font-size:14.5px; }
-  .srow .chips { margin-top:6px; } .srow .chip { min-height:40px; padding:6px 12px; font-size:14px; }
+  .srow .chips { margin-top:6px; } .srow .chip { min-height:44px; padding:6px 12px; font-size:14px; }
   .prop { background:var(--navy); color:#fff; border-radius:18px; padding:20px; margin-top:16px; box-shadow:var(--shadow); }
   .prop h2 { color:#fff; font-size:22px; }
   .prop .sec { border-top:1px solid rgba(255,255,255,.16); padding:12px 0 2px; margin-top:12px; }
@@ -104,7 +104,7 @@
         <li><span class="eg">&ldquo;A designer asks for three swatches. The request sits in the shared inbox over the weekend because nobody owns it.&rdquo;</span></li>
         <li><span class="eg">&ldquo;Sales promises a rush install date, but operations only finds out when the order lands, so we have to call the customer back.&rdquo;</span></li>
       </ul></div>
-      <div class="step" style="margin-top:16px"><span class="n">1</span><h3>Identify the moment that creates friction &mdash; for you, or for your customer</h3></div>
+      <div class="step" style="margin-top:16px"><span class="n">A</span><h3>Identify the moment that creates friction &mdash; for you, or for your customer</h3></div>
       <p class="small" style="margin-top:2px">In your own words &mdash; one moment, a sentence or two.</p>
       <div class="egbox">
         <div class="k">A few examples</div>
@@ -118,13 +118,13 @@
       <label class="sr" for="what">Describe the friction</label>
       <textarea id="what" maxlength="240" placeholder="What happens, and what goes wrong?"></textarea>
       <div class="count"><span id="wc">0</span>/240</div>
-      <div class="step" style="margin-top:20px"><span class="n">2</span><h3>Where does it happen? <span class="small">(pick all that apply)</span></h3></div>
+      <div class="step" style="margin-top:20px"><span class="n">B</span><h3>Where does it happen? <span class="small">(pick all that apply)</span></h3></div>
       <div class="tiles t3" id="where"></div>
-      <div class="step" style="margin-top:18px"><span class="n">3</span><h3>What kind of problem is it? <span class="small">(pick all that apply)</span></h3></div>
+      <div class="step" style="margin-top:18px"><span class="n">C</span><h3>What kind of problem is it? <span class="small">(pick all that apply)</span></h3></div>
       <div class="tiles t3" id="bucket"></div>
-      <div class="step" style="margin-top:18px"><span class="n">4</span><h3>What gets lost? <span class="small">(pick all that apply)</span></h3></div>
+      <div class="step" style="margin-top:18px"><span class="n">D</span><h3>What gets lost? <span class="small">(pick all that apply)</span></h3></div>
       <div class="tiles t4" id="lost"></div>
-      <div class="step" style="margin-top:18px"><span class="n">5</span><h3>What does it cost us? <span class="small">(pick all that apply)</span></h3></div>
+      <div class="step" style="margin-top:18px"><span class="n">E</span><h3>What does it cost us? <span class="small">(pick all that apply)</span></h3></div>
       <div class="chips" id="hurt"><button class="chip" data-v="1">It's annoying</button><button class="chip" data-v="2">It wastes time</button><button class="chip" data-v="3">We lose sales or customers</button></div>
       <div class="row"><button class="btn block" id="go1" type="submit" disabled>Add my answer</button></div>
     </form>
@@ -198,7 +198,7 @@
       </ul></div>
       <p class="small" style="margin-top:4px">For each part of your fix, tap who should do it.<br><b>Robot</b>: the system does it on its own. <b>Human</b>: a person needs to do it.</p>
       <div class="sorter" id="sorter"></div>
-      <div class="step" style="margin-top:18px"><span class="n">?</span><h3>About how much time could this save the team each week?</h3></div>
+      <div class="step" style="margin-top:18px"><span class="n">2</span><h3>About how much time could this save the team each week?</h3></div>
       <label class="sr" for="mins">Time back per week</label>
       <input type="range" id="mins" min="0" max="1200" step="30" value="120"><div class="range-ends"><span>None</span><output id="minsOut" for="mins">2 hrs / week</output><span>20 hrs</span></div>
       <label class="f" for="instead">What would people do with that time?</label>
@@ -222,7 +222,7 @@
       <div class="prop" id="prop" aria-live="polite"></div>
       <div class="row"><button class="btn block" id="go5" type="button" disabled>Share our proposal with the room</button></div>
       <p class="small" style="margin-top:10px">When it's time to share, present it in three parts: <b>here's the problem</b>, <b>here's our fix</b>, <b>here's how it would work</b>.</p>
-      <div class="seeroom"><span>Shared it? If you have time, go again &mdash; take a <b>between teams</b> or <b>inside one team</b> problem through the same five steps.</span><button class="btn navy" type="button" id="another">Submit another answer</button></div>
+      <div class="seeroom"><span>Shared it? If you have time, go again &mdash; take a <b>between teams</b> or <b>inside one team</b> problem through the same five steps.</span><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn navy" type="button" id="another">Submit another answer</button><a class="btn ghost" href="wall.html?view=proposals" target="_blank" rel="noopener">See the room</a></span></div>
     </div>
     <div class="card" id="planCard">
       <div class="eyebrow">Your step-by-step plan</div>
@@ -450,7 +450,7 @@
       (ph.length ? '<div class="sec"><div class="k">Already on the plan</div>' + ph.map(function (p) { return '<span class="tagp">' + BL.esc(p.name) + '</span>'; }).join('') + '</div>' : '');
     /* Step 3's trigger is free text now, and the action/measure each accept a custom entry, so gate on the rendered values. */
     $('go5').disabled = !(v.problem && v.trigText && v.actText.length && v.owner && v.measText);
-    if (S.shared) { $('go5').textContent = 'Shared. Update and share again'; }
+    $('go5').textContent = S.shared ? 'Shared. Update and share again' : 'Share our proposal with the room';
     renderPlan();
   }
   $('go5').addEventListener('click', function () {
@@ -469,7 +469,11 @@
   /* A group with time left can take a second problem all the way through and share that too. */
   $('another').addEventListener('click', function () {
     if (!S.shared) { BL.toast('Share this one first'); return; }
-    S.propId = ''; S.shared = false; S.problem = ''; S.fix = null; S.sort = {}; S.mins = null; S.instead = ''; S.title = '';
+    S.propId = ''; S.shared = false;
+    /* Repaint every field too, or round two starts on a screen still showing round one's
+       answers with the share button stuck on "Shared" and disabled. */
+    applyDraft({ problem: '', fix: null, sort: {}, mins: 120, instead: '', title: '' });
+    $('go5').textContent = 'Share our proposal with the room';
     save();
     BL.toast('Round two. Pick another problem \u2014 try a handoff or an internal one.');
     go(2);
