@@ -448,7 +448,8 @@
       '<div class="sec"><div class="k">How it would work</div><ul>' + v.sorts.map(function (s) { return '<li>' + BL.esc(s.t) + ' · <b>' + s.c + '</b></li>'; }).join('') + '</ul></div>' +
       '<div class="sec"><div class="k">Why it matters</div><p><b>We’ll know it works when:</b> ' + E(v.measText) + '</p><p><b>Time back:</b> about ' + fmt(v.minutes).toLowerCase() + (v.instead ? ', for ' + BL.esc(v.instead) : '') + '</p></div>' +
       (ph.length ? '<div class="sec"><div class="k">Already on the plan</div>' + ph.map(function (p) { return '<span class="tagp">' + BL.esc(p.name) + '</span>'; }).join('') + '</div>' : '');
-    $('go5').disabled = !(v.problem && v.trig.length && v.act.length && v.owner && v.meas.length);
+    /* Step 3's trigger is free text now, and the action/measure each accept a custom entry, so gate on the rendered values. */
+    $('go5').disabled = !(v.problem && v.trigText && v.actText.length && v.owner && v.measText);
     if (S.shared) { $('go5').textContent = 'Shared. Update and share again'; }
     renderPlan();
   }
